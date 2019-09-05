@@ -3,7 +3,7 @@ let xhr = new XMLHttpRequest();
 xhr.open("GET", "warmstart_test.json");
 //xhr.responseType = "json";
 xhr.onload = function(){
-  console.log(response);
-  h.textContent = response;
+  console.log(xhr.response);
+  h.textContent = xhr.response;
 }
 xhr.send();
