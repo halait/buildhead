@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" contents="width=device-width, initial-scale=1">
+		<title>Let's do it</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				user-select: none;
+				-khtml-user-select: none;
+				-o-user-select: none;
+				-moz-user-select: none;
+				-webkit-user-select: none;
+			}
+			label {
+				white-space: nowrap;
+				display: block;
+			}
+			
+			input[type=number]{
+				width: 50%;
+			}
+			
+			.radios{
+				margin-left: 30px;
+			}
+			.toolbar{
+				position: absolute;
+				height: 40px;
+				box-sizing: border-box;
+				background-color: #333;
+				display: none;
+				justify-content: space-between;
+			}
+			.toolbarBtn{
+				border-radius: 100%;
+				height: 38px;
+				height: 100%;
+			}
+			.toolbarBtn:hover{
+				background-color: #999;
+			}
+			.activeBtn{
+				background-color: #ddd;
+			}
+			.activeBtn:hover{
+				background-color: #ddd;
+			}
+			.overlay{
+				width: 100%;
+				min-height: 100%;
+				display: none;
+				position: absolute;
+				background-color: #444;
+			}
+			.popup{
+				background-color: #333;
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				max-height: 90vh;
+				width: auto;
+				display: none;
+				overflow: auto;
+				padding: 30px;
+				border-radius: 5px;
+				color: #fff;
+			}
+			.popupHeader{
+				font: small-caps 24px sans-serif;
+				margin-bottom: 30px;
+				white-space: nowrap;
+			}
+			.levelBtn{
+				width: 120px;
+				margin: 10px;
+				border-radius: 10px;
+			}
+			.unlockedLevelBtn{
+				background-color: #06b;
+			}
+			.unlockedLevelBtn:hover{
+				background-color: #08f;
+			}
+			.startSimulationBtn{
+				background-color: #0a0;
+			}
+			.startSimulationBtn:hover{
+				background-color: #0f0;
+			}
+			.stopSimulationBtn{
+				background-color: #a00;
+			}
+			.stopSimulationBtn:hover{
+				background-color: #f00;
+			}
+			.closeBtn{
+				height: 30px;
+				position: absolute;
+				right: 0;
+				top: 0;
+				border-radius: 5px;
+			}
+			.closeBtn:hover{
+				background-color: #b00;
+			}
+			#reuseableHtml{
+				display: none;
+			}
+			#game{
+				position: absolute;
+				top: 40px;
+				cursor: crosshair;
+				width: 100%;
+				background: radial-gradient(100% 60% at 50% 100%, #11a, 10%, #002);
+			}
+			#logo{
+				margin: 5% auto;
+				display: block;
+				width: 80%;
+				max-width: 800px;
+				background-color: #000;
+				border-radius: 5%;
+			}
+			#logoText:hover{
+				fill: #f80;
+			}
+			#nextLevelBtn{
+				height: 50px;
+				background-color: #06b;
+				border-radius: 10px;
+			}
+			#nextLevelBtn:hover{
+				background-color: #08f;
+			}
+			#input{
+				display: block;
+				margin-left: 20px;
+			}
+			/*
+			@media (max-width: 800px){
+				.toolbar{
+					height: 40px;
+				}
+				.toolbarBtn{
+					margin: 1px auto;
+					height: 38px;
+				}
+				#game{
+					top: 40px;
+					height: calc(100% - 40px);
+				}
+			}
+			*/
+
+			#inputTexture{
+				position: absolute;
+				top: 50%;
+				left: 50%;
+			}
+
+		</style>
+	</head>
+	<body>
+		<canvas id="game"></canvas>
+		<div id="sandboxToolbar" class="toolbar"></div>
+		<div id="assemblySceneBtnsDiv" class="toolbar"></div>
+		<div id="simulationSceneBtnsDiv" class="toolbar"></div>
+
+
+		<div id="createPolygonToolbar" class="toolbar">
+			<svg id="polygonDoneBtn" class="toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="40" fill="white">Done</text>
+			</svg>
+		</div>
+
+
+
+		<div id="menuUI" class="overlay" tabindex="-1">
+			<svg id="logo" preserveAspectRatio="xMinYMin meet" viewBox="0 0 145 20" xmlns="http://www.w3.org/2000/svg">
+				<text id="logoText" text-anchor="middle" x="50%" y="17" font-family="sans-serif" font-size="20" fill="white">DEVICECRAFT</text>
+			</svg>
+			<svg class="levelBtn unlockedLevelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">0</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">1</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">2</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">3</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">4</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">5</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">6</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">7</text>
+			</svg>
+			<svg class="levelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">8</text>
+			</svg>
+		</div>
+		
+		<div id="saveLevelUI" class="popup">
+			<p class="popupHeader">Save Level</p>
+			File name: <input id="saveText" draggable="false" type="text"/>
+			<button id="saveBtn">Save</button><br>
+			<p id="saveMessageP"></p>
+			<a id="downloadlink" download style="display: none">Download</a><br>
+		</div>
+		
+		<div id="loadLevelUI" class="popup">
+			<p class="popupHeader">Load Level</p>
+			<input id="input" type="file" accept="application/json"/>
+			<p id="loadMessageP"></p><br>
+		</div>
+
+		<div id="exceptionDiv" class="popup">
+			<p class="popupHeader">Error</p>
+			Message: <span id="exceptionMessageP"></span><br><br>
+		</div>
+		
+		<div id="setCustomObroundPopup" class="popup">
+			<p class="popupHeader">Custom Obround Properties</p>
+		</div>
+
+		<div id="setCustomCirclePopup" class="popup">
+			<p class="popupHeader">Custom Circle Properties</p>
+		</div>
+
+
+
+
+
+		<div id="createPolygonPopup" class="popup">
+			<p class="popupHeader">Custom Polygon Properties</p>
+		</div>
+
+
+
+
+
+
+		<div id="successSceneDiv" class="popup">
+			<p class="popupHeader">Success</p>
+			<svg id="nextLevelBtn" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30">
+				<text x="5" y="22" font-family="sans-serif" font-size="19px" fill="black">Next Level</text>
+			</svg>
+		</div>
+
+
+		<div id="reuseableHtml">
+			<svg class="startSimulationBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polygon points="30 80, 30 20, 85 50" fill="#fff"/>
+			</svg>
+			<svg class="stopSimulationBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polygon points="25 25, 75 25, 75 75, 25 75" fill="#fff"/>
+			</svg>
+			<svg class="ccwWheelCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="50" cy="50" fill="rgb(255, 0, 0)" r="40"/>
+			</svg>
+			<svg class="nWheelCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="50" cy="50" fill="rgb(0, 179, 0)" r="40"/>
+			</svg>
+			<svg class="cwWheelCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="50" cy="50" fill="rgb(0, 0, 255)" r="40"/>
+			</svg>
+			<svg class="tWheelCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="50" cy="50" fill="rgb(255, 255, 255)" r="40"/>
+			</svg>
+			<svg class="nRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polyline points="40 0, 50 50, 80 100" fill="none" stroke="#0ff" stroke-width="14"/>
+				<circle cx="50" cy="50" fill="rgb(255, 255, 0)" r="7"/>
+			</svg>
+			<svg class="cRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polyline points="40 0, 50 50, 80 100" fill="none" stroke="rgb(200, 200, 200)" stroke-width="14"/>
+				<circle cx="50" cy="50" fill="rgb(255, 255, 0)" r="7"/>
+			</svg>
+			<svg class="gRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<line x1="20" y1="20" x2="80" y2="80" stroke="rgb(255, 255, 255)" stroke-width="10"/>
+			</svg>
+			<svg class="moveBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polygon points="50 10, 35 25, 65 25" fill="#aaa"/>
+				<polygon points="10 50, 25 35, 25 65" fill="#aaa"/>
+				<polygon points="50 90, 35 75, 65 75" fill="#aaa"/>
+				<polygon points="90 50, 75 35, 75 65" fill="#aaa"/>
+				<line x1="50" y1="20" x2="50" y2="80" stroke="#aaa" stroke-width="7"/>
+				<line x1="20" y1="50" x2="80" y2="50" stroke="#aaa" stroke-width="7"/>
+			</svg>
+			<svg class="removeBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<line x1="20" y1="20" x2="80" y2="80" stroke="#f00" stroke-width="7"/>
+				<line x1="80" y1="20" x2="20" y2="80" stroke="#f00" stroke-width="7"/>
+			</svg>
+			<svg class="backBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<line x1="10" y1="50" x2="90" y2="50" stroke="#fff" stroke-width="5"/>
+				<line x1="10" y1="50" x2="40" y2="20" stroke="#fff" stroke-width="5"/>
+				<line x1="10" y1="50" x2="40" y2="80" stroke="#fff" stroke-width="5"/>
+			</svg>
+			<svg class="assemblyFieldCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<rect x="18" y="25" height="45" width="65" fill="rgb(0, 128, 255)"/>
+			</svg>
+			<svg class="goalFieldCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<rect x="18" y="25" height="45" width="65" fill="rgb(255, 128, 0)" />
+			</svg>
+			<svg class="saveLevelBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polygon points="25 25, 65 25, 75 35, 75 75, 25 75" fill="#039"/>
+				<rect x="32" y="25" width="28" height="20" fill="#999"/>
+				<rect x="48" y="27" width="8" height="16" fill="#000"/>
+			</svg>
+			<svg class="loadLevelBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<rect x="20" y="30" width="60" height="40" fill="#dd0"/>
+				<polygon points="30 35, 90 35, 80 70, 20 70" fill="#880"/>
+				<polygon points="44 32, 56 32, 56 22, 44 22" fill="#0f0"/>
+				<polygon points="40 22, 50 12, 60 22" fill="#0f0"/>
+			</svg>
+
+			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"/>
+				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"/>
+			</svg>
+
+
+
+
+			<svg class="polygonBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polygon points="50 20, 25 75, 75 75" fill="#fff"/>
+			</svg>
+
+
+
+
+
+			<form id="customProperties">
+				<h3>Type: </h3>
+				<label><input id="fixedType" class="radios" name="typeRadio" type="radio">Fixed</label>
+				<label><input id="movableType" class="radios" name="typeRadio" type="radio" checked>Movable</label>
+				<span id="customGroup">
+					<h3>Group: </h3>
+					<p>If type is fixed, then group will automatically be set to fixed.</p>
+					<label><input id="coplanarGroup" class="radios" name="groupRadio" type="radio" checked>Coplanar</label>
+					<label><input id="nonCoplanarGroup" class="radios" name="groupRadio" type="radio">Non-Coplanar</label>
+				</span>
+				<span id="customTarget">
+					<h3>Target: </h3>
+					<p>Group must be coplanar in order for object to be target.</p>
+					<label><input id="target" class="radios" name="targetRadio" type="radio">Yes</label>
+					<label><input id="nonTarget" class="radios" name="targetRadio" type="radio" checked>No</label>
+				</span>
+				<h3>Density: </h3>
+				<input id="density" type="number" step="0.001" min="0" placeholder="If empty defaults to 30.0">
+				<h3>Friction: </h3>
+				<label>Static friction: <input id="staticFriction" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.8"></label><br>
+				<label>Kinetic friction: <input id="kineticFriction" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.5"></label>
+				<h3>Velocity Resistance: </h3>
+				<label>Linear velocity resistance: <input id="linearResistance" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.01"></label><br>
+				<label>Rotational velocity resistance: <input id="rotationalResistance" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.01"></label>
+				<h3>Joinable: </h3>
+				<label><input id="joinable" class="radios" name="joinableRadio" type="radio">Yes</label>
+				<label><input id="nonJoinable" class="radios" name="joinableRadio" type="radio" checked>No</label>
+				<input id="submitBtn" type="submit" value="Apply">
+			</form>
+
+			<span id="rodProperties">
+				<h3>Width: </h3>
+				<input id="width" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.05"><br><br>
+			</span>
+
+			<span id="circleProperties">
+				<h3>Radius: </h3>
+				<input id="radius" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.1">
+				<h3>Motor Speed: </h3>
+				<input id="motorSpeed" type="number" step="0.001" placeholder="If empty then circle non-motorized">
+				<h3>Max Motor Torque: </h3>
+				<input id="maxMotorTorque" type="number" step="0.001" min="0" placeholder="If empty then circle non-motorized"><br><br>
+			</span>
+			<!--
+			<svg id="createCustomBtn" class="toolbarBtn" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+				<polygon points="9.393 30.607, 30.607 9.393, 80 58.787, 58.787 80" fill="#d60"/>
+				<polygon points="58.787 80, 80 58.787, 80 80" fill="#ff8"/>
+				<polygon points="72.929 80, 80 72.929, 80 80" fill="#000"/>
+			</svg>
+			-->
+		</div>
+
+		<input id="inputTexture" type="file" accept="image/png"/>
+
+		<script src="parameters.js"></script>
+		
+		<script src="physics.js"></script>
+
+		<script src="levels.js"></script>
+		<script src="event_handler.js"></script>
+		<script src="helper.js"></script>
+
+		<script src="render.js"></script>
+		
+		<script src="menu_scene.js"></script>
+		<script src="sandbox_scene.js"></script>
+		<script src="assembly_scene.js"></script>
+		<script src="simulation_scene.js"></script>
+		<script src="save_level_scene.js"></script>
+		<script src="load_level_scene.js"></script>
+		<script src="exception_scene.js"></script>
+		<script src="create_custom_scene.js"></script>
+		<script src="success_scene.js"></script>
+
+		<script src="create_polygon_scene.js"></script>
+
+		<script src="init.js"></script>
+	</body>
+</html>

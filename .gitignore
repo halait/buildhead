@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Devicecraft/code_graveyard.js
+/Devicecraft/test_perf.html
+/Devicecraft/textureCreator.html
+/Devicecraft/triTest.html
