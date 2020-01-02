@@ -19,9 +19,12 @@ var assemblyScene = {
 
 	startLevel(level){
 		this.currentLevel = level;
+		/*
 		for(const def of levelJsons[level]){
 			create(def);
 		}
+		*/
+		loadLevelScene.loadLevel(levelJsons[level]);
 		sceneManager.push(this);
 		pw.render();
 	},
