@@ -24,8 +24,7 @@ var assemblyScene = {
 			create(def);
 		}
 		*/
-		loadLevelScene.loadLevel(levelJsons[level]);
-		sceneManager.push(this);
+		if(loadLevelScene.loadLevel(levelJsons[level])) sceneManager.push(this);
 		pw.render();
 	},
 
