@@ -44,32 +44,32 @@ var createCustomScene = {
 
 	createForm(formElement){
 		return {
-			movableType: formElement.querySelector("#movableType"),
-			coplanarGroup: formElement.querySelector("#coplanarGroup"),
-			target: formElement.querySelector("#target"),
-			density: formElement.querySelector("#density"),
-			staticFriction: formElement.querySelector("#staticFriction"),
-			kineticFriction: formElement.querySelector("#kineticFriction"),
-			linearVelocityResistance: formElement.querySelector("#linearResistance"),
-			rotationalVelocityResistance: formElement.querySelector("#rotationalResistance"),
-			joinable: formElement.querySelector("#joinable")
+			movableType: formElement.querySelector(".movableType"),
+			coplanarGroup: formElement.querySelector(".coplanarGroup"),
+			target: formElement.querySelector(".target"),
+			density: formElement.querySelector(".density"),
+			staticFriction: formElement.querySelector(".staticFriction"),
+			kineticFriction: formElement.querySelector(".kineticFriction"),
+			linearVelocityResistance: formElement.querySelector(".linearResistance"),
+			rotationalVelocityResistance: formElement.querySelector(".rotationalResistance"),
+			joinable: formElement.querySelector(".joinable")
 		}
 	},
 
 	addFormEvents(formElement){
-		let customGroup = formElement.querySelector("#customGroup");
-		let customTarget = formElement.querySelector("#customTarget");
-		let coplanarGroup = formElement.querySelector("#coplanarGroup");
-		formElement.querySelector("#movableType").oninput = () => {
+		let customGroup = formElement.querySelector(".customGroup");
+		let customTarget = formElement.querySelector(".customTarget");
+		let coplanarGroup = formElement.querySelector(".coplanarGroup");
+		formElement.querySelector(".movableType").oninput = () => {
 			customGroup.style.display = "block";
 			if(coplanarGroup.checked) customTarget.style.display = "block";
 		}
-		formElement.querySelector("#fixedType").oninput = () => {
+		formElement.querySelector(".fixedType").oninput = () => {
 			customGroup.style.display = "none";
 			customTarget.style.display = "none";
 		}
 		coplanarGroup.oninput = () => {customTarget.style.display = "block";}
-		formElement.querySelector("#nonCoplanarGroup").oninput = () => {customTarget.style.display = "none";}
+		formElement.querySelector(".nonCoplanarGroup").oninput = () => {customTarget.style.display = "none";}
 	},
 
 	planeForm: null,
