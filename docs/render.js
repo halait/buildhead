@@ -81,7 +81,7 @@ inputTexture.onchange = () => {
 	img.onload = () => {
 		try {
 			createTexture(img);
-		} catch {
+		} catch(err) {
 			inputTexture.style.display = "block";
 		}
 	};

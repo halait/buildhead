@@ -203,72 +203,69 @@
 	*/
 
 
-	class MemoryManager {
-		constructor(memory){
-			let len = memory.length;
-			if(len > 65535) console.error("Are you sure?");
-			this.memory = memory;
-			this.memory[0] = -len;
-			this.memory[this.memory.length - 1] = len;
-		}
-
-		alloc(size){
-			if(size < 1) throw "Size must be atleast 1";
-			if(!Number.isInteger(size)) throw "Size must be representable as integer: " + size;
-			size += 2;
-			for(let ptr = 0, len = this.memory.length; ptr < len; ptr += Math.abs(this.memory[ptr])){
-				if(!Number.isInteger(ptr)) throw "Ptr not representable as integer: " + ptr;
-				if(!Number.isInteger(this.memory[ptr])) throw "this.memory[ptr] not representable as integer: " + this.memory[ptr];
-				if(-this.memory[ptr] >= size) {
-					if(-this.memory[ptr] > size){
-						this.memory[ptr + size] = this.memory[ptr] + size;
-						this.memory[ptr - this.memory[ptr] - 1] = -this.memory[ptr + size];
-					}
-					this.memory[ptr] = size;
-					this.memory[ptr + size - 1] = -size;
-					console.log(size + " floats allocated at adress: " + (ptr + 1));
-					return ++ptr;
-				}
-			}
-			console.error("Memory failure");
-		}
-
-		free(ptr){
-			if(!Number.isInteger(ptr)) throw "Ptr must be representable as integer: " + ptr;
-			--ptr;
-			console.log("freeing ptr: " + ptr);
-			if(this.memory[ptr] < 20) throw "freeing ptr with size: " + this.memory[ptr];
-			if(ptr < 0) throw "Cannot free ptr: " + ptr;
-			let start = ptr;
-			let end = this.memory[ptr] + ptr;
-			if(this.memory[end] < 0) end -= this.memory[end];
-			if(start > 0 && this.memory[start - 1] > 0) start -= this.memory[start - 1];
-			let size = end - start;
-			if(!Number.isInteger(size)) throw "Size must be representable as integer: " + size;
-			this.memory[start] = -size;
-			this.memory[end - 1] = size;
-
-
-			// temp
-			this.memory.fill(0, start + 1, end - 1);
-		}
-
-		freeAll(){
-			let len = this.memory.length;
-			this.memory[0] = -len;
-			this.memory[this.memory.length - 1] = len;
-		}
-
-		set(pointer, offset, value){
-			this.data[pointer + offset] = value;
-		}
-		get(pointer, offset){
-			return this.data[pointer + offset];
-		}
+class MemoryManager {
+	constructor(memory){
+		let len = memory.length;
+		if(len > 65535) console.error("Are you sure?");
+		this.memory = memory;
+		this.memory[0] = -len;
+		this.memory[this.memory.length - 1] = len;
 	}
 
+	alloc(size){
+		if(size < 1) throw "Size must be atleast 1";
+		if(!Number.isInteger(size)) throw "Size must be representable as integer: " + size;
+		size += 2;
+		for(let ptr = 0, len = this.memory.length; ptr < len; ptr += Math.abs(this.memory[ptr])){
+			if(!Number.isInteger(ptr)) throw "Ptr not representable as integer: " + ptr;
+			if(!Number.isInteger(this.memory[ptr])) throw "this.memory[ptr] not representable as integer: " + this.memory[ptr];
+			if(-this.memory[ptr] >= size) {
+				if(-this.memory[ptr] > size){
+					this.memory[ptr + size] = this.memory[ptr] + size;
+					this.memory[ptr - this.memory[ptr] - 1] = -this.memory[ptr + size];
+				}
+				this.memory[ptr] = size;
+				this.memory[ptr + size - 1] = -size;
+				console.log(size + " floats allocated at adress: " + (ptr + 1));
+				return ++ptr;
+			}
+		}
+		console.error("Memory failure");
+	}
+
+	free(ptr){
+		if(!Number.isInteger(ptr)) throw "Ptr must be representable as integer: " + ptr;
+		--ptr;
+		console.log("freeing ptr: " + ptr);
+		if(this.memory[ptr] < 20) throw "freeing ptr with size: " + this.memory[ptr];
+		if(ptr < 0) throw "Cannot free ptr: " + ptr;
+		let start = ptr;
+		let end = this.memory[ptr] + ptr;
+		if(this.memory[end] < 0) end -= this.memory[end];
+		if(start > 0 && this.memory[start - 1] > 0) start -= this.memory[start - 1];
+		let size = end - start;
+		if(!Number.isInteger(size)) throw "Size must be representable as integer: " + size;
+		this.memory[start] = -size;
+		this.memory[end - 1] = size;
 
 
+		// temp
+		this.memory.fill(0, start + 1, end - 1);
+	}
+
+	freeAll(){
+		let len = this.memory.length;
+		this.memory[0] = -len;
+		this.memory[this.memory.length - 1] = len;
+	}
+
+	set(pointer, offset, value){
+		this.data[pointer + offset] = value;
+	}
+	get(pointer, offset){
+		return this.data[pointer + offset];
+	}
+}
 
 const pw = {
 
