@@ -75,11 +75,11 @@ var createCustomScene = {
 	planeForm: null,
 	circleForm: null,
 
-	customPropertiesForm: document.getElementById("customProperties"),
+	customPropertiesForm: document.querySelector(".customProperties"),
 
 	init() {
 		let formElement = this.customPropertiesForm.cloneNode(true);
-		formElement.insertBefore(document.getElementById("rodProperties"), formElement.querySelector("#submitBtn"));
+		formElement.insertBefore(document.getElementById("rodProperties"), formElement.querySelector(".submitBtn"));
 		this.planeForm = this.createForm(formElement);
 		this.planeForm.width = formElement.querySelector("#width");
 		this.addFormEvents(formElement);
@@ -111,7 +111,7 @@ var createCustomScene = {
 		this.planeUi.prepend(sceneCloseBtn);
 
 		formElement = this.customPropertiesForm.cloneNode(true);
-		formElement.insertBefore(document.getElementById("circleProperties"), formElement.querySelector("#submitBtn"));
+		formElement.insertBefore(document.getElementById("circleProperties"), formElement.querySelector(".submitBtn"));
 		this.circleForm = this.createForm(formElement);
 		this.circleForm.radius = formElement.querySelector("#radius");
 		this.circleForm.motorSpeed = formElement.querySelector("#motorSpeed");
