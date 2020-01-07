@@ -2,8 +2,11 @@
 var canvas = document.getElementById("game");
 
 pw.gl = canvas.getContext("webgl");
-if(!pw.gl) console.log("aint no webgl on this b");
-else console.log("webgl be workin dawg");
+let noWebGlErr = "Sorry, this game cannot be played here because WebGl is not supported.";
+if(!pw.gl) {
+	throw noWebGlErr;
+	exceptionScene.throw(noWebGlErr);
+}
 
 let vertexShaderSource = `
 	attribute vec2 a_position;
@@ -83,7 +86,7 @@ inputTexture.onchange = () => {
 			createTexture(img);
 		} catch(err) {
 			inputTexture.style.display = "block";
-			console.error(err);
+			//console.warn(err);
 		}
 	};
 	img.src = "newestTex.png";
@@ -136,7 +139,6 @@ pw.gl.clear(pw.gl.COLOR_BUFFER_BIT);
 
 let white = new Float32Array([1.0, 1.0, 1.0]);
 let red = new Float32Array([1.0, 0.1, 0.1]);
-let debugPoints = [];
 
 pw.PO_COLORS = [
 	[1.0, 0.0, 0.0], [0.0, 0.6, 0.0], [0.0, 0.0, 1.0], [0.85, 0.35, 0.0],

@@ -273,8 +273,11 @@ class MemoryManager {
 }
 
 const pw = {
-
-	TOTAL_ITER: VELOCITY_ITERATIONS + POSITION_ITERATIONS,
+	G: -0.004,
+	//MIN_AA: 0.0,
+	VELOCITY_ITERATIONS: 64,
+	POSITION_ITERATIONS: 2,
+	TOTAL_ITER: this.VELOCITY_ITERATIONS + this.POSITION_ITERATIONS,
 	//isVelocityIter = true,
 	unsolved: true,
 	warmStarting: true,
@@ -290,7 +293,7 @@ const pw = {
 		for(let i = 0, len = this.poTotal; i < len; ++i){
 			let ptr = this.PO_PTRS[i];
 			if(M[O_TYPE + ptr] == this.FIXED_TYPE) continue;
-			M[O_VY + ptr] += G;
+			M[O_VY + ptr] += this.G;
 			M[O_VX + ptr] *= M[O_VM + ptr];
 			M[O_VY + ptr] *= M[O_VM + ptr];
 			M[O_W + ptr] *= M[O_WM + ptr];
@@ -362,7 +365,7 @@ const pw = {
 
 
 					if(this.warmStarting){
-					/*
+					
 						let jx = M[C_JN + i] * M[C_NX + i] - M[C_JT + i] * M[C_NY + i];
 						let jy = M[C_JN + i] * M[C_NY + i] + M[C_JT + i] * M[C_NX + i];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -375,7 +378,7 @@ const pw = {
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += (M[C_JN + i] * M[C_RNB + i] + M[C_JT + i] * M[C_RTB + i]) * M[O_I_INV + bsi];
 						}
-						*/
+						/*
 						let jx = M[C_JN + i] * M[C_NX + i];
 						let jy = M[C_JN + i] * M[C_NY + i];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -388,7 +391,8 @@ const pw = {
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += M[C_JN + i] * M[C_RNB + i] * M[O_I_INV + bsi];
 						}
-						M[C_JT + i] = 0.0;
+						//M[C_JT + i] = 0.0;
+						*/
 					} else {
 						M[C_JN + i] = 0.0;
 						M[C_JT + i] = 0.0;
@@ -396,7 +400,6 @@ const pw = {
 				}
 
 			} else if(M[C_TYPE + si] === this.JOINT_TYPE){
-				M[C_SUM_T + si] = 0.0;
 				M[C_RAX + si] = M[C_LAX + si] * M[O_COS + asi] - M[C_LAY + si] * M[O_SIN + asi];
 				M[C_RAY + si] = M[C_LAY + si] * M[O_COS + asi] + M[C_LAX + si] * M[O_SIN + asi];
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
@@ -422,25 +425,37 @@ const pw = {
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
 						M[O_VX + asi] -= M[C_JX + si] * M[O_M_INV + asi];
 						M[O_VY + asi] -= M[C_JY + si] * M[O_M_INV + asi];
-						M[O_W + asi] -= (M[C_RAX + si] * M[C_JY + si] - M[C_RAY + si] * M[C_JX + si]) * M[O_I_INV + asi];
+						M[O_W + asi] -= ((M[C_RAX + si] * M[C_JY + si] - M[C_RAY + si] * M[C_JX + si]) + M[C_SUM_T + si]) * M[O_I_INV + asi];
 					}
 					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
 						M[O_VX + bsi] += M[C_JX + si] * M[O_M_INV + bsi];
 						M[O_VY + bsi] += M[C_JY + si] * M[O_M_INV + bsi];
-						M[O_W + bsi] += (M[C_RBX + si] * M[C_JY + si] - M[C_RBY + si] * M[C_JX + si]) * M[O_I_INV + bsi];
+						M[O_W + bsi] += ((M[C_RBX + si] * M[C_JY + si] - M[C_RBY + si] * M[C_JX + si]) + M[C_SUM_T + si]) * M[O_I_INV + bsi];
 					}
+				} else {
+					M[C_SUM_T + si] = 0.0;
+					M[C_JX + si] = 0.0;
+					M[C_JY + si] = 0.0;
 				}
-				//M[C_JN + si] = 0.0;
-				//M[C_JT + si] *= 0.5;
-				
 			}
 		}
 		//temp
 		//console.log("cons = " + cons);
 		// solve velocity constraints
 		let iter = 0
-		for(this.unsolved = true; this.unsolved && iter < VELOCITY_ITERATIONS; ++iter){
-			this.unsolved = false;
+		for(this.unsolved = true; this.unsolved && iter < this.VELOCITY_ITERATIONS; ++iter){
+
+
+
+
+
+			// IMPORTANT EXPERIMENTAL
+			//this.unsolved = false;
+
+
+
+
+
 
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 				let si = this.C_PTRS[ptr];
@@ -452,14 +467,58 @@ const pw = {
 					let len = 1;
 					if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) len = 2;
 
-					// update i increment
+					// TODO implement block solver from GDC Erin Catto video
+					// TODO update i increment?
 					for(let i = si, c = 0; c < len; i += 16, c += 1){
 						if(M[C_ACTIVE + i] == 0) continue;
-						//debugPoints.push([[M[C_NX + i], M[C_NY + i]], orange]);
+						// compute relative velocities
 						let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
-						let vn = M[C_NX + i] * vxRel + M[C_NY + i] * vyRel;
-						let vt = M[C_NX + i] * vyRel - M[C_NY + i] * vxRel;
+						// compute tangential impulse (friction)
+						let jt = (M[C_NX + i] * vyRel - M[C_NY + i] * vxRel) * M[C_MT + i];
+						let oldJt = M[C_JT + i];
+						M[C_JT + i] += jt;
+						let maxJt = Math.abs(M[C_JN + i]) * M[C_US + si];
+						if(Math.abs(M[C_JT + i]) > maxJt){
+							M[C_JT + i] = maxJt * Math.sign(jt);
+							jt = M[C_JT + i] - oldJt;
+						}
+						let jx = jt * -M[C_NY + i];
+						let jy = jt * M[C_NX + i];
+						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
+							M[O_VX + asi] -= jx * M[O_M_INV + asi];
+							M[O_VY + asi] -= jy * M[O_M_INV + asi];
+							M[O_W + asi] -= jt * M[C_RTA + i] * M[O_I_INV + asi];
+						}
+						if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
+							M[O_VX + bsi] += jx * M[O_M_INV + bsi];
+							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
+							M[O_W + bsi] += jt * M[C_RTB + i] * M[O_I_INV + bsi];
+						}
+						// compute normal impulse with updated velocities
+						vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
+						vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
+						let jn = ((M[C_NX + i] * vxRel + M[C_NY + i] * vyRel) + M[C_DIST + i]) * M[C_M + i];
+						let oldJn = M[C_JN + i];
+						M[C_JN + i] += jn;
+						if(M[C_JN + i] > 0) M[C_JN + i] = 0;
+						jn = M[C_JN + i] - oldJn;
+						// it's possible oldJn was already 0 because there was never a negative impulse due to adding seperation as velocity
+						if(jn) {
+							let jx = jn * M[C_NX + i];
+							let jy = jn * M[C_NY + i];
+							if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
+								M[O_VX + asi] -= jx * M[O_M_INV + asi];
+								M[O_VY + asi] -= jy * M[O_M_INV + asi];
+								M[O_W + asi] -= jn * M[C_RNA + i] * M[O_I_INV + asi];
+							}
+							if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
+								M[O_VX + bsi] += jx * M[O_M_INV + bsi];
+								M[O_VY + bsi] += jy * M[O_M_INV + bsi];
+								M[O_W + bsi] += jn * M[C_RNB + i] * M[O_I_INV + bsi];
+							}
+						}
+
 						// only continue if relative normal velocity is less than distance between game objects
 						/*
 						if(nv > -M[C_DIST + i]) continue;
@@ -473,6 +532,10 @@ const pw = {
 							else jf = j * M[C_UK + si];
 						}
 						*/
+
+
+
+						/*
 						let j = 0.0;
 						let jf = vt * M[C_MT + i];
 						// temp
@@ -486,8 +549,8 @@ const pw = {
 						j = M[C_JN + i] - oldJ;
 						if(j) {
 
-
-							if(iter == 0) console.log(j);
+						
+							//if(iter == 0) console.log(j);
 
 
 
@@ -512,6 +575,8 @@ const pw = {
 						//debugPoints.push([M[C_RBX + i] + M[O_TX + bsi], M[C_RBY + i] + M[O_TY + bsi]]);
 
 						M[C_JT + i] += jf;
+						
+
 						// integrate impulse into velocity
 						let jx = j * M[C_NX + i] - jf * M[C_NY + i];
 						let jy = j * M[C_NY + i] + jf * M[C_NX + i];
@@ -525,19 +590,21 @@ const pw = {
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += (j * M[C_RNB + i] + jf * M[C_RTB + i]) * M[O_I_INV + bsi];
 						}
+						*/
 					}
 
 				} else if(M[C_TYPE + si] == this.JOINT_TYPE){
-					if(M[C_IS_MOTOR + si] && M[C_SUM_T + si] < M[C_M_MAX_T + si]){
+					if(M[C_IS_MOTOR + si]){
 						let aa = M[O_W + asi] - M[O_W + bsi] - M[C_MW + si];
-						let t = aa * M[C_M_I + si];
-						if(M[C_SUM_T + si] + Math.abs(t) * 0.99 > M[C_M_MAX_T + si]) {
-							if(t < 0.0) t = M[C_SUM_T + si] - M[C_M_MAX_T + si];
-							else t = M[C_M_MAX_T + si] - M[C_SUM_T + si];
+						let jm = aa * M[C_M_I + si];
+						let oldJm = M[C_SUM_T + si];
+						M[C_SUM_T + si] += jm;
+						if(Math.abs(M[C_SUM_T + si]) > M[C_M_MAX_T + si]) {
+							M[C_SUM_T + si] = M[C_M_MAX_T + si] * Math.sign(jm);
+							jm = M[C_SUM_T + si] - oldJm;
 						}
-						M[O_W + asi] -= t * M[O_I_INV + asi];
-						M[O_W + bsi] += t * M[O_I_INV + bsi];
-						M[C_SUM_T + si] += Math.abs(t);
+						M[O_W + asi] -= jm * M[O_I_INV + asi];
+						M[O_W + bsi] += jm * M[O_I_INV + bsi];
 					}
 					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si];
 					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si];
@@ -548,28 +615,12 @@ const pw = {
 					vyRel /= vn;
 					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
 					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
-					//let mInv = vn * (M[O_M_INV + asi] + M[O_M_INV + bsi]) + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-					// sure?
-					//if(vn > 0.0) vn *= 1.25;
-
-					let wax = M[C_RAX + si] + M[O_TX + asi];
-					let way = M[C_RAY + si] + M[O_TY + asi];
-					let wbx = M[C_RBX + si] + M[O_TX + bsi];
-					let wby = M[C_RBY + si] + M[O_TY + bsi];
-					if(wax != wbx || way != wby) {
-						let nx = wax - wbx;
-						let ny = way - wby;
-						let dist = Math.sqrt(nx * nx + ny * ny);
-						vn += dist * 0.2;
-					}
-
 					let j = vn / mInv;
-					// somehow calculate revolute friction?
+					// TODO implement revolute friction?
 					// integrate impulse into velocity
 					let jx = j * vxRel;
 					let jy = j * vyRel;
-
 					M[C_JX + si] += jx;
 					M[C_JY + si] += jy;
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -582,19 +633,6 @@ const pw = {
 						M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 						M[O_W + bsi] += j * rnb * M[O_I_INV + bsi];
 					}
-					/*
-					let nx = (M[C_RAX + si] + M[O_TX + asi]) - (M[C_RBX + si] + M[O_TX + bsi]);
-					let ny = (M[C_RAY + si] + M[O_TY + asi]) - (M[C_RBY + si] + M[O_TY + bsi]);
-					if(!nx && !ny) continue;
-					let n = Math.sqrt(nx * nx + ny * ny);
-					nx /= n;
-					ny /= n;
-					rna = M[C_RAX + si] * ny - M[C_RAY + si] * nx;
-					rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
-					mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-					j = (vxRel * nx + vyRel * ny) / mInv;
-					M[C_JN + si] += j;
-					*/
 				}
 			}
 		}
@@ -614,7 +652,7 @@ const pw = {
 
 		// solve position constraints
 		iter = 0
-		for(this.unsolved = true; this.unsolved && iter < POSITION_ITERATIONS; ++iter){
+		for(this.unsolved = true; this.unsolved && iter < this.POSITION_ITERATIONS; ++iter){
 			this.unsolved = false;
 
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){

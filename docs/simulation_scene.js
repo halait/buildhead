@@ -1,5 +1,4 @@
 "use strict";
-var isSimulating = false;
 var isRenderFrame = false;
 var successPending = true;
 //var dt = 0.0;

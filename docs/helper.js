@@ -1,4 +1,9 @@
 "use strict";
+var isSimulating = false;
+var assemblyField = false;
+var goalField = false;
+var debugPoints = [];
+var sandboxMode = false;
 // constants
 const MAX_SNAP_DIST = 0.025;
 
@@ -477,7 +482,41 @@ function getHandlesNear(x, y, objToIgnore){
 
 
 // scene management
+const sceneManager = {
+	history: [menuScene],
+	current: menuScene,
+	currentFloat: false,
 
+	push(scene){
+		if(this.currentFloat) this.pop();
+		this.current.suspend();
+		this.history.push(scene);
+		this.current = scene;
+		this.current.start();
+	},
+
+	pop(){
+		if(this.currentFloat){
+			this.currentFloat.suspend();
+			this.currentFloat = false;
+			return;
+		}
+		this.current.suspend();
+		this.history.pop();
+		this.current = this.history[this.history.length - 1];
+		this.current.start();
+	},
+
+	float(scene, arg){
+		if(this.currentFloat){
+			this.pop();
+		}
+		scene.start(arg);
+		this.currentFloat = scene;
+	}
+};
+window.onresize();
+menuScene.start();
 /*
 function sceneManager.push(newScene){
 	if(floatingScene){
@@ -507,39 +546,10 @@ function sceneManager.float(scene){
 	scene.start();
 }
 */
-function dragCanvas(x, y){
-	xTranslate += x;
-	yTranslate += y;
-	pw.gl.uniform2f(pw.U_TRANSLATE_LOCATION, xTranslate, yTranslate);
-	if(!isSimulating) pw.render();
-}
-
-function scaleCanvas(d){
-	scale = Math.min(Math.max(scale - d, 0.2), 8.0);
-	pw.gl.uniform2f(pw.U_SCALE_LOCATION, aspectRatio * scale, scale);
-	if(!isSimulating) pw.render();
-}
 
 //message: "The level your attempting to load is unplayable because it is missing key objects, it can only be loaded in sandbox mode."
 
-function resetCanvas(){
-	pw.destroyAll();
-	gameObjects.splice(0);
-	joints.splice(0);
-	targets.splice(0);
-	goalField = false;
-	assemblyField = false;
 
-	debugPoints.splice(0);
-
-	scale = 1.0;
-	scaleCanvas(0.0);
-	xTranslate = 0.0;
-	yTranslate = 0.0;
-	dragCanvas(0.0, 0.0);
-	pw.render();
-	console.log("canvas cleared");
-}
 
 function create(def){
 	if(def.form == pw.CIRCLE_FORM) {
