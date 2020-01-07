@@ -193,7 +193,6 @@ class Obround extends GameObject {
 		let p = pw.getPosition(this.ref);
 		this.originX = p[0];
 		this.originY = p[1];
-		//if(!this.isLegalPosition()) canvas.style.cursor = "no-drop";
 	}
 
 	setVertex(vertex, x, y, join){

@@ -128,6 +128,11 @@
 	const C_M_MAX_T = 19;
 	const C_SUM_T = 20;
 	const C_M_I = 21;
+
+	const C_JX = 22;
+	const C_JY = 23;
+
+
 	//const C_RMB = 19;
 	//const C_RMA_INV = 20;
 	//const C_RMA = 20;
@@ -397,31 +402,35 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				
-				if(false && this.warmStarting){
-					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si];
-					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si];
-					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
-					if(!vn) continue;
-					vxRel /= vn;
-					vyRel /= vn;
-					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
-					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
-					M[C_JN + si] *= 0.5;
-					let jx = M[C_JN + si] * vxRel;
-					let jy = M[C_JN + si] * vyRel;
+				if(this.warmStarting){
+					/*
+					let wax = M[C_RAX + si] + M[O_TX + asi];
+					let way = M[C_RAY + si] + M[O_TY + asi];
+					let wbx = M[C_RBX + si] + M[O_TX + bsi];
+					let wby = M[C_RBY + si] + M[O_TY + bsi];
+					if(wax == wbx && way == wby) continue;
+					let nx = wax - wbx;
+					let ny = way - wby;
+					let dist = Math.sqrt(nx * nx + ny * ny);
+					nx /= dist;
+					ny /= dist;
+					let rna = M[C_RAX + si] * ny - M[C_RAY + si] * nx;
+					let rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
+
+					//M[C_JN + si] *= 0.5;
+					*/
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
-						M[O_VX + asi] -= jx * M[O_M_INV + asi];
-						M[O_VY + asi] -= jy * M[O_M_INV + asi];
-						M[O_W + asi] -= M[C_JN + si] * rna * M[O_I_INV + asi];
+						M[O_VX + asi] -= M[C_JX + si] * M[O_M_INV + asi];
+						M[O_VY + asi] -= M[C_JY + si] * M[O_M_INV + asi];
+						M[O_W + asi] -= (M[C_RAX + si] * M[C_JY + si] - M[C_RAY + si] * M[C_JX + si]) * M[O_I_INV + asi];
 					}
 					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
-						M[O_VX + bsi] += jx * M[O_M_INV + bsi];
-						M[O_VY + bsi] += jy * M[O_M_INV + bsi];
-						M[O_W + bsi] += M[C_JN + si] * rnb * M[O_I_INV + bsi];
+						M[O_VX + bsi] += M[C_JX + si] * M[O_M_INV + bsi];
+						M[O_VY + bsi] += M[C_JY + si] * M[O_M_INV + bsi];
+						M[O_W + bsi] += (M[C_RBX + si] * M[C_JY + si] - M[C_RBY + si] * M[C_JX + si]) * M[O_I_INV + bsi];
 					}
 				}
-				M[C_JN + si] = 0.0;
+				//M[C_JN + si] = 0.0;
 				//M[C_JT + si] *= 0.5;
 				
 			}
@@ -476,6 +485,13 @@ const pw = {
 						if(M[C_JN + i] > 0) M[C_JN + i] = 0;
 						j = M[C_JN + i] - oldJ;
 						if(j) {
+
+
+							if(iter == 0) console.log(j);
+
+
+
+
 							this.unsolved = true;
 							if(Math.abs(M[C_JT + i]) < Math.abs(M[C_JN + i])){
 								if(Math.abs(jf) > -M[C_JN + i] * M[C_US + si]) {
@@ -525,24 +541,37 @@ const pw = {
 					}
 					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si];
 					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si];
+					if(!vxRel && !vyRel) continue;
+					this.unsolved = true;
 					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
 					vxRel /= vn;
 					vyRel /= vn;
-					if(vn == 0.0) continue;
-					this.unsolved = true;
 					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
 					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
 					//let mInv = vn * (M[O_M_INV + asi] + M[O_M_INV + bsi]) + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-					
 					// sure?
 					//if(vn > 0.0) vn *= 1.25;
+
+					let wax = M[C_RAX + si] + M[O_TX + asi];
+					let way = M[C_RAY + si] + M[O_TY + asi];
+					let wbx = M[C_RBX + si] + M[O_TX + bsi];
+					let wby = M[C_RBY + si] + M[O_TY + bsi];
+					if(wax != wbx || way != wby) {
+						let nx = wax - wbx;
+						let ny = way - wby;
+						let dist = Math.sqrt(nx * nx + ny * ny);
+						vn += dist * 0.2;
+					}
+
 					let j = vn / mInv;
-					M[C_JN + si] += j;
 					// somehow calculate revolute friction?
 					// integrate impulse into velocity
 					let jx = j * vxRel;
 					let jy = j * vyRel;
+
+					M[C_JX + si] += jx;
+					M[C_JY + si] += jy;
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
 						M[O_VX + asi] -= jx * M[O_M_INV + asi];
 						M[O_VY + asi] -= jy * M[O_M_INV + asi];
@@ -553,6 +582,19 @@ const pw = {
 						M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 						M[O_W + bsi] += j * rnb * M[O_I_INV + bsi];
 					}
+					/*
+					let nx = (M[C_RAX + si] + M[O_TX + asi]) - (M[C_RBX + si] + M[O_TX + bsi]);
+					let ny = (M[C_RAY + si] + M[O_TY + asi]) - (M[C_RBY + si] + M[O_TY + bsi]);
+					if(!nx && !ny) continue;
+					let n = Math.sqrt(nx * nx + ny * ny);
+					nx /= n;
+					ny /= n;
+					rna = M[C_RAX + si] * ny - M[C_RAY + si] * nx;
+					rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
+					mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
+					j = (vxRel * nx + vyRel * ny) / mInv;
+					M[C_JN + si] += j;
+					*/
 				}
 			}
 		}
@@ -667,9 +709,11 @@ const pw = {
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
 					//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
 					// tune?
-					let j = (dist * 0.5) / mInv;
+					//let j = (dist * 0.5) / mInv;
+					let j = dist / mInv;
 					let jx = j * nx;
 					let jy = j * ny;
+
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE) {
 						let aax = jx * M[O_M_INV + asi];
 						let aay = jy * M[O_M_INV + asi];
@@ -1166,7 +1210,8 @@ const pw = {
 	SURFACE_POLYGON_FORM: 8,
 	POLYGONS_FORM: 9,
 
-	PO_SIZES: new Uint8Array([34, 22, 25, 22, 22, 38, 22,   22, 38, 38, 22]),
+	//PO_SIZES: new Uint8Array([34, 22, 25, 22, 22, 38, 22,   22, 38, 38, 22]),
+	PO_SIZES: new Uint8Array([34, 22, 25, 22, 22, 38, 24,   22, 38, 38, 22]),
 
 
 	// For now two types of physics objects, maybe more in the future.
@@ -1808,14 +1853,15 @@ const pw = {
 			this.M[O_UY + poPtr] = dy * this.M[O_L_INV + poPtr];
 
 			if(this.M[O_L + poPtr] < this.MIN_PLANE_LEN * 0.99){
-				if(vertexIndex == 0){
+				/*if(vertexIndex == 0){
 					x = this.M[O_W1X + poPtr] - this.M[O_UX + poPtr] * this.MIN_PLANE_LEN;
 					y = this.M[O_W1Y + poPtr] - this.M[O_UY + poPtr] * this.MIN_PLANE_LEN;
-				} else {
+				} else {*/
 					x = this.M[O_W0X + poPtr] + this.M[O_UX + poPtr] * this.MIN_PLANE_LEN;
 					y = this.M[O_W0Y + poPtr] + this.M[O_UY + poPtr] * this.MIN_PLANE_LEN;
-				}
-				this.setVertex(poPtr, vertexIndex, x, y);
+				//}
+				//this.setVertex(poPtr, vertexIndex, x, y);
+				this.setVertex(poPtr, 1, x, y);
 				return;
 			}
 
