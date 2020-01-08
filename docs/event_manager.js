@@ -1,10 +1,41 @@
 "use strict";
 
-let toolbars = document.getElementsByClassName("toolbar");
-var aspectRatio = 0.0;
+var isMousedown = false;
 var xSub = 0.0;
 var widthMultiplier = 0.0;
 var heightMultiplier = 0.0;
+canvas.addEventListener('mousedown', (e) => {
+	if(sceneManager.currentFloat) {
+		sceneManager.pop();
+		return;
+	}
+	if(isMousedown || !sceneManager.current.eventHandler) {
+		console.log("eventHandler == false");
+		return;
+	}
+	isMousedown = true;
+	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
+	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
+	sceneManager.current.eventHandler.handleActivePress();
+});
+canvas.addEventListener('mousemove', (e) => {
+	if(!isMousedown || !sceneManager.current.eventHandler) return;
+	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
+	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
+	sceneManager.current.eventHandler.handleActiveDrag();
+});
+canvas.addEventListener('mouseup', () => {
+	canvas.style.cursor = "crosshair";
+	if(!isMousedown || !sceneManager.current.eventHandler) return;
+	isMousedown = false;
+	sceneManager.current.eventHandler.handleActiveMouseup();
+});
+canvas.addEventListener('wheel', (e) => {
+	if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
+});
+
+let toolbars = document.getElementsByClassName("toolbar");
+var aspectRatio = 0.0;
 window.onresize = () => {
 	let w = window.innerWidth * window.devicePixelRatio;
 	let h = window.innerHeight * window.devicePixelRatio - 40;
