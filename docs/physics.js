@@ -283,13 +283,10 @@ const pw = {
 	warmStarting: true,
 
 	update(){
-
-
-		//make this.M local by let m = this.M
+		// scope M to function so faster access
 		let M = this.M;
 
-
-		// integrate gravity and resistance
+		// integrate external forces (gravity and air resistance)
 		for(let i = 0, len = this.poTotal; i < len; ++i){
 			let ptr = this.PO_PTRS[i];
 			if(M[O_TYPE + ptr] == this.FIXED_TYPE) continue;
@@ -300,13 +297,9 @@ const pw = {
 		}
 
 
-		// temp
-		//let cons = 0;
 		// initialize constraints
 		for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 			let si = this.C_PTRS[ptr];
-			//temp
-			//++cons;
 			let asi = M[C_PO_PTR_A + si];
 			let bsi = M[C_PO_PTR_B + si];
 
@@ -478,11 +471,12 @@ const pw = {
 						let jt = (M[C_NX + i] * vyRel - M[C_NY + i] * vxRel) * M[C_MT + i];
 						let oldJt = M[C_JT + i];
 						M[C_JT + i] += jt;
-						let maxJt = Math.abs(M[C_JN + i]) * M[C_US + si];
+						let maxJt = -M[C_JN + i] * M[C_US + si];
 						if(Math.abs(M[C_JT + i]) > maxJt){
 							M[C_JT + i] = maxJt * Math.sign(jt);
 							jt = M[C_JT + i] - oldJt;
 						}
+						// integrate impusle
 						let jx = jt * -M[C_NY + i];
 						let jy = jt * M[C_NX + i];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -495,14 +489,16 @@ const pw = {
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += jt * M[C_RTB + i] * M[O_I_INV + bsi];
 						}
-						// compute normal impulse with updated velocities
+						// update velocities
 						vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
+						// compute normal impulse
 						let jn = ((M[C_NX + i] * vxRel + M[C_NY + i] * vyRel) + M[C_DIST + i]) * M[C_M + i];
 						let oldJn = M[C_JN + i];
 						M[C_JN + i] += jn;
 						if(M[C_JN + i] > 0) M[C_JN + i] = 0;
 						jn = M[C_JN + i] - oldJn;
+						// integrate impusle
 						// it's possible oldJn was already 0 because there was never a negative impulse due to adding seperation as velocity
 						if(jn) {
 							let jx = jn * M[C_NX + i];
@@ -518,109 +514,49 @@ const pw = {
 								M[O_W + bsi] += jn * M[C_RNB + i] * M[O_I_INV + bsi];
 							}
 						}
-
-						// only continue if relative normal velocity is less than distance between game objects
-						/*
-						if(nv > -M[C_DIST + i]) continue;
-						this.unsolved = true;
-						// compute normal impulse      tune?
-						let j = (nv + M[C_DIST + i]) * 1.01 * M[C_M + i];
-						// compute friction
-						let jf = (M[C_NX + i] * vyRel - M[C_NY + i] * vxRel) * M[C_MT + i];
-						if(Math.abs(jf) > -j * M[C_US + si]) {
-							if(jf > 0) jf = -j * M[C_UK + si];
-							else jf = j * M[C_UK + si];
-						}
-						*/
-
-
-
-						/*
-						let j = 0.0;
-						let jf = vt * M[C_MT + i];
-						// temp
-						//if(vn < -M[C_DIST + i]) {
-							//this.unsolved = true;
-							// compute normal impulse          tune?
-						j = (vn + M[C_DIST + i]) * 1.01 * M[C_M + i];
-						let oldJ = M[C_JN + i];
-						M[C_JN + i] += j;
-						if(M[C_JN + i] > 0) M[C_JN + i] = 0;
-						j = M[C_JN + i] - oldJ;
-						if(j) {
-
-						
-							//if(iter == 0) console.log(j);
-
-
-
-
-							this.unsolved = true;
-							if(Math.abs(M[C_JT + i]) < Math.abs(M[C_JN + i])){
-								if(Math.abs(jf) > -M[C_JN + i] * M[C_US + si]) {
-									jf = -M[C_JN + i] * M[C_UK + si] * Math.sign(jf);
-								}
-							} else {
-								jf = 0.0;
-							}
-						} else if(vt && M[C_JN + i] && Math.abs(M[C_JT + i]) < Math.abs(M[C_JN + i])){
-							if(Math.abs(jf) > -M[C_JN + i] * M[C_US + si]) {
-								jf = -M[C_JN + i] * M[C_UK + si] * Math.sign(jf);
-							}
-						} else {
-							continue;
-						}
-
-						//debugPoints.push([M[C_RAX + i] + M[O_TX + asi], M[C_RAY + i] + M[O_TY + asi]]);
-						//debugPoints.push([M[C_RBX + i] + M[O_TX + bsi], M[C_RBY + i] + M[O_TY + bsi]]);
-
-						M[C_JT + i] += jf;
-						
-
-						// integrate impulse into velocity
-						let jx = j * M[C_NX + i] - jf * M[C_NY + i];
-						let jy = j * M[C_NY + i] + jf * M[C_NX + i];
-						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
-							M[O_VX + asi] -= jx * M[O_M_INV + asi];
-							M[O_VY + asi] -= jy * M[O_M_INV + asi];
-							M[O_W + asi] -= (j * M[C_RNA + i] + jf * M[C_RTA + i]) * M[O_I_INV + asi];
-						}
-						if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
-							M[O_VX + bsi] += jx * M[O_M_INV + bsi];
-							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
-							M[O_W + bsi] += (j * M[C_RNB + i] + jf * M[C_RTB + i]) * M[O_I_INV + bsi];
-						}
-						*/
 					}
 
+
 				} else if(M[C_TYPE + si] == this.JOINT_TYPE){
+					// revolute constraint solver
 					if(M[C_IS_MOTOR + si]){
+						// compute relative angular velocity and subtract desired velocity
 						let aa = M[O_W + asi] - M[O_W + bsi] - M[C_MW + si];
+						// compute motor impulse
 						let jm = aa * M[C_M_I + si];
+						// clamp impulse to max torque
 						let oldJm = M[C_SUM_T + si];
 						M[C_SUM_T + si] += jm;
 						if(Math.abs(M[C_SUM_T + si]) > M[C_M_MAX_T + si]) {
 							M[C_SUM_T + si] = M[C_M_MAX_T + si] * Math.sign(jm);
 							jm = M[C_SUM_T + si] - oldJm;
 						}
+						// integrate impusle
 						M[O_W + asi] -= jm * M[O_I_INV + asi];
 						M[O_W + bsi] += jm * M[O_I_INV + bsi];
 					}
+					// compute relative velocities
 					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si];
 					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si];
+					// if no relative velocities then early out
 					if(!vxRel && !vyRel) continue;
 					this.unsolved = true;
+					// compute normal vector from relative velocities because any relative velocity violates constraint
 					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
+					// normalize vectors
 					vxRel /= vn;
 					vyRel /= vn;
+					// the cross product of the radius vector and the normal vector usuallu will change so this must be recalculated
 					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
 					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
+					// therefore the mass seen by the constraint is always changing aswell
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
 					let j = vn / mInv;
 					// TODO implement revolute friction?
-					// integrate impulse into velocity
+					// integrate impulse
 					let jx = j * vxRel;
 					let jy = j * vyRel;
+					// unlike the collision constraint we must save impulses as vector (for warm-starting) because the direction of the vector changes throughout the step
 					M[C_JX + si] += jx;
 					M[C_JY + si] += jy;
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -663,28 +599,6 @@ const pw = {
 				if(M[C_TYPE + si] == this.COLLISION_TYPE){
 					let len = 7;
 					let collisionData = this.getCollisionData(si, asi, bsi);
-					/*
-					if(M[C_FORM + si] == this.POINT_SURFACE_FORM){
-						collisionData = this.getCirclePlaneCollisionData(asi, bsi);
-					} else if(M[C_FORM + si] == this.POINTS_FORM){
-						collisionData = this.getCirclesCollisionData(asi, bsi);
-					} else if(M[C_FORM + si] == this.SURFACES_FORM){
-						collisionData = this.getPlanesCollisionData(asi, bsi);
-						len = 14;
-
-
-
-					} else if(M[C_FORM + si] == this.POINT_POLYGON_FORM){
-						collisionData = this.getCirclePolygonCollisionData(asi, bsi);
-
-
-
-
-
-					} else {
-						console.warn("oh ohh");
-					}
-					*/
 					if(!collisionData) continue;
 					for(let i = si, c = 0; c < len; i += 16, c += 7){
 						if(collisionData[6 + c] > 0.0) continue;
@@ -1455,9 +1369,9 @@ const pw = {
 		this.M[O_FORM + ptr] = def.form;
 		this.M[O_TYPE + ptr] = def.type;
 		this.M[O_GROUP + ptr] = def.group;
-		if(def.staticFriction === undefined) this.M[O_US + ptr] = 0.8;
+		if(def.staticFriction === undefined) this.M[O_US + ptr] = 0.9;
 		else this.M[O_US + ptr] = def.staticFriction;
-		if(def.kineticFriction === undefined) this.M[O_UK + ptr] = 0.5;
+		if(def.kineticFriction === undefined) this.M[O_UK + ptr] = 0.7;
 		else this.M[O_UK + ptr] = def.kineticFriction;
 		if(def.linearVelocityResistance === undefined) this.M[O_VM + ptr] = 0.99;
 		else this.M[O_VM + ptr] = 1.0 - def.linearVelocityResistance;
