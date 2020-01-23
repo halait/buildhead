@@ -1,217 +1,232 @@
 "use strict";
-
-	//temp
-	const O_NUM_FLOATS = -1;
-
-
-
-	const O_FORM = 0;
-	const O_TYPE = 1;
-	const O_P = 2;
-	const O_M = 3;
-	const O_M_INV = 4;
-	const O_I = 5;
-	const O_I_INV = 6;
-	const O_GROUP = 7;
-	const O_US = 8;
-	const O_UK = 9;
-	const O_VM = 10;
-	const O_WM = 11;
-	const O_VX = 12;
-	const O_VY = 13;
-	const O_W = 14;
-	const O_TX = 15;
-	const O_TY = 16;
-	const O_COS = 17;
-	const O_SIN = 18;
-	const O_O = 19;
-	const O_USERFLOATS_PTR = 20;
-
-	// this.CIRCLE_FORM CUSTOM PROPERTIES
-	const O_RADIUS = 21;
-
-	// AABB_FORM only
-	const O_MIN_X = 21;
-	const O_MIN_Y = 22;
-	const O_MAX_X = 23;
-	const O_MAX_Y = 24;
-
-	// this.PLANE_FORM CUSTOM PROPERTIES
-	const O_L = 21;
-	const O_L_INV = 22;
-	const O_L0X = 23;
-	const O_L0Y = 24;
-	const O_L1X = 25;
-	const O_L1Y = 26;
-	const O_W0X = 27;
-	const O_W0Y = 28;
-	const O_W1X = 29;
-	const O_W1Y = 30;
-	const O_UX = 31;
-	const O_UY = 32;
-	const O_HALF_WIDTH = 33;
-
-
-	// POLYGON_FORM only
-	const O_NUM_VERTICES = 21;
-
-
-	//per vertex offset
-	const V_LX = 0;
-	const V_LY = 1;
-	const V_WX = 2;
-	const V_WY = 3;
-	const V_UX = 4;
-	const V_UY = 5;
-	const V_L = 6;
-	const V_L_INV = 7;
+/* TODO
+	- implement block solver for multiple contacts
+	- consolidate physics object PLANE_FORM into POLYGON_FORM for simplification purposes
+*/
+// PRE-ALPHA
+/* GLOSSARY
+	- physics object: actual objects that are simulated by the physics engine. For now this is circles, planes and convex polygons.
+*/
 
 
 
 
+/*
+	This physics engine is made specifically for use in the browser and thus written in JS (perhaps ported to WASM in the future).
+	Due to most JS engines being slow accessing variables inside objects relative to native running code I am experimenting
+	using a large typedArray (Float64Array) to store data rather than objects to improve performance. There is ~20% speed boost in
+	V8 so I am sticking with it for now. I emulated C/C++ style of manual memory management with typedArray serving as memory. For
+	each physics object and constraint created elements (floats) are allocated in a contiguous block in the typedArray and assigned
+	a pointer which is simply the index of the first element of the allocated elements that can be used to hold arbitrary floats.
+	The pointer plus an offset is used to access elements.
+*/
+// physics object offsets
+// temp
+const O_NUM_FLOATS = -1;
+const O_FORM = 0;
+const O_TYPE = 1;
+const O_P = 2;
+const O_M = 3;
+const O_M_INV = 4;
+const O_I = 5;
+const O_I_INV = 6;
+const O_GROUP = 7;
+const O_US = 8;
+const O_UK = 9;
+const O_VM = 10;
+const O_WM = 11;
+const O_VX = 12;
+const O_VY = 13;
+const O_W = 14;
+const O_TX = 15;
+const O_TY = 16;
+const O_COS = 17;
+const O_SIN = 18;
+const O_O = 19;
+const O_USERFLOATS_PTR = 20;
 
-	const C_FORM = 0;
-	const C_TYPE = 1;
-	const C_PO_PTR_A = 2;
-	const C_PO_PTR_B = 3;
-	const C_US = 4;
-	const C_UK = 5;
+// CIRCLE_FORM only offsets
+const O_RADIUS = 21;
 
+// AABB_FORM only offsets
+const O_MIN_X = 21;
+const O_MIN_Y = 22;
+const O_MAX_X = 23;
+const O_MAX_Y = 24;
 
-
-	const C_ACTIVE = 6;
-	const C_RAX = 7;
-	const C_RAY = 8;
-	const C_RBX = 9;
-	const C_RBY = 10;
-
-	const C_JN = 11;
-	const C_JT = 12;
-
-	// COLLISION_FORM only
-	const C_NX = 13;
-	const C_NY = 14;
-	const C_DIST = 15;
-	const C_RNA = 16;
-	const C_RNB = 17;
-	const C_M = 18;
-	const C_RTA = 19;
-	const C_RTB = 20;
-	const C_MT = 21;
-
-	/*
-	const C_ACTIVE = 22;
-	const C_NX = 23;
-	const C_NY = 24;
-	const C_DIST = 25;
-	const C_RAX = 26;
-	const C_RAY = 27;
-	const C_RBX = 28;
-	const C_RBY = 29;
-	const C_JN = 30;
-	const C_JT = 31;
-	const C_RNA = 32;
-	const C_RNB = 33;
-	const C_M = 34;
-	const C_RTA = 35;
-	const C_RTB = 36;
-	const C_MT = 37;
-	*/
-
-	// revolute only
-	const C_LAX = 13;
-	const C_LAY = 14;
-	const C_LBX = 15;
-	const C_LBY = 16;
-	const C_IS_MOTOR = 17;
-	const C_MW = 18;
-	const C_M_MAX_T = 19;
-	const C_SUM_T = 20;
-	const C_M_I = 21;
-
-	const C_JX = 22;
-	const C_JY = 23;
+// PLANE_FORM only offsets
+const O_L = 21;
+const O_L_INV = 22;
+const O_L0X = 23;
+const O_L0Y = 24;
+const O_L1X = 25;
+const O_L1Y = 26;
+const O_W0X = 27;
+const O_W0Y = 28;
+const O_W1X = 29;
+const O_W1Y = 30;
+const O_UX = 31;
+const O_UY = 32;
+const O_HALF_WIDTH = 33;
 
 
-	//const C_RMB = 19;
-	//const C_RMA_INV = 20;
-	//const C_RMA = 20;
-	//const C_RMB_INV = 21;
+// POLYGON_FORM only offsets
+const O_NUM_VERTICES = 21;
 
-
-	/*
-	const C_FORM = 0;
-	const C_TYPE = 1;
-	const C_PO_PTR_A = 2;
-	const C_PO_PTR_B = 3;
-	const C_US = 4;
-	const C_UK = 5;
-	const C_NUM_
+// vertex offsets
+const V_LX = 0;
+const V_LY = 1;
+const V_WX = 2;
+const V_WY = 3;
+const V_UX = 4;
+const V_UY = 5;
+const V_L = 6;
+const V_L_INV = 7;
 
 
 
 
+// constraint offsets
+const C_FORM = 0;
+const C_TYPE = 1;
+const C_PO_PTR_A = 2;
+const C_PO_PTR_B = 3;
+const C_US = 4;
+const C_UK = 5;
 
-	const C_ACTIVE = 6;
-	const C_RAX = 7;
-	const C_RAY = 8;
-	const C_RBX = 9;
-	const C_RBY = 10;
 
-	const C_JN = 11;
-	const C_JT = 12;
+const C_ACTIVE = 6;
+const C_RAX = 7;
+const C_RAY = 8;
+const C_RBX = 9;
+const C_RBY = 10;
 
-	// this.COLLISION_FORM only
-	const C_NX = 13;
-	const C_NY = 14;
-	const C_DIST = 15;
-	const C_RNA = 16;
-	const C_RNB = 17;
-	const C_M = 18;
-	const C_RTA = 19;
-	const C_RTB = 20;
-	const C_MT = 21;
+const C_JN = 11;
+const C_JT = 12;
 
-	/*
-	const C_ACTIVE = 22;
-	const C_NX = 23;
-	const C_NY = 24;
-	const C_DIST = 25;
-	const C_RAX = 26;
-	const C_RAY = 27;
-	const C_RBX = 28;
-	const C_RBY = 29;
-	const C_JN = 30;
-	const C_JT = 31;
-	const C_RNA = 32;
-	const C_RNB = 33;
-	const C_M = 34;
-	const C_RTA = 35;
-	const C_RTB = 36;
-	const C_MT = 37;
-	*/
-	/*
-	// revolute only
-	const C_LAX = 13;
-	const C_LAY = 14;
-	const C_LBX = 15;
-	const C_LBY = 16;
-	const C_IS_MOTOR = 17;
-	const C_MW = 18;
-	const C_M_MAX_T = 19;
-	const C_SUM_T = 20;
-	const C_M_I = 21;
-	//const C_RMB = 19;
-	//const C_RMA_INV = 20;
-	//const C_RMA = 20;
-	//const C_RMB_INV = 21;
-	*/
+// COLLISION_FORM only
+const C_NX = 13;
+const C_NY = 14;
+const C_DIST = 15;
+const C_RNA = 16;
+const C_RNB = 17;
+const C_M = 18;
+const C_RTA = 19;
+const C_RTB = 20;
+const C_MT = 21;
+
+/*
+const C_ACTIVE = 22;
+const C_NX = 23;
+const C_NY = 24;
+const C_DIST = 25;
+const C_RAX = 26;
+const C_RAY = 27;
+const C_RBX = 28;
+const C_RBY = 29;
+const C_JN = 30;
+const C_JT = 31;
+const C_RNA = 32;
+const C_RNB = 33;
+const C_M = 34;
+const C_RTA = 35;
+const C_RTB = 36;
+const C_MT = 37;
+*/
+
+// JOINT_FORM only
+const C_LAX = 13;
+const C_LAY = 14;
+const C_LBX = 15;
+const C_LBY = 16;
+const C_IS_MOTOR = 17;
+const C_MW = 18;
+const C_M_MAX_T = 19;
+const C_SUM_T = 20;
+const C_M_I = 21;
+const C_JX = 22;
+const C_JY = 23;
+
+
+//const C_RMB = 19;
+//const C_RMA_INV = 20;
+//const C_RMA = 20;
+//const C_RMB_INV = 21;
+
+
+/*
+const C_FORM = 0;
+const C_TYPE = 1;
+const C_PO_PTR_A = 2;
+const C_PO_PTR_B = 3;
+const C_US = 4;
+const C_UK = 5;
+const C_NUM_
+
+
+
+
+
+const C_ACTIVE = 6;
+const C_RAX = 7;
+const C_RAY = 8;
+const C_RBX = 9;
+const C_RBY = 10;
+
+const C_JN = 11;
+const C_JT = 12;
+
+// this.COLLISION_FORM only
+const C_NX = 13;
+const C_NY = 14;
+const C_DIST = 15;
+const C_RNA = 16;
+const C_RNB = 17;
+const C_M = 18;
+const C_RTA = 19;
+const C_RTB = 20;
+const C_MT = 21;
+
+/*
+const C_ACTIVE = 22;
+const C_NX = 23;
+const C_NY = 24;
+const C_DIST = 25;
+const C_RAX = 26;
+const C_RAY = 27;
+const C_RBX = 28;
+const C_RBY = 29;
+const C_JN = 30;
+const C_JT = 31;
+const C_RNA = 32;
+const C_RNB = 33;
+const C_M = 34;
+const C_RTA = 35;
+const C_RTB = 36;
+const C_MT = 37;
+*/
+/*
+// revolute only
+const C_LAX = 13;
+const C_LAY = 14;
+const C_LBX = 15;
+const C_LBY = 16;
+const C_IS_MOTOR = 17;
+const C_MW = 18;
+const C_M_MAX_T = 19;
+const C_SUM_T = 20;
+const C_M_I = 21;
+//const C_RMB = 19;
+//const C_RMA_INV = 20;
+//const C_RMA = 20;
+//const C_RMB_INV = 21;
+*/
 
 
 class MemoryManager {
 	constructor(memory){
 		let len = memory.length;
-		if(len > 65535) console.error("Are you sure?");
+		if(len > 65535) console.warn("Are you sure?");
 		this.memory = memory;
 		this.memory[0] = -len;
 		this.memory[this.memory.length - 1] = len;
@@ -219,11 +234,10 @@ class MemoryManager {
 
 	alloc(size){
 		if(size < 1) throw "Size must be atleast 1";
-		if(!Number.isInteger(size)) throw "Size must be representable as integer: " + size;
+		if(!Number.isInteger(size)) throw "Size must be representable as integer. Size passed: " + size;
 		size += 2;
 		for(let ptr = 0, len = this.memory.length; ptr < len; ptr += Math.abs(this.memory[ptr])){
-			if(!Number.isInteger(ptr)) throw "Ptr not representable as integer: " + ptr;
-			if(!Number.isInteger(this.memory[ptr])) throw "this.memory[ptr] not representable as integer: " + this.memory[ptr];
+			if(!Number.isInteger(this.memory[ptr])) throw "this.memory[ptr] = " + this.memory[ptr] + " not representable as integer.";
 			if(-this.memory[ptr] >= size) {
 				if(-this.memory[ptr] > size){
 					this.memory[ptr + size] = this.memory[ptr] + size;
@@ -231,19 +245,19 @@ class MemoryManager {
 				}
 				this.memory[ptr] = size;
 				this.memory[ptr + size - 1] = -size;
-				console.log(size + " floats allocated at adress: " + (ptr + 1));
+				console.log(size + " floats allocated at adress: " + ptr);
 				return ++ptr;
 			}
 		}
-		console.error("Memory failure");
+		throw "Memory failure";
 	}
 
 	free(ptr){
-		if(!Number.isInteger(ptr)) throw "Ptr must be representable as integer: " + ptr;
+		if(!Number.isInteger(ptr)) throw "Ptr must be representable as integer, ptr = " + ptr;
+		if(ptr < 0) throw "Unable to free ptr less than 0, ptr = " + ptr;
 		--ptr;
 		console.log("freeing ptr: " + ptr);
-		if(this.memory[ptr] < 20) throw "freeing ptr with size: " + this.memory[ptr];
-		if(ptr < 0) throw "Cannot free ptr: " + ptr;
+		if(this.memory[ptr] < 20) console.warn("freeing ptr with size: " + this.memory[ptr]);
 		let start = ptr;
 		let end = this.memory[ptr] + ptr;
 		if(this.memory[end] < 0) end -= this.memory[end];
@@ -252,8 +266,6 @@ class MemoryManager {
 		if(!Number.isInteger(size)) throw "Size must be representable as integer: " + size;
 		this.memory[start] = -size;
 		this.memory[end - 1] = size;
-
-
 		// temp
 		this.memory.fill(0, start + 1, end - 1);
 	}
@@ -262,14 +274,18 @@ class MemoryManager {
 		let len = this.memory.length;
 		this.memory[0] = -len;
 		this.memory[this.memory.length - 1] = len;
+		// temp
+		//this.memory.fill(0);
 	}
-
+	/*
 	set(pointer, offset, value){
 		this.data[pointer + offset] = value;
 	}
+
 	get(pointer, offset){
 		return this.data[pointer + offset];
 	}
+	*/
 }
 
 const pw = {
@@ -283,10 +299,10 @@ const pw = {
 	warmStarting: true,
 
 	update(){
-		// scope M to function so faster access
+		// scope M to function for faster access
 		let M = this.M;
 
-		// integrate external forces (gravity and air resistance)
+		// integrate external forces (gravity and physics object resistance)
 		for(let i = 0, len = this.poTotal; i < len; ++i){
 			let ptr = this.PO_PTRS[i];
 			if(M[O_TYPE + ptr] == this.FIXED_TYPE) continue;
@@ -305,17 +321,7 @@ const pw = {
 
 			if(M[C_TYPE + si] === this.COLLISION_TYPE){
 				let collisionData = this.getCollisionData(si, asi, bsi);
-				/*
-				if(!collisionData) {
-					M[C_ACTIVE + si] = 0;
-					if(M[C_FORM + si] == this.SURFACES_FORM) M[C_ACTIVE + si + 16] = 0;
-					continue;
-				}
-				*/
 				// never updated to accomadate C_JT
-
-
-
 				for(let i = si, c = 0, len = collisionData.length; c < len; i += 16, c += 7){
 																																// tune
 					if(!collisionData || collisionData[0 + c] === null || collisionData[6 + c] > 1.0){
@@ -324,11 +330,12 @@ const pw = {
 						M[C_JT + i] = 0.0;
 						continue;
 					}
+					// normal vector
 					M[C_NX + i] = collisionData[0 + c];
 					M[C_NY + i] = collisionData[1 + c];
-					// distance between collision points
+					// distance between collision vertices
 					M[C_DIST + i] = collisionData[6 + c];
-					// Vectors from center of mass to collision vertex (radius vector)
+					// vectors from center of masses to collision vertex (radius vectors)
 					M[C_RAX + i] = collisionData[2 + c] - M[O_TX + asi];
 					M[C_RAY + i] = collisionData[3 + c] - M[O_TY + asi];
 					M[C_RBX + i] = collisionData[4 + c] - M[O_TX + bsi];
@@ -342,23 +349,18 @@ const pw = {
 						debugPoints.push([[collisionData[4 + c], collisionData[5 + c]], white]);
 					}
 					*/
-					// objA projection of radius vector on normal vector
+					// cross product of radius vector and normal vector
 					M[C_RNA + i] = M[C_RAX + i] * collisionData[1 + c] - M[C_RAY + i] * collisionData[0 + c];
-					// objB projection of radius vector on normal vector
 					M[C_RNB + i] = M[C_RBX + i] * collisionData[1 + c] - M[C_RBY + i] * collisionData[0 + c];
-					// total mass in the collision normal reference
+					// total inverse "mass" in normal reference
 					M[C_M + i] = 1.0 / (M[O_M_INV + asi] + M[O_M_INV + bsi] + M[C_RNA + i] * M[C_RNA + i] * M[O_I_INV + asi] + M[C_RNB + i] * M[C_RNB + i] * M[O_I_INV + bsi]);
-					// objA projection of radius vector on tangential vector
+					// dot product of radius vector and tangential vector
 					M[C_RTA + i] = M[C_RAX + i] * collisionData[0 + c] + M[C_RAY + i] * collisionData[1 + c];
-					// objB projection of radius vector on tangential vector
 					M[C_RTB + i] = M[C_RBX + i] * collisionData[0 + c] + M[C_RBY + i] * collisionData[1 + c];
-					// total mass in the collision tangential reference
+					// total inverse "mass" in tangential reference
 					M[C_MT + i] = 1.0 / (M[O_M_INV + asi] + M[O_M_INV + bsi] + M[C_RTA + i] * M[C_RTA + i] * M[O_I_INV + asi] + M[C_RTB + i] * M[C_RTB + i] * M[O_I_INV + bsi]);
 
-
-
 					if(this.warmStarting){
-					
 						let jx = M[C_JN + i] * M[C_NX + i] - M[C_JT + i] * M[C_NY + i];
 						let jy = M[C_JN + i] * M[C_NY + i] + M[C_JT + i] * M[C_NX + i];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -371,50 +373,20 @@ const pw = {
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += (M[C_JN + i] * M[C_RNB + i] + M[C_JT + i] * M[C_RTB + i]) * M[O_I_INV + bsi];
 						}
-						/*
-						let jx = M[C_JN + i] * M[C_NX + i];
-						let jy = M[C_JN + i] * M[C_NY + i];
-						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
-							M[O_VX + asi] -= jx * M[O_M_INV + asi];
-							M[O_VY + asi] -= jy * M[O_M_INV + asi];
-							M[O_W + asi] -= M[C_JN + i] * M[C_RNA + i] * M[O_I_INV + asi];
-						}
-						if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
-							M[O_VX + bsi] += jx * M[O_M_INV + bsi];
-							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
-							M[O_W + bsi] += M[C_JN + i] * M[C_RNB + i] * M[O_I_INV + bsi];
-						}
-						//M[C_JT + i] = 0.0;
-						*/
 					} else {
 						M[C_JN + i] = 0.0;
 						M[C_JT + i] = 0.0;
 					}
-				}
 
+				}
 			} else if(M[C_TYPE + si] === this.JOINT_TYPE){
+				// vectors from center of masses to joint vertices (radius vectors)
 				M[C_RAX + si] = M[C_LAX + si] * M[O_COS + asi] - M[C_LAY + si] * M[O_SIN + asi];
 				M[C_RAY + si] = M[C_LAY + si] * M[O_COS + asi] + M[C_LAX + si] * M[O_SIN + asi];
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
 				if(this.warmStarting){
-					/*
-					let wax = M[C_RAX + si] + M[O_TX + asi];
-					let way = M[C_RAY + si] + M[O_TY + asi];
-					let wbx = M[C_RBX + si] + M[O_TX + bsi];
-					let wby = M[C_RBY + si] + M[O_TY + bsi];
-					if(wax == wbx && way == wby) continue;
-					let nx = wax - wbx;
-					let ny = way - wby;
-					let dist = Math.sqrt(nx * nx + ny * ny);
-					nx /= dist;
-					ny /= dist;
-					let rna = M[C_RAX + si] * ny - M[C_RAY + si] * nx;
-					let rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
-
-					//M[C_JN + si] *= 0.5;
-					*/
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
 						M[O_VX + asi] -= M[C_JX + si] * M[O_M_INV + asi];
 						M[O_VY + asi] -= M[C_JY + si] * M[O_M_INV + asi];
@@ -430,6 +402,7 @@ const pw = {
 					M[C_JX + si] = 0.0;
 					M[C_JY + si] = 0.0;
 				}
+
 			}
 		}
 		//temp
@@ -457,26 +430,27 @@ const pw = {
 				let asi = M[C_PO_PTR_A + si];
 				let bsi = M[C_PO_PTR_B + si];
 				if(M[C_TYPE + si] === this.COLLISION_TYPE){
+					// TODO implement block solver from GDC Erin Catto video
 					let len = 1;
 					if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) len = 2;
-
-					// TODO implement block solver from GDC Erin Catto video
 					// TODO update i increment?
 					for(let i = si, c = 0; c < len; i += 16, c += 1){
 						if(M[C_ACTIVE + i] == 0) continue;
-						// compute relative velocities
+						// relative velocity at collsion vertices
 						let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
-						// compute tangential impulse (friction)
+						// tangential impulse (friction)
 						let jt = (M[C_NX + i] * vyRel - M[C_NY + i] * vxRel) * M[C_MT + i];
 						let oldJt = M[C_JT + i];
 						M[C_JT + i] += jt;
+						// clamp to max friction calculated by constraint coefficient of friction (only static for now) times accumulated normal impulse
 						let maxJt = -M[C_JN + i] * M[C_US + si];
 						if(Math.abs(M[C_JT + i]) > maxJt){
-							M[C_JT + i] = maxJt * Math.sign(jt);
+							if(jt > 0) M[C_JT + i] = maxJt;
+							else M[C_JT + i] = -maxJt;
 							jt = M[C_JT + i] - oldJt;
 						}
-						// integrate impusle
+						// integrate tangential impusle
 						let jx = jt * -M[C_NY + i];
 						let jy = jt * M[C_NX + i];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -489,18 +463,20 @@ const pw = {
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += jt * M[C_RTB + i] * M[O_I_INV + bsi];
 						}
-						// update velocities
+						// update relative velocity
 						vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
-						// compute normal impulse
+						// normal impulse
 						let jn = ((M[C_NX + i] * vxRel + M[C_NY + i] * vyRel) + M[C_DIST + i]) * M[C_M + i];
 						let oldJn = M[C_JN + i];
 						M[C_JN + i] += jn;
+						// clamp to insure accumulated normal impulse (M[C_JN + i]) stays negative (push only)
 						if(M[C_JN + i] > 0) M[C_JN + i] = 0;
 						jn = M[C_JN + i] - oldJn;
-						// integrate impusle
-						// it's possible oldJn was already 0 because there was never a negative impulse due to adding seperation as velocity
+						/* It's somewhat likely oldJn was already 0 because there was never a negative impulse
+							(due to using speculative contacts), thus check jn to save unnecessary work. */
 						if(jn) {
+							// integrate impusle
 							let jx = jn * M[C_NX + i];
 							let jy = jn * M[C_NY + i];
 							if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -516,11 +492,11 @@ const pw = {
 						}
 					}
 
-
+					// revolute joint solver
 				} else if(M[C_TYPE + si] == this.JOINT_TYPE){
-					// revolute constraint solver
 					if(M[C_IS_MOTOR + si]){
-						// compute relative angular velocity and subtract desired velocity
+						// solve motor sub-constraint
+						// relative angular velocity minus desired velocity
 						let aa = M[O_W + asi] - M[O_W + bsi] - M[C_MW + si];
 						// compute motor impulse
 						let jm = aa * M[C_M_I + si];
@@ -535,28 +511,30 @@ const pw = {
 						M[O_W + asi] -= jm * M[O_I_INV + asi];
 						M[O_W + bsi] += jm * M[O_I_INV + bsi];
 					}
-					// compute relative velocities
+					// relative velocity at joint vertices
 					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si];
 					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si];
-					// if no relative velocities then early out
+					// if no relative velocity then done
 					if(!vxRel && !vyRel) continue;
 					this.unsolved = true;
-					// compute normal vector from relative velocities because any relative velocity violates constraint
+					// length of relative velocity vector
 					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
 					// normalize vectors
 					vxRel /= vn;
 					vyRel /= vn;
-					// the cross product of the radius vector and the normal vector usuallu will change so this must be recalculated
+					// the cross product of radius vector and relative velocity vector
 					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
 					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
-					// therefore the mass seen by the constraint is always changing aswell
+					// total "mass" in constraint reference
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
 					let j = vn / mInv;
 					// TODO implement revolute friction?
 					// integrate impulse
 					let jx = j * vxRel;
 					let jy = j * vyRel;
-					// unlike the collision constraint we must save impulses as vector (for warm-starting) because the direction of the vector changes throughout the step
+					// accumulate impulse
+					/* Unlike the collision constraint save impulses as vector (for warm-starting) rather than
+						scalar because the direction of the vector changes throughout the step. */
 					M[C_JX + si] += jx;
 					M[C_JY + si] += jy;
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -575,8 +553,8 @@ const pw = {
 		//console.log("vi = " + iter);
 
 		// integrate velocities
-		for(let i = 0, len = this.poTotal; i < len; ++i){
-			let ptr = this.PO_PTRS[i];
+		for(let i = 0, ptr = this.PO_PTRS[i], len = this.poTotal; i < len; ++i, ptr = this.PO_PTRS[i]){
+			//let ptr = this.PO_PTRS[i];
 			if(M[O_TYPE + ptr] == this.FIXED_TYPE) continue;
 			M[O_TX + ptr] += M[O_VX + ptr];
 			M[O_TY + ptr] += M[O_VY + ptr];
@@ -590,7 +568,6 @@ const pw = {
 		iter = 0
 		for(this.unsolved = true; this.unsolved && iter < this.POSITION_ITERATIONS; ++iter){
 			this.unsolved = false;
-
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 				let si = this.C_PTRS[ptr];
 				if(!M[C_ACTIVE + si]) continue;
@@ -619,6 +596,7 @@ const pw = {
 							M[O_VY + asi] -= aay;
 							M[O_TX + asi] -= aax;
 							M[O_TY + asi] -= aay;
+							// forgot to update angular velocity?
 							//M[O_O + asi] -= j * rna * M[O_I_INV + asi];
 							//M[O_COS + asi] = Math.cos(M[O_O + asi]);
 							//M[O_SIN + asi] = Math.sin(M[O_O + asi]);
@@ -631,6 +609,7 @@ const pw = {
 							M[O_VY + bsi] += aby;
 							M[O_TX + bsi] += abx;
 							M[O_TY + bsi] += aby;
+							// forgot to update angular velocity?
 							//M[O_O + bsi] += j * rnb * M[O_I_INV + bsi];
 							//M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
 							//M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
@@ -657,9 +636,9 @@ const pw = {
 					ny /= dist;
 					let rna = M[C_RAX + si] * ny - M[C_RAY + si] * nx;
 					let rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
-					// total mass in the collision normal reference
-					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-					//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
+					// total "mass" in the constraint reference
+					//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
+					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
 					// tune?
 					//let j = (dist * 0.5) / mInv;
 					let j = dist / mInv;
@@ -672,12 +651,12 @@ const pw = {
 						let aaa = j * rna * M[O_I_INV + asi];
 						M[O_VX + asi] -= aax;
 						M[O_VY + asi] -= aay;
-						M[O_W + asi] -= aaa;
+						//M[O_W + asi] -= aaa;
 						M[O_TX + asi] -= aax;
 						M[O_TY + asi] -= aay;
-						M[O_O + asi] -= aaa;
-						M[O_COS + asi] = Math.cos(M[O_O + asi]);
-						M[O_SIN + asi] = Math.sin(M[O_O + asi]);
+						//M[O_O + asi] -= aaa;
+						//M[O_COS + asi] = Math.cos(M[O_O + asi]);
+						//M[O_SIN + asi] = Math.sin(M[O_O + asi]);
 						this.updateWorldPositions(asi);
 					}
 					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE) {
@@ -686,12 +665,12 @@ const pw = {
 						let aba = j * rnb * M[O_I_INV + bsi]
 						M[O_VX + bsi] += abx;
 						M[O_VY + bsi] += aby;
-						M[O_W + bsi] += aba;
+						//M[O_W + bsi] += aba;
 						M[O_TX + bsi] += abx;
 						M[O_TY + bsi] += aby;
-						M[O_O + bsi] += aba;
-						M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
-						M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
+						//M[O_O + bsi] += aba;
+						//M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
+						//M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
 						this.updateWorldPositions(bsi);
 					}
 				}
