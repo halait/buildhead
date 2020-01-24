@@ -4,6 +4,13 @@ var menuScene = {
 		sandboxMode = false;
 		resetCanvas();
 		this.ui.style.display = "block";
+
+		if(tutorialScene.step != -1){
+			tutorialScene.step = -1;
+			tutorialScene.removeCurrentEventListener();
+		}
+
+
 	},
 	suspend(){
 		this.ui.style.display = "none";
@@ -22,7 +29,10 @@ var menuScene = {
 
 	init(){
 		this.ui.onkeydown = (e) => {if(e.key == "s") sceneManager.push(sandboxScene);};
-		this.levelBtns[0].onclick = () => {assemblyScene.startLevel(0);};
+		this.levelBtns[0].onclick = () => {
+			assemblyScene.startLevel(0);
+			sceneManager.float(tutorialScene);
+		};
 		for(let i = 1, len = menuScene.levelBtns.length; i < len; ++i){
 			if(localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i);
 		}

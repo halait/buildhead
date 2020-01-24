@@ -15,7 +15,10 @@ var simulationScene = {
 	},
 	suspend(){
 		isSimulating = false;
-		this.toolbar .style.display = "none";
+		this.toolbar.style.display = "none";
+
+		console.log("stopped simulation");
+
 	},
 
 	toolbar: document.getElementById("simulationSceneBtnsDiv"),
@@ -54,6 +57,7 @@ var simulationScene = {
 						successPending = false;
 						let nextLevel = assemblyScene.currentLevel + 1;
 						successScene.nextLevelBtn.onclick = function() {
+						// change to pop to keep history array smaller?
 							sceneManager.push(menuScene);
 							assemblyScene.startLevel(nextLevel);
 						};

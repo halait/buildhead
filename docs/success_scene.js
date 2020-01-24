@@ -15,7 +15,7 @@ var successScene = {
 	},
 	init(){
 		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.pop();});
+		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.unfloat();});
 		successScene.ui.prepend(sceneCloseBtn);
 	}
 }

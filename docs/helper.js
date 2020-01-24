@@ -1,4 +1,9 @@
 "use strict";
+/* TODO
+	- implement joints for polygon
+	- perhaps encapsulate all game logic
+*/
+
 var isSimulating = false;
 var assemblyField = false;
 var goalField = false;
@@ -245,7 +250,7 @@ class Obround extends GameObject {
 					x: j.x,
 					y: j.y
 				};
-				if(j.gameObject.def.motorJoinable){
+				if(j.gameObject.def.motorJoinable && j.vertex == 0){
 					j.gameObject.def.motorJoinable = false;
 					jointDef.motorVelocity = j.gameObject.def.motorVelocity;
 					jointDef.maxMotorTorque = j.gameObject.def.maxMotorTorque;
@@ -263,7 +268,7 @@ class Obround extends GameObject {
 					x: j.x,
 					y: j.y
 				};
-				if(j.gameObject.def.motorJoinable){
+				if(j.gameObject.def.motorJoinable && j.vertex == 0){
 					j.gameObject.def.motorJoinable = false;
 					jointDef.motorVelocity = j.gameObject.def.motorVelocity;
 					jointDef.maxMotorTorque = j.gameObject.def.maxMotorTorque;
@@ -488,19 +493,16 @@ const sceneManager = {
 	currentFloat: false,
 
 	push(scene){
-		if(this.currentFloat) this.pop();
+		this.unfloat();
 		this.current.suspend();
 		this.history.push(scene);
 		this.current = scene;
 		this.current.start();
+		//console.error("push");
 	},
 
 	pop(){
-		if(this.currentFloat){
-			this.currentFloat.suspend();
-			this.currentFloat = false;
-			return;
-		}
+		this.unfloat();
 		this.current.suspend();
 		this.history.pop();
 		this.current = this.history[this.history.length - 1];
@@ -508,11 +510,17 @@ const sceneManager = {
 	},
 
 	float(scene, arg){
-		if(this.currentFloat){
-			this.pop();
-		}
+		this.unfloat();
 		scene.start(arg);
 		this.currentFloat = scene;
+		//console.error("float");
+	},
+
+	unfloat(){
+		if(this.currentFloat){
+			this.currentFloat.suspend();
+			this.currentFloat = false;
+		}
 	}
 };
 window.onresize();

@@ -5,7 +5,7 @@ var xSub = 0.0;
 var widthMultiplier = 0.0;
 var heightMultiplier = 0.0;
 canvas.addEventListener('mousedown', (e) => {
-	if(sceneManager.currentFloat) {
+	if(sceneManager.currentFloat && sceneManager.currentFloat != tutorialScene) {
 		sceneManager.pop();
 		return;
 	}
@@ -90,7 +90,7 @@ function resetCanvas(){
 	yTranslate = 0.0;
 	dragCanvas(0.0, 0.0);
 	pw.render();
-	console.log("canvas cleared");
+	console.warn("canvas cleared");
 }
 
 var mx;

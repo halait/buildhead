@@ -122,6 +122,30 @@
 			.closeBtn:hover{
 				background-color: #b00;
 			}
+			#tutorialShowBtn {
+				display: none;
+			}
+			#tutorialShrinkBtn, #tutorialShowBtn {
+				background-color: #000;
+				width: 70px;
+				border-radius: 10px;
+				position:absolute;
+				right: 10px;
+				bottom: 10px;
+			}
+			#tutorialShrinkBtn:hover, #tutorialShowBtn:hover {
+				background-color: #222;
+			}
+			#tutorialImg {
+				border-radius: 20px;
+				margin-bottom: 20px;
+			}
+
+			#tutorialUi{
+				top: 60px;
+				transform: translateX(-50%) translateY(0%);
+			}
+
 			#reuseableHtml{
 				display: none;
 			}
@@ -225,7 +249,20 @@
 				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="60" fill="white">8</text>
 			</svg>
 		</div>
+
+
+		<div id="tutorialUi" class="popup">
+			<p class="popupHeader">Tutorial</p>
+			<img id="tutorialImg"></img>
+			<svg id="tutorialShrinkBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="30" fill="white">Hide</text>
+			</svg>
+			<svg id="tutorialShowBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
+				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="30" fill="white">Show</text>
+			</svg>
+		</div>
 		
+
 		<div id="saveLevelUI" class="popup">
 			<p class="popupHeader">Save Level</p>
 			File name: <input id="saveText" draggable="false" type="text"/>
@@ -305,12 +342,18 @@
 				<circle cx="50" cy="50" fill="rgb(255, 255, 255)" r="40"/>
 			</svg>
 			<svg class="nRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-				<polyline points="40 0, 50 50, 80 100" fill="none" stroke="#0ff" stroke-width="14"/>
-				<circle cx="50" cy="50" fill="rgb(255, 255, 0)" r="7"/>
+				<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="#0ff" stroke-width="18"/>
+				<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"/>
+				<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"/>
+				<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"/>
+				<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"/>
 			</svg>
 			<svg class="cRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-				<polyline points="40 0, 50 50, 80 100" fill="none" stroke="rgb(200, 200, 200)" stroke-width="14"/>
-				<circle cx="50" cy="50" fill="rgb(255, 255, 0)" r="7"/>
+				<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="rgb(200, 200, 200)" stroke-width="18"/>
+				<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"/>
+				<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"/>
+				<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"/>
+				<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"/>
 			</svg>
 			<svg class="gRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 				<line x1="20" y1="20" x2="80" y2="80" stroke="rgb(255, 255, 255)" stroke-width="10"/>
@@ -471,6 +514,9 @@
 		<script src="create_custom_scene.js"></script>
 		<script src="create_polygon_scene.js"></script>
 		<script src="success_scene.js"></script>
+
+		<script src="tutorial_scene.js"></script>
+
 		<script src="menu_scene.js"></script>
 
 		<script src="helper.js"></script>

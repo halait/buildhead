@@ -75,7 +75,7 @@ var createPolygonScene = {
 		this.ui.appendChild(formElement);
 
 		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.pop();});
+		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.unfloat();});
 		this.ui.prepend(sceneCloseBtn);
 
 		document.getElementById("polygonDoneBtn").addEventListener("mousedown", () => {

@@ -637,8 +637,8 @@ const pw = {
 					let rna = M[C_RAX + si] * ny - M[C_RAY + si] * nx;
 					let rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
 					// total "mass" in the constraint reference
-					//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
+					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
+					//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
 					// tune?
 					//let j = (dist * 0.5) / mInv;
 					let j = dist / mInv;
@@ -651,12 +651,12 @@ const pw = {
 						let aaa = j * rna * M[O_I_INV + asi];
 						M[O_VX + asi] -= aax;
 						M[O_VY + asi] -= aay;
-						//M[O_W + asi] -= aaa;
+						M[O_W + asi] -= aaa;
 						M[O_TX + asi] -= aax;
 						M[O_TY + asi] -= aay;
-						//M[O_O + asi] -= aaa;
-						//M[O_COS + asi] = Math.cos(M[O_O + asi]);
-						//M[O_SIN + asi] = Math.sin(M[O_O + asi]);
+						M[O_O + asi] -= aaa;
+						M[O_COS + asi] = Math.cos(M[O_O + asi]);
+						M[O_SIN + asi] = Math.sin(M[O_O + asi]);
 						this.updateWorldPositions(asi);
 					}
 					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE) {
@@ -665,12 +665,12 @@ const pw = {
 						let aba = j * rnb * M[O_I_INV + bsi]
 						M[O_VX + bsi] += abx;
 						M[O_VY + bsi] += aby;
-						//M[O_W + bsi] += aba;
+						M[O_W + bsi] += aba;
 						M[O_TX + bsi] += abx;
 						M[O_TY + bsi] += aby;
-						//M[O_O + bsi] += aba;
-						//M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
-						//M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
+						M[O_O + bsi] += aba;
+						M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
+						M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
 						this.updateWorldPositions(bsi);
 					}
 				}
@@ -1171,7 +1171,7 @@ const pw = {
 
 			let aForm = this.M[O_FORM + def.poPtrA];
 			let bForm = this.M[O_FORM + def.poPtrB];
-			console.log("aForm = " + aForm + "  this.CIRCLE_FORM = " + this.CIRCLE_FORM);
+			//console.log("aForm = " + aForm + "  this.CIRCLE_FORM = " + this.CIRCLE_FORM);
 			if(aForm == this.CIRCLE_FORM){
 				if(bForm == this.PLANE_FORM) def.form = this.POINT_SURFACE_FORM;
 				else if(bForm == this.CIRCLE_FORM) def.form = this.POINTS_FORM;
@@ -1224,6 +1224,15 @@ const pw = {
 		}
 		let ptr = this.POMM.alloc(this.PO_SIZES[def.form]);
 
+
+		// temp
+		if(def.form == this.POLYGONS_FORM || def.form == this.SURFACE_POLYGON_FORM || def.form == this.SURFACES_FORM){
+			this.M[C_JN + ptr + 16] = 0.0;
+			this.M[C_JT + ptr + 16] = 0.0;
+		}
+
+
+
 		this.M[C_JN + ptr] = 0.0;
 		this.M[C_JT + ptr] = 0.0;
 
@@ -1238,6 +1247,15 @@ const pw = {
 			if(def.x === undefined || def.y === undefined) console.error("Missing x and/or y (position).");
 			this.M[C_ACTIVE + ptr] = 1;
 			this.setJointPosition(ptr, def.x, def.y);
+
+
+
+
+			this.M[C_JX + ptr] = 0.0;
+			this.M[C_JY + ptr] = 0.0;
+
+
+
 			if(def.motorVelocity === undefined){
 				this.M[C_IS_MOTOR + ptr] = 0;
 			} else if(def.maxMotorTorque !== undefined){

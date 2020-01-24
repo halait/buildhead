@@ -4,8 +4,8 @@ var createCustomScene = {
 	planeUi: document.getElementById("setCustomObroundPopup"),
 	circleUi: document.getElementById("setCustomCirclePopup"),
 	ui: null,
-	closeBtn: closeBtn.cloneNode(true),
-	backScene: false,
+	//closeBtn: closeBtn.cloneNode(true),
+	//backScene: false,
 	start(form){
 		if(form === pw.CIRCLE_FORM) this.ui = this.circleUi;
 		else this.ui = this.planeUi;
@@ -107,7 +107,7 @@ var createCustomScene = {
 		};
 		this.planeUi.appendChild(formElement);
 		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.pop();});
+		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.unfloat();});
 		this.planeUi.prepend(sceneCloseBtn);
 
 		formElement = this.customPropertiesForm.cloneNode(true);
@@ -163,7 +163,7 @@ var createCustomScene = {
 		};
 		this.circleUi.appendChild(formElement);
 		sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.pop();});
+		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.unfloat();});
 		this.circleUi.prepend(sceneCloseBtn);
 	}
 }
