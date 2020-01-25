@@ -1227,6 +1227,7 @@ const pw = {
 
 		// temp
 		if(def.form == this.POLYGONS_FORM || def.form == this.SURFACE_POLYGON_FORM || def.form == this.SURFACES_FORM){
+			console.log("resseting 2nd impulses");
 			this.M[C_JN + ptr + 16] = 0.0;
 			this.M[C_JT + ptr + 16] = 0.0;
 		}
@@ -1244,15 +1245,16 @@ const pw = {
 		this.M[C_UK + ptr] = (this.M[O_UK + def.poPtrA] + this.M[O_UK + def.poPtrB]) * 0.5;
 
 		if(def.type == this.JOINT_TYPE){
-			if(def.x === undefined || def.y === undefined) console.error("Missing x and/or y (position).");
+			if(def.x === undefined || def.y === undefined) throw "Missing x and/or y (position).";
 			this.M[C_ACTIVE + ptr] = 1;
 			this.setJointPosition(ptr, def.x, def.y);
 
 
-
-
+			console.log("this.M[C_JX + ptr] = " + this.M[C_JX + ptr] + " this.M[C_JY + ptr] = " + this.M[C_JY + ptr] + " M[C_SUM_T + ptr] = " + this.M[C_SUM_T + ptr] + " C_JX + ptr = " + (C_JX + ptr));
+			console.log("resseting joint impulses");
 			this.M[C_JX + ptr] = 0.0;
 			this.M[C_JY + ptr] = 0.0;
+			this.M[C_SUM_T + ptr] = 0.0;
 
 
 

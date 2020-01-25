@@ -15,8 +15,9 @@ const tutorialScene = {
 		this.ui.style.display = "none";
 	},
 	removeCurrentEventListener(){
-		if(this.step > -1) {
+		if(this.step != -1) {
 			this.events[this.step].target.removeEventListener(this.events[this.step].type, this.events[this.step].callback);
+			console.log("current evtlist remooved");
 		}
 	},
 	events: [

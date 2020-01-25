@@ -6,7 +6,7 @@ var widthMultiplier = 0.0;
 var heightMultiplier = 0.0;
 canvas.addEventListener('mousedown', (e) => {
 	if(sceneManager.currentFloat && sceneManager.currentFloat != tutorialScene) {
-		sceneManager.pop();
+		sceneManager.unfloat();
 		return;
 	}
 	if(isMousedown || !sceneManager.current.eventHandler) {
@@ -461,12 +461,14 @@ var removeEventHandler = {
 	handleActivePress(){},
 	handleActiveDrag(){},
 	handleActiveMouseup(){
-		for(let i = gameObjects.length - 1; i > -1; --i){
-			if(sandboxMode || (pw.getType(gameObjects[i].ref) !== pw.FIXED_TYPE && !gameObjects[i].def.target)){
-				if(pw.isPointInside(gameObjects[i].ref, mx, my)){
-					gameObjects[i].destroy();
-					pw.render();
-					return;
+		if(sandboxMode || pw.isPointInside(assemblyField.ref, mx, my)){
+			for(let i = gameObjects.length - 1; i > -1; --i){
+				if(sandboxMode || (pw.getType(gameObjects[i].ref) !== pw.FIXED_TYPE && !gameObjects[i].def.target)){
+					if(pw.isPointInside(gameObjects[i].ref, mx, my)){
+						gameObjects[i].destroy();
+						pw.render();
+						return;
+					}
 				}
 			}
 		}

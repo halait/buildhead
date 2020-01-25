@@ -62,7 +62,7 @@ var loadLevelScene = {
 			loadLevelScene.messageP.textContent = "";
 			loadLevelScene.fileInput.value = "";
 			let json = loadLevelScene.reader.result;
-			if(loadLevelScene.loadLevel(json)) sceneManager.pop();
+			if(loadLevelScene.loadLevel(json)) sceneManager.unfloat();
 		}
 	}
 }

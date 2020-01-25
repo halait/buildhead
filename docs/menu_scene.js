@@ -6,8 +6,8 @@ var menuScene = {
 		this.ui.style.display = "block";
 
 		if(tutorialScene.step != -1){
-			tutorialScene.step = -1;
 			tutorialScene.removeCurrentEventListener();
+			tutorialScene.step = -1;
 		}
 
 

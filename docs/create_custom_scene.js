@@ -102,7 +102,7 @@ var createCustomScene = {
 			} else {
 				console.error("Unhandled texture");
 			}
-			sceneManager.pop();
+			sceneManager.unfloat();
 			return false;
 		};
 		this.planeUi.appendChild(formElement);
@@ -158,7 +158,7 @@ var createCustomScene = {
 			} else if(this.circleDef.group != COPLANAR_GROUP){
 				console.error("assigning texture coordinates failed");
 			}
-			sceneManager.pop();
+			sceneManager.unfloat();
 			return false;
 		};
 		this.circleUi.appendChild(formElement);
