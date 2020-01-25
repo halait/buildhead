@@ -20,6 +20,11 @@ canvas.addEventListener('mousedown', (e) => {
 });
 canvas.addEventListener('mousemove', (e) => {
 	if(!isMousedown || !sceneManager.current.eventHandler) return;
+
+
+	e.preventDefault();
+
+
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 	sceneManager.current.eventHandler.handleActiveDrag();

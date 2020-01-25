@@ -44,8 +44,12 @@ const tutorialScene = {
 				console.log("heyy again");
 					let j0 = last.joints[0];
 					let j1 = last.joints[1];
-					if(j0.gameObjectA != j1.gameObjectA && (j0.gameObjectA.def.target || j1.gameObjectA.def.target) && j0.def.va == 0 && j1.def.va == 0){
-						console.log("heyy last time");
+					if(
+						j0.gameObjectA != j1.gameObjectA &&
+						(j0.gameObjectA.def.target || j1.gameObjectA.def.target) &&
+						j0.def.va == 0 && j1.def.va == 0 &&
+						(j0.def.motorVelocity || j1.def.motorVelocity)
+					){
 						sceneManager.float(tutorialScene);
 					}
 				}
