@@ -14,7 +14,7 @@ const MAX_SNAP_DIST = 0.025;
 
 const DEFAULT_ROD_WIDTH = 0.02;
 const DEFAULT_ROD_DENSITY = 20.0;
-const MIN_ROD_LENGTH = 0.05;
+const MIN_ROD_LENGTH = 0.1;
 
 const DEFAULT_WHEEL_RADIUS = 0.1;
 const DEFAULT_WHEEL_DENSITY = 1.0 / (Math.PI * DEFAULT_WHEEL_RADIUS * DEFAULT_WHEEL_RADIUS);
@@ -187,6 +187,14 @@ class Circle extends GameObject{
 
 class Obround extends GameObject {
 	constructor(def){
+	/*
+		let dx = def.vertices[0][0] - def.vertices[1][0];
+		let dy = def.vertices[0][1] - def.vertices[1][1];
+		let len = Math.sqrt(dx * dx + dy * dy);
+		if(len < MIN_ROD_LENGTH){
+			def.vertices[1][0] = MIN_ROD_LENGTH;
+		}
+		*/
 		super(def);
 		this.vertex0ConnectedObjectsEnd = 0;
 		if(def.userFloats[H_IS_JOINABLE]){

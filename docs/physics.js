@@ -1328,7 +1328,7 @@ const pw = {
 	},
 	
 	
-	MIN_PLANE_LEN: 0.01,
+	MIN_PLANE_LEN: 0.05,
 	MIN_AABB_LEN: 0.05,
 
 	M: new Float64Array(65000),
@@ -1414,9 +1414,9 @@ const pw = {
 				console.error("Missing width in PhysicsObject definition of this.PLANE_FORM");
 			}
 			if(def.vertices[0][0] == def.vertices[1][0] && def.vertices[0][1] == def.vertices[1][1]) def.vertices[1][0] += this.MIN_PLANE_LEN;
+			this.M[O_HALF_WIDTH + ptr] = def.width * 0.5;
 			this.setVertex(ptr, 0, def.vertices[0][0], def.vertices[0][1]);
 			this.setVertex(ptr, 1, def.vertices[1][0], def.vertices[1][1]);
-			this.M[O_HALF_WIDTH + ptr] = def.width * 0.5;
 
 		} else if(def.form == this.AABB_FORM){
 			if(def.vertices === undefined || def.vertices.length != 2){
@@ -1802,19 +1802,26 @@ const pw = {
 			this.M[O_L_INV + poPtr] =  1.0 / this.M[O_L + poPtr];
 			this.M[O_UX + poPtr] = dx * this.M[O_L_INV + poPtr];
 			this.M[O_UY + poPtr] = dy * this.M[O_L_INV + poPtr];
+			
 
-			if(this.M[O_L + poPtr] < this.MIN_PLANE_LEN * 0.99){
-				/*if(vertexIndex == 0){
-					x = this.M[O_W1X + poPtr] - this.M[O_UX + poPtr] * this.MIN_PLANE_LEN;
-					y = this.M[O_W1Y + poPtr] - this.M[O_UY + poPtr] * this.MIN_PLANE_LEN;
-				} else {*/
-					x = this.M[O_W0X + poPtr] + this.M[O_UX + poPtr] * this.MIN_PLANE_LEN;
-					y = this.M[O_W0Y + poPtr] + this.M[O_UY + poPtr] * this.MIN_PLANE_LEN;
-				//}
-				//this.setVertex(poPtr, vertexIndex, x, y);
+
+			if(this.M[O_L + poPtr] < this.MIN_PLANE_LEN){
+				console.log("rod too small");
+				let x = 0.0;
+				let y = 0.0;
+				if(this.M[O_L + poPtr] > 0.0001){
+					x = this.M[O_W0X + poPtr] + this.M[O_UX + poPtr] * this.MIN_PLANE_LEN * 1.01;
+					y = this.M[O_W0Y + poPtr] + this.M[O_UY + poPtr] * this.MIN_PLANE_LEN * 1.01;
+				} else {
+					x = this.M[O_W0X + poPtr] + this.MIN_PLANE_LEN * 1.01;
+					y = this.M[O_W0Y + poPtr];
+				}
 				this.setVertex(poPtr, 1, x, y);
 				return;
 			}
+
+
+
 
 			this.M[O_L0X + poPtr] = this.M[O_W0X + poPtr] - this.M[O_TX + poPtr];
 			this.M[O_L0Y + poPtr] = this.M[O_W0Y + poPtr] - this.M[O_TY + poPtr];

@@ -76,7 +76,7 @@
 				left: 50%;
 				top: 50%;
 				transform: translateX(-50%) translateY(-50%);
-				max-height: 90vh;
+				//max-height: 90vh;
 				width: auto;
 				display: none;
 				overflow: auto;
@@ -138,11 +138,12 @@
 			}
 			#tutorialImg {
 				border-radius: 20px;
-				margin-bottom: 20px;
+				margin-bottom: 40px;
 			}
 
 			#tutorialUi{
 				top: 60px;
+				max-height: calc(100% - 120px);
 				transform: translateX(-50%) translateY(0%);
 			}
 
@@ -279,7 +280,7 @@
 
 		<div id="exceptionDiv" class="popup">
 			<p class="popupHeader">Error</p>
-			Message: <span id="exceptionMessageP"></span><br><br>
+			<span id="exceptionMessageP"></span><br><br>
 		</div>
 		
 		<div id="setCustomObroundPopup" class="popup">

@@ -9,7 +9,7 @@ const tutorialScene = {
 		this.events[this.step].target.addEventListener(this.events[this.step].type, this.events[this.step].callback);
 		this.img.src = this.step + "tut.png";
 		this.ui.style.display = "block";
-		console.log("start");
+		this.showImg();
 	},
 	suspend(){
 		this.ui.style.display = "none";
@@ -66,34 +66,21 @@ const tutorialScene = {
 		},
 
 	],
+	shrinkBtn: document.getElementById("tutorialShrinkBtn"),
+	showBtn: document.getElementById("tutorialShowBtn"),
+	hideImg(){
+		this.img.style.display = "none";
+		this.shrinkBtn.style.display = "none";
+		this.showBtn.style.display = "block";
+	},
+	showImg(){
+		this.img.style.display = "block";
+		this.shrinkBtn.style.display = "block";
+		this.showBtn.style.display = "none";
+	},
 	init(){
-	/*
-		let nextBtn = document.getElementById("tutorialNextBtn");
-		nextBtn.addEventListener("click", () => {
-			this.img.src = this.step++ + "tut.png";
-		});
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.pop();});
-		this.ui.prepend(sceneCloseBtn);
-		*/
-		let shrinkBtn = document.getElementById("tutorialShrinkBtn");
-		let showBtn = document.getElementById("tutorialShowBtn");
-		shrinkBtn.addEventListener(
-			"click",
-			() => {
-				this.img.style.display = "none";
-				shrinkBtn.style.display = "none";
-				showBtn.style.display = "block";
-			}
-		);
-		showBtn.addEventListener(
-			"click",
-			() => {
-				this.img.style.display = "block";
-				shrinkBtn.style.display = "block";
-				showBtn.style.display = "none";
-			}
-		);
+		this.shrinkBtn.addEventListener("click", () => {this.hideImg();});
+		this.showBtn.addEventListener("click", () => {this.showImg();});
 	}
 };
 tutorialScene.init();
