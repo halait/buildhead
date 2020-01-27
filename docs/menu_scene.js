@@ -16,10 +16,9 @@ var menuScene = {
 		this.ui.style.display = "none";
 	},
 
-	unlockLevel(levelNum, setLocalStorage){
-		if(setLocalStorage) localStorage.setItem(levelNum + "isPlayable", true);
+	unlockLevel(levelNum){
 		this.levelBtns[levelNum].onclick = () => {
-			assemblyScene.startLevel("levels/docs/" + levelNum + ".json");
+			assemblyScene.startLevel("levels/" + levelNum + ".json");
 		};
 		this.levelBtns[levelNum].classList.add("unlockedLevelBtn");
 	},
@@ -34,7 +33,7 @@ var menuScene = {
 			sceneManager.float(tutorialScene);
 		};
 		for(let i = 1, len = menuScene.levelBtns.length; i < len; ++i){
-			if(localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i, false);
+			if(localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i);
 		}
 	}
 }

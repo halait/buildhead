@@ -15,21 +15,7 @@ var loadLevelScene = {
 		this.ui.style.display = "none";
 	},
 
-	loadLevel(json){
-		let defs = null;
-		try {
-			defs = JSON.parse(json);
-		} catch(err){
-			exceptionScene.throw(
-				"This level file is corrupted and cannot be loaded. Try another level file or please consider sending feedback to have the issue solved, it will be apreciated."
-			);
-			console.error(err);
-			return false;
-		}
-		if(!defs[0].JSON_LevelFile){
-			exceptionScene.throw("Cannot load this level because it's missing the required level file signature, probably because it's not a level file.");
-			return false;
-		}
+	load(defs){
 		resetCanvas();
 		for(let i = 1, len = defs.length; i < len; ++i){
 			if(create(defs[i]) === null) {
@@ -59,10 +45,25 @@ var loadLevelScene = {
 		});
 
 		this.reader.onload = function(){
+			sceneManager.unfloat();
 			loadLevelScene.messageP.textContent = "";
 			loadLevelScene.fileInput.value = "";
 			let json = loadLevelScene.reader.result;
-			if(loadLevelScene.loadLevel(json)) sceneManager.unfloat();
+			let defs = null;
+			try {
+				defs = JSON.parse(json);
+			} catch(err){
+				exceptionScene.throw(
+					"This level file is corrupted and cannot be loaded. Try another level file or please consider sending feedback to have the issue solved, it will be apreciated."
+				);
+				console.error(err);
+				return false;
+			}
+			if(!defs[0].JSON_LevelFile){
+				exceptionScene.throw("Cannot load this level because it's missing the required level file signature, probably because it's not a level file.");
+				return false;
+			}
+			loadLevelScene.load(defs);
 		}
 	}
 }

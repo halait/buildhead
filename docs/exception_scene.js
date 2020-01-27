@@ -9,6 +9,7 @@ var exceptionScene = {
 		sceneManager.float(this);
 	},
 	start(){
+		loadingScreen.style.display = "none";
 		this.ui.style.display = "block";
 	},
 	suspend(){

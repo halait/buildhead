@@ -10,37 +10,37 @@ var assemblyScene = {
 	eventHandler: false,
 	activeBtn: false,
 	toolbar: document.getElementById("assemblySceneBtnsDiv"),
-	currentLevel: 0,
+	levelNum: 0,
 
 	handleWheel(e) {
 		e.preventDefault();
 		scaleCanvas(e.deltaY * 0.001);
 	},
 	
-	async startLevel(level){
-		if(path) level = path + level;
-		this.currentLevel = level;
-		console.log("starting level " + level);
+	async startLevel(levelPath){
+		this.levelNum = parseInt(levelPath[7]);
+		if(path) levelPath = path + levelPath;
+		console.log("path: " + levelPath);
 		loadingScreen.style.display = "block";
-		let response = await fetch(level);
-		loadLevelScene.loadLevel(response.json());
+		let response = null;
+		try {
+			response = await fetch(levelPath);
+		} catch {
+			exceptionScene.throw("Unable to load level, check your internet connection.");
+			return;
+		}
+		if(!response.ok){
+			exceptionScene.throw("Level file could not be found.");
+			return;
+		}
+		try {
+			loadLevelScene.load(await response.json());
+		} catch {
+			exceptionScene.throw("Unable to parse level file.");
+			return;
+		}
 		sceneManager.push(this);
 		loadingScreen.style.display = "none";
-		/*
-		try {
-		} catch {
-			loadLevelScene.loadLevel(levelJsons[level[7]]);
-			sceneManager.push(this);
-			loadingScreen.style.display = "none";
-		}
-		/*
-			.then(json => {console.log(json);})
-		.catch(() => {console.log("heyy");});
-		if(loadLevelScene.loadLevel(levelJsons[level])) {
-			sceneManager.push(this);
-			pw.render();
-		}
-		*/
 	},
 
 	init(){

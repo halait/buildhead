@@ -52,7 +52,8 @@ var simulationScene = {
 					}
 					if(success) {
 						successPending = false;
-						let nextLevel = assemblyScene.currentLevel + 1;
+						let nextLevel = assemblyScene.levelNum + 1;
+						localStorage.setItem(nextLevel + "isPlayable", true);
 						menuScene.unlockLevel(nextLevel, true);
 						successScene.nextLevelBtn.onclick = menuScene.levelBtns[nextLevel].onclick;
 						sceneManager.float(successScene);
