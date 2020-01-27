@@ -521,7 +521,6 @@ const sceneManager = {
 		}
 	}
 };
-document.getElementById("loadingScreen").style.display = "none";
 sceneManager.push(menuScene);
 window.onresize();
 

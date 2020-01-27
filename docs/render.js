@@ -90,6 +90,7 @@ inputTexture.onchange = () => {
 	let rd = new FileReader();
 	rd.onload = (e) => {img.src = e.target.result;};
 	rd.readAsDataURL(inputTexture.files[0]);
+	document.getElementById("loadingScreen").style.display = "none";
 }
 
 
