@@ -416,7 +416,7 @@ const pw = {
 
 
 			// IMPORTANT EXPERIMENTAL
-			//this.unsolved = false;
+			this.unsolved = false;
 
 
 
@@ -476,6 +476,7 @@ const pw = {
 						/* It's somewhat likely oldJn was already 0 because there was never a negative impulse
 							(due to using speculative contacts), thus check jn to save unnecessary work. */
 						if(jn) {
+							this.unsolved = true;
 							// integrate impusle
 							let jx = jn * M[C_NX + i];
 							let jy = jn * M[C_NY + i];
@@ -567,7 +568,13 @@ const pw = {
 		// solve position constraints
 		iter = 0
 		for(this.unsolved = true; this.unsolved && iter < this.POSITION_ITERATIONS; ++iter){
+
+
+			//temp EXPERIEMENTAL
 			this.unsolved = false;
+
+
+
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 				let si = this.C_PTRS[ptr];
 				if(!M[C_ACTIVE + si]) continue;
@@ -586,7 +593,8 @@ const pw = {
 						//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
 						let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
 						// tune?
-						let j = (collisionData[6 + c] * 0.5) / mInv;
+						//let j = (collisionData[6 + c] * 0.5) / mInv;
+						let j = (collisionData[6 + c]) / mInv;
 						let jx = j * collisionData[0 + c];
 						let jy = j * collisionData[1 + c];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE) {
@@ -932,12 +940,11 @@ const pw = {
 				}
 			}
 
-			/*
 			debugPoints.push([px0, py0]);
 			debugPoints.push([sx0, sy0]);
 			debugPoints.push([px1, py1]);
 			debugPoints.push([sx1, sy1]);
-			*/
+
 			dist0 = Math.sqrt(dist0);
 			nx0 /= dist0;
 			ny0 /= dist0;
@@ -1055,10 +1062,12 @@ const pw = {
 					}
 				}
 			}
+			/*
 			debugPoints.push([bx0, by0]);
 			debugPoints.push([ax0, ay0]);
 			debugPoints.push([bx1, by1]);
 			debugPoints.push([ax1, ay1]);
+			*/
 			dist0 = Math.sqrt(dist0);
 			nx0 /= dist0;
 			ny0 /= dist0;
@@ -1325,6 +1334,28 @@ const pw = {
 			motorInertia = 1.0 / motorInertia;
 		}
 		this.M[C_M_I + jPtr] = motorInertia;
+	},
+
+	resetAllImpulses(){
+		let M = this.M;
+		for(let i = 0, len = this.cTotal; i < len; ++i){
+			let ptr = this.C_PTRS[i];
+			if(M[C_TYPE + ptr] === this.COLLISION_TYPE){
+				let cLen = 1;
+				if(M[C_FORM + ptr] == this.SURFACES_FORM || M[C_FORM + ptr] == this.SURFACE_POLYGON_FORM || M[C_FORM + ptr] == this.POLYGONS_FORM) cLen = 2;
+				for(let cPtr = ptr, c = 0; c < cLen; cPtr += 16, c += 1){
+					M[C_JN + cPtr] = 0.0;
+					M[C_JT + cPtr] = 0.0;
+				}
+			} else if(M[C_TYPE + ptr] === this.JOINT_TYPE){
+				M[C_JX + ptr] = 0.0;
+				M[C_JY + ptr] = 0.0;
+				M[C_SUM_T + ptr] = 0.0;
+			} else {
+				throw "Unimplemented form";
+			}
+		}
+		console.log("all impulses reset");
 	},
 	
 	

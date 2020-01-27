@@ -16,9 +16,6 @@ var simulationScene = {
 	suspend(){
 		isSimulating = false;
 		this.toolbar.style.display = "none";
-
-		console.log("stopped simulation");
-
 	},
 
 	toolbar: document.getElementById("simulationSceneBtnsDiv"),
@@ -56,12 +53,8 @@ var simulationScene = {
 					if(success) {
 						successPending = false;
 						let nextLevel = assemblyScene.currentLevel + 1;
-						successScene.nextLevelBtn.onclick = function() {
-						// change to pop to keep history array smaller?
-							sceneManager.push(menuScene);
-							assemblyScene.startLevel(nextLevel);
-						};
-						menuScene.unlockLevel(nextLevel);
+						menuScene.unlockLevel(nextLevel, true);
+						successScene.nextLevelBtn.onclick = menuScene.levelBtns[nextLevel].onclick;
 						sceneManager.float(successScene);
 					}
 				}
@@ -70,6 +63,7 @@ var simulationScene = {
 			isRenderFrame = !isRenderFrame;
 			requestAnimationFrame(simulationScene.simulate);
 		} else {
+			pw.resetAllImpulses();
 			for(const o of gameObjects){
 				if(pw.getType(o.ref) == pw.FIXED_TYPE) continue;
 				pw.setPosition(o.ref, o.originX, o.originY);

@@ -67,32 +67,29 @@ pw.U_SCALE_LOCATION = pw.gl.getUniformLocation(program, "u_scale");
 pw.U_TRANSLATE_LOCATION = pw.gl.getUniformLocation(program, "u_translate");
 pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 
+let loadingScreen = document.getElementById("loadingScreen");
+let inputTexture = document.getElementById("inputTexture");
+let path = false;
+
 (function(){
 	let img = document.createElement("img");
 	img.onload = () => {
-		try {
-			createTexture(img);
-			document.getElementById("loadingScreen").style.display = "none";
-		} catch(err) {
-			inputTexture.style.display = "block";
-		}
-		pw.render();
+		createTexture(img);
+		loadingScreen.style.display = "none";
 	};
-	img.src = "newestTex.png";
+	if(window.location.protocol == "file:") {
+		path = "https://halait.github.io/js-physics-game/";
+		inputTexture.style.display = "block";
+		inputTexture.onchange = () => {
+			inputTexture.style.display = "none";
+			let rd = new FileReader();
+			rd.onload = (e) => {img.src = e.target.result;};
+			rd.readAsDataURL(inputTexture.files[0]);
+		}
+	} else {
+		img.src = "newestTex.png";
+	}
 })();
-
-let inputTexture = document.getElementById("inputTexture");
-
-inputTexture.onchange = () => {
-	inputTexture.style.display = "none";
-	let img = document.createElement("img");
-	img.onload = () => {createTexture(img)};
-	let rd = new FileReader();
-	rd.onload = (e) => {img.src = e.target.result;};
-	rd.readAsDataURL(inputTexture.files[0]);
-	document.getElementById("loadingScreen").style.display = "none";
-}
-
 
 function createTexture(pixels){
 	const texture = pw.gl.createTexture();
@@ -111,7 +108,7 @@ function createTexture(pixels){
 	//pw.gl.disable(pw.gl.DEPTH_TEST);
 	//pw.gl.enable(pw.gl.BLEND);
 	//pw.gl.blendFunc(pw.gl.SRC_ALPHA, pw.gl.ONE);
-	return texture;
+	//return texture;
 }
 
 

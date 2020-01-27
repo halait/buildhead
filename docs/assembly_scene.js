@@ -16,16 +16,31 @@ var assemblyScene = {
 		e.preventDefault();
 		scaleCanvas(e.deltaY * 0.001);
 	},
-
-	startLevel(level){
+	
+	async startLevel(level){
+		if(path) level = path + level;
 		this.currentLevel = level;
+		console.log("starting level " + level);
+		loadingScreen.style.display = "block";
+		let response = await fetch(level);
+		loadLevelScene.loadLevel(response.json());
+		sceneManager.push(this);
+		loadingScreen.style.display = "none";
 		/*
-		for(const def of levelJsons[level]){
-			create(def);
+		try {
+		} catch {
+			loadLevelScene.loadLevel(levelJsons[level[7]]);
+			sceneManager.push(this);
+			loadingScreen.style.display = "none";
+		}
+		/*
+			.then(json => {console.log(json);})
+		.catch(() => {console.log("heyy");});
+		if(loadLevelScene.loadLevel(levelJsons[level])) {
+			sceneManager.push(this);
+			pw.render();
 		}
 		*/
-		if(loadLevelScene.loadLevel(levelJsons[level])) sceneManager.push(this);
-		pw.render();
 	},
 
 	init(){

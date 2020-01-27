@@ -84,7 +84,7 @@ const tutorialScene = {
 		this.shrinkBtn.addEventListener("click", () => {this.hideImg();});
 		this.showBtn.addEventListener("click", () => {this.showImg();});
 		this.img.onload = () => {
-			this.img.style.display = "block";
+			this.showImg();
 			this.loadingMsg.style.display = "none";
 		};
 	}

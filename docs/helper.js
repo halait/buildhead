@@ -498,6 +498,7 @@ const sceneManager = {
 		this.history.push(scene);
 		this.current = scene;
 		this.current.start();
+		console.warn("push trace")
 	},
 
 	pop(){

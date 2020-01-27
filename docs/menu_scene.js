@@ -16,11 +16,11 @@ var menuScene = {
 		this.ui.style.display = "none";
 	},
 
-	unlockLevel(levelNum){
-		localStorage.setItem(levelNum + "isPlayable", true);
-		this.levelBtns[levelNum].onclick = function() {
-			assemblyScene.startLevel(levelNum);
-		}
+	unlockLevel(levelNum, setLocalStorage){
+		if(setLocalStorage) localStorage.setItem(levelNum + "isPlayable", true);
+		this.levelBtns[levelNum].onclick = () => {
+			assemblyScene.startLevel("levels/" + levelNum + ".json");
+		};
 		this.levelBtns[levelNum].classList.add("unlockedLevelBtn");
 	},
 
@@ -29,12 +29,12 @@ var menuScene = {
 
 	init(){
 		this.ui.onkeydown = (e) => {if(e.key == "s") sceneManager.push(sandboxScene);};
-		this.levelBtns[0].onclick = () => {
-			assemblyScene.startLevel(0);
+		this.levelBtns[0].onclick = async function() {
+			await assemblyScene.startLevel("levels/" + 0 + ".json");
 			sceneManager.float(tutorialScene);
 		};
 		for(let i = 1, len = menuScene.levelBtns.length; i < len; ++i){
-			if(localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i);
+			if(localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i, false);
 		}
 	}
 }
