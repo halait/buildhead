@@ -78,7 +78,7 @@ let path = false;
 		loadingScreen.style.display = "none";
 	};
 	if(window.location.protocol == "file:") {
-		path = "https://halait.github.io/js-physics-game/";
+		path = "https://halait.github.io/js-physics-game/docs/";
 		inputTexture.style.display = "block";
 		inputTexture.onchange = () => {
 			inputTexture.style.display = "none";

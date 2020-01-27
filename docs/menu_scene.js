@@ -19,7 +19,7 @@ var menuScene = {
 	unlockLevel(levelNum, setLocalStorage){
 		if(setLocalStorage) localStorage.setItem(levelNum + "isPlayable", true);
 		this.levelBtns[levelNum].onclick = () => {
-			assemblyScene.startLevel("levels/" + levelNum + ".json");
+			assemblyScene.startLevel("levels/docs/" + levelNum + ".json");
 		};
 		this.levelBtns[levelNum].classList.add("unlockedLevelBtn");
 	},
