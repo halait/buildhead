@@ -104,13 +104,13 @@ class GameObject {
 	}
 
 	isLegalPosition(){
+		if(!sandboxMode && !pw.isWithinAABB(assemblyField.ref, this.ref)) return false;
 		let group = pw.getGroup(this.ref);
 		for(const o of gameObjects){
-			if(o != this && GROUP_CONTACTS[group].includes(pw.getGroup(o.ref)) && !this.connectedObjects.includes(o) && pw.isPenetrating(this.ref, o.ref)){
+			if(o != this && !this.connectedObjects.includes(o) && GROUP_CONTACTS[group].includes(pw.getGroup(o.ref)) && pw.isPenetrating(this.ref, o.ref)){
 				return false;
 			}
 		}
-		if(!sandboxMode && !pw.isWithinAABB(assemblyField.ref, this.ref)) return false;
 		return true;
 	}
 }
@@ -187,14 +187,6 @@ class Circle extends GameObject{
 
 class Obround extends GameObject {
 	constructor(def){
-	/*
-		let dx = def.vertices[0][0] - def.vertices[1][0];
-		let dy = def.vertices[0][1] - def.vertices[1][1];
-		let len = Math.sqrt(dx * dx + dy * dy);
-		if(len < MIN_ROD_LENGTH){
-			def.vertices[1][0] = MIN_ROD_LENGTH;
-		}
-		*/
 		super(def);
 		this.vertex0ConnectedObjectsEnd = 0;
 		if(def.userFloats[H_IS_JOINABLE]){
@@ -496,17 +488,16 @@ function getHandlesNear(x, y, objToIgnore){
 
 // scene management
 const sceneManager = {
-	history: [menuScene],
-	current: menuScene,
+	history: [],
+	current: null,
 	currentFloat: false,
 
 	push(scene){
 		this.unfloat();
-		this.current.suspend();
+		if(this.current) this.current.suspend();
 		this.history.push(scene);
 		this.current = scene;
 		this.current.start();
-		//console.error("push");
 	},
 
 	pop(){
@@ -521,7 +512,6 @@ const sceneManager = {
 		this.unfloat();
 		scene.start(arg);
 		this.currentFloat = scene;
-		//console.error("float");
 	},
 
 	unfloat(){
@@ -531,41 +521,9 @@ const sceneManager = {
 		}
 	}
 };
+document.getElementById("loadingScreen").style.display = "none";
+sceneManager.push(menuScene);
 window.onresize();
-menuScene.start();
-/*
-function sceneManager.push(newScene){
-	if(floatingScene){
-		sceneManager.pop();
-	}
-	newScene.backScene = currentScene;
-	currentScene.suspend();
-	currentScene = newScene;
-	currentScene.start();
-}
-function sceneManager.pop(){
-	if(floatingScene){
-		floatingScene.suspend();
-		floatingScene = false;
-		return;
-	}
-	currentScene.suspend();
-	currentScene = currentScene.backScene;
-	currentScene.start();
-}
-var floatingScene = false;
-function sceneManager.float(scene){
-	if(floatingScene){
-		sceneManager.pop();
-	}
-	floatingScene = scene;
-	scene.start();
-}
-*/
-
-//message: "The level your attempting to load is unplayable because it is missing key objects, it can only be loaded in sandbox mode."
-
-
 
 function create(def){
 	if(def.form == pw.CIRCLE_FORM) {

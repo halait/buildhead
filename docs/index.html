@@ -78,12 +78,12 @@
 				left: 50%;
 				top: 50%;
 				transform: translateX(-50%) translateY(-50%);
-				//max-height: 90vh;
+				max-height: calc(100% - 120px);
 				width: auto;
 				display: none;
 				overflow: auto;
 				padding: 30px;
-				border-radius: 5px;
+				border-radius: 20px;
 				color: #fff;
 			}
 			.popupHeader{
@@ -102,6 +102,9 @@
 			.unlockedLevelBtn:hover{
 				background-color: #08f;
 			}
+			.startSimulationBtn, .stopSimulationBtn, .backBtn {
+				border-radius: 0px;
+			}
 			.startSimulationBtn{
 				background-color: #0a0;
 			}
@@ -114,6 +117,12 @@
 			.stopSimulationBtn:hover{
 				background-color: #f00;
 			}
+			.backBtn {
+				background-color: #a00;
+			}
+			.backBtn:hover {
+				background-color: #f00;
+			}
 			.closeBtn{
 				height: 30px;
 				position: absolute;
@@ -124,31 +133,27 @@
 			.closeBtn:hover{
 				background-color: #b00;
 			}
+			#tutorialUi{
+				top: 60px;
+				transform: translateX(-50%) translateY(0%);
+			}
+			#tutorialImgDiv {
+				max-height: calc(100vh - 240px);
+				overflow: auto;
+			}
 			#tutorialShowBtn {
 				display: none;
 			}
 			#tutorialShrinkBtn, #tutorialShowBtn {
 				background-color: #000;
-				width: 70px;
+				height: 40px;
 				border-radius: 10px;
-				position:absolute;
-				right: 10px;
-				bottom: 10px;
+				float: right;
+				margin-top: 20px;
 			}
 			#tutorialShrinkBtn:hover, #tutorialShowBtn:hover {
 				background-color: #222;
 			}
-			#tutorialImg {
-				border-radius: 20px;
-				margin-bottom: 40px;
-			}
-
-			#tutorialUi{
-				top: 60px;
-				max-height: calc(100% - 120px);
-				transform: translateX(-50%) translateY(0%);
-			}
-
 			#reuseableHtml{
 				display: none;
 			}
@@ -203,9 +208,22 @@
 				top: 50%;
 				left: 50%;
 			}
+			#loadingScreen{
+				background-color: #000;
+				color: white;
+				font-size: 40px;
+				position: absolute;
+				z-index: 1;
+				line-height: 100vh;
+				box-sizing: border-box;
+				height: 100%;
+				width: 100%;
+				text-align: center;
+			}
 		</style>
 	</head>
 	<body>
+		<div id="loadingScreen">Loading...</div>
 		<canvas id="game"></canvas>
 		<div id="sandboxToolbar" class="toolbar"></div>
 		<div id="assemblySceneBtnsDiv" class="toolbar"></div>
@@ -256,7 +274,9 @@
 
 		<div id="tutorialUi" class="popup">
 			<p class="popupHeader">Tutorial</p>
-			<img id="tutorialImg">
+			<div id="tutorialImgDiv">
+				<img id="tutorialImg">
+			</div>
 			<svg id="tutorialShrinkBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
 				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="30" fill="white">Hide</text>
 			</svg>
@@ -268,7 +288,7 @@
 
 		<div id="saveLevelUI" class="popup">
 			<p class="popupHeader">Save Level</p>
-			File name: <input id="saveText" draggable="false" type="text"/>
+			File name: <input id="saveText" type="text"/>
 			<button id="saveBtn">Save</button><br>
 			<p id="saveMessageP"></p>
 			<a id="downloadlink" download style="display: none">Download</a><br>
