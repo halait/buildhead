@@ -86,8 +86,8 @@ inputTexture.onchange = () => {
 			createTexture(img);
 		} catch(err) {
 			inputTexture.style.display = "block";
-			//console.warn(err);
 		}
+		pw.render();
 	};
 	img.src = "newestTex.png";
 })();
