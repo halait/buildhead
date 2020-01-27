@@ -72,6 +72,7 @@ pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 	img.onload = () => {
 		try {
 			createTexture(img);
+			document.getElementById("loadingScreen").style.display = "none";
 		} catch(err) {
 			inputTexture.style.display = "block";
 		}

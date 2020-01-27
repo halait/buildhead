@@ -5,13 +5,13 @@ const tutorialScene = {
 	img: document.getElementById("tutorialImg"),
 	loadingMsg: document.getElementById("tutImgLoadingMsg"),
 	start(){
-		this.hideImg();
+		this.img.style.display = "none";
+		this.loadingMsg.style.display = "block";
 		this.removeCurrentEventListener();
 		++this.step;
 		this.events[this.step].target.addEventListener(this.events[this.step].type, this.events[this.step].callback);
 		this.img.src = this.step + "tut.png";
 		this.ui.style.display = "block";
-		this.loadingMsg.style.display = "block";
 	},
 	suspend(){
 		this.ui.style.display = "none";
@@ -84,7 +84,7 @@ const tutorialScene = {
 		this.shrinkBtn.addEventListener("click", () => {this.hideImg();});
 		this.showBtn.addEventListener("click", () => {this.showImg();});
 		this.img.onload = () => {
-			this.showImg();
+			this.img.style.display = "block";
 			this.loadingMsg.style.display = "none";
 		};
 	}
