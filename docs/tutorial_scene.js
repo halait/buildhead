@@ -3,13 +3,15 @@ const tutorialScene = {
 	step: -1,
 	ui: document.getElementById("tutorialUi"),
 	img: document.getElementById("tutorialImg"),
+	loadingMsg: document.getElementById("tutImgLoadingMsg"),
 	start(){
+		this.hideImg();
 		this.removeCurrentEventListener();
 		++this.step;
 		this.events[this.step].target.addEventListener(this.events[this.step].type, this.events[this.step].callback);
 		this.img.src = this.step + "tut.png";
 		this.ui.style.display = "block";
-		this.showImg();
+		this.loadingMsg.style.display = "block";
 	},
 	suspend(){
 		this.ui.style.display = "none";
@@ -81,6 +83,10 @@ const tutorialScene = {
 	init(){
 		this.shrinkBtn.addEventListener("click", () => {this.hideImg();});
 		this.showBtn.addEventListener("click", () => {this.showImg();});
+		this.img.onload = () => {
+			this.showImg();
+			this.loadingMsg.style.display = "none";
+		};
 	}
 };
 tutorialScene.init();

@@ -205,6 +205,7 @@
 
 			#inputTexture{
 				position: absolute;
+				display: "none";
 				top: 50%;
 				left: 50%;
 			}
@@ -275,7 +276,8 @@
 		<div id="tutorialUi" class="popup">
 			<p class="popupHeader">Tutorial</p>
 			<div id="tutorialImgDiv">
-				<img alt="Loading..." id="tutorialImg">
+				<p id="tutImgLoadingMsg">Loading...</p>
+				<img alt="Unable to load, check your network connection" id="tutorialImg">
 			</div>
 			<svg id="tutorialShrinkBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
 				<text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif" font-size="30" fill="white">Hide</text>
@@ -519,9 +521,7 @@
 
 		<input id="inputTexture" type="file" accept="image/png"/>
 
-
 		<script src="physics.js"></script>
-
 		<script src="render.js"></script>
 		<script src="event_manager.js"></script>
 

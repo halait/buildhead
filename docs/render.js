@@ -67,18 +67,6 @@ pw.U_SCALE_LOCATION = pw.gl.getUniformLocation(program, "u_scale");
 pw.U_TRANSLATE_LOCATION = pw.gl.getUniformLocation(program, "u_translate");
 pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 
-let inputTexture = document.getElementById("inputTexture");
-inputTexture.style.display = "none";
-
-inputTexture.onchange = () => {
-	inputTexture.style.display = "none";
-	let img = document.createElement("img");
-	img.onload = () => {createTexture(img)};
-	let rd = new FileReader();
-	rd.onload = (e) => {img.src = e.target.result;};
-	rd.readAsDataURL(inputTexture.files[0]);
-}
-
 (function(){
 	let img = document.createElement("img");
 	img.onload = () => {
@@ -91,6 +79,18 @@ inputTexture.onchange = () => {
 	};
 	img.src = "newestTex.png";
 })();
+
+let inputTexture = document.getElementById("inputTexture");
+
+inputTexture.onchange = () => {
+	inputTexture.style.display = "none";
+	let img = document.createElement("img");
+	img.onload = () => {createTexture(img)};
+	let rd = new FileReader();
+	rd.onload = (e) => {img.src = e.target.result;};
+	rd.readAsDataURL(inputTexture.files[0]);
+}
+
 
 function createTexture(pixels){
 	const texture = pw.gl.createTexture();
