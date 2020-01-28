@@ -27,7 +27,7 @@ let fragmentShaderSource = `
 	varying vec2 v_tex_coords;
 	void main() {
 		gl_FragColor = texture2D(u_sampler, v_tex_coords);
-		if(gl_FragColor.a < 0.8) discard;
+		if(gl_FragColor.a == 0.0) discard;
 	}
 `;
 
@@ -82,8 +82,8 @@ function createTexture(imgPath){
 		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);
 		pw.gl.texImage2D(pw.gl.TEXTURE_2D, 0, pw.gl.RGBA, pw.gl.RGBA, pw.gl.UNSIGNED_BYTE, img);
 		pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
-		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.NEAREST);
-		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.LINEAR);
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.NEAREST_MIPMAP_NEAREST);
+		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.NEAREST);
 		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_S, pw.gl.CLAMP_TO_EDGE);
 		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_T, pw.gl.CLAMP_TO_EDGE);
 		pw.gl.activeTexture(pw.gl.TEXTURE0);
@@ -139,13 +139,13 @@ pw.WHEEL_J = [
 	[Math.cos(Math.PI * 2.0 / 1.5), Math.sin(Math.PI * 2.0 / 1.5)]
 ];
 
-const GREEN_TC  = [0.625, 0.767, 0.625, 0.767];
-const GRAY_TC  = [0.625, 0.803, 0.625, 0.803];
-const AQUA_TC  = [0.625, 0.839, 0.625, 0.839];
-const WHITE_TC  = [0.625, 0.875, 0.625, 0.875];
-const ORANGE_TC  = [0.625, 0.911, 0.625, 0.911];
-const DARK_ORANGE_TC  = [0.625, 0.946, 0.625, 0.946];
-const BLUE_TC = [0.625, 0.982, 0.625, 0.982];
+const GREEN_TC  = [0.875, 0.018, 0.875, 0.018];
+const GRAY_TC  = [0.875, 0.054, 0.875, 0.054];
+const AQUA_TC  = [0.875, 0.089, 0.875, 0.089];
+const WHITE_TC  = [0.875, 0.125, 0.875, 0.125];
+const ORANGE_TC  = [0.875, 0.161, 0.875, 0.161];
+const DARK_ORANGE_TC  = [0.875, 0.196, 0.875, 0.196];
+const BLUE_TC = [0.875, 0.232, 0.875, 0.232];
 //const DR_TC  = [];
 
 pw.render = function() {
@@ -290,14 +290,14 @@ pw.render = function() {
 				this.positions[p++] = y0 - r;
 				this.texCoords[c++] = 0.5;
 				this.texCoords[c++] = 0.5;
-				this.texCoords[c++] = 0.75;
+				this.texCoords[c++] = 1.0;
 				this.texCoords[c++] = 0.5;
-				this.texCoords[c++] = 0.75;
-				this.texCoords[c++] = 0.75;
-				this.texCoords[c++] = 0.75;
-				this.texCoords[c++] = 0.75;
+				this.texCoords[c++] = 1.0;
+				this.texCoords[c++] = 1.0;
+				this.texCoords[c++] = 1.0;
+				this.texCoords[c++] = 1.0;
 				this.texCoords[c++] = 0.5;
-				this.texCoords[c++] = 0.75;
+				this.texCoords[c++] = 1.0;
 				this.texCoords[c++] = 0.5;
 				this.texCoords[c++] = 0.5;
 
@@ -315,14 +315,14 @@ pw.render = function() {
 				this.positions[p++] = y1 - r;
 				this.texCoords[c++] = 0.5;
 				this.texCoords[c++] = 0.5;
-				this.texCoords[c++] = 0.75;
+				this.texCoords[c++] = 1.0;
 				this.texCoords[c++] = 0.5;
-				this.texCoords[c++] = 0.75;
-				this.texCoords[c++] = 0.75;
-				this.texCoords[c++] = 0.75;
-				this.texCoords[c++] = 0.75;
+				this.texCoords[c++] = 1.0;
+				this.texCoords[c++] = 1.0;
+				this.texCoords[c++] = 1.0;
+				this.texCoords[c++] = 1.0;
 				this.texCoords[c++] = 0.5;
-				this.texCoords[c++] = 0.75;
+				this.texCoords[c++] = 1.0;
 				this.texCoords[c++] = 0.5;
 				this.texCoords[c++] = 0.5;
 			}

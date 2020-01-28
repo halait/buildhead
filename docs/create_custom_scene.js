@@ -151,7 +151,9 @@ var createCustomScene = {
 			}
 			if(this.circleDef.group == FIXED_GROUP){
 				this.circleDef.userFloats[1] = 0.5;
-				this.circleDef.userFloats[3] = 0.75;
+				this.circleDef.userFloats[2] = 0.5;
+				this.circleDef.userFloats[3] = 1.0;
+				this.circleDef.userFloats[4] = 1.0;
 			} else if(this.circleDef.group == NON_COPLANAR_GROUP) {
 				this.circleDef.userFloats[1] = 0.25;
 				this.circleDef.userFloats[3] = 0.5;
