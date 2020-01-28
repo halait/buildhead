@@ -1,5 +1,5 @@
 "use strict";
-var isRenderFrame = false;
+//var isRenderFrame = false;
 var successPending = true;
 //var dt = 0.0;
 //var before = 0.0;
@@ -36,16 +36,19 @@ var simulationScene = {
 			this.xDragStart = false;
 		},
 	},
-
-	simulate() {
+	before: 0,
+	simulate(now) {
 		if(isSimulating) {
-			if(isRenderFrame) {
-				pw.render();
-			} else {
+			requestAnimationFrame(simulationScene.simulate);
+			if(now - simulationScene.before < 32) return;
+			simulationScene.before = now;
+			//if(isRenderFrame) {
+				//pw.render();
+			//} else {
 				if(successPending){
 					let success = true;
-					for(const t of targets){
-						if(!pw.isWithinAABB(goalField.ref, t.ref)) {
+					for(let i = 0, len = targets.length; i != len; ++i){
+						if(!pw.isWithinAABB(goalField.ref, targets[i].ref)) {
 							success = false;
 							break;
 						}
@@ -55,14 +58,19 @@ var simulationScene = {
 						let nextLevel = assemblyScene.levelNum + 1;
 						localStorage.setItem(nextLevel + "isPlayable", true);
 						menuScene.unlockLevel(nextLevel, true);
-						successScene.nextLevelBtn.onclick = menuScene.levelBtns[nextLevel].onclick;
+						successScene.nextLevelBtn.onclick = () => {
+							sceneManager.unfloat();
+							sceneManager.pop();
+							sceneManager.pop();
+							menuScene.levelBtns[nextLevel].onclick();
+						}
 						sceneManager.float(successScene);
 					}
 				}
 				pw.update();
-			}
-			isRenderFrame = !isRenderFrame;
-			requestAnimationFrame(simulationScene.simulate);
+				pw.render();
+			//}
+			//isRenderFrame = !isRenderFrame;
 		} else {
 			pw.resetAllImpulses();
 			for(const o of gameObjects){

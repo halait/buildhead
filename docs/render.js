@@ -22,15 +22,14 @@ let vertexShaderSource = `
 `;
 
 let fragmentShaderSource = `
-	precision lowp float;
+	precision highp float;
 	uniform sampler2D u_sampler;
 	varying vec2 v_tex_coords;
 	void main() {
 		gl_FragColor = texture2D(u_sampler, v_tex_coords);
-		if(gl_FragColor.a == 0.0) discard;
+		if(gl_FragColor.a < 0.8) discard;
 	}
 `;
-
 
 function createShader(type, source) {
   let shader = pw.gl.createShader(type);
@@ -68,49 +67,36 @@ pw.U_TRANSLATE_LOCATION = pw.gl.getUniformLocation(program, "u_translate");
 pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 
 let loadingScreen = document.getElementById("loadingScreen");
-let inputTexture = document.getElementById("inputTexture");
 let path = false;
+if(window.location.protocol == "file:") path = "https://halait.github.io/js-physics-game/";
 
-(function(){
+function createTexture(imgPath){
 	let img = document.createElement("img");
-	img.onload = () => {
-		createTexture(img);
-		loadingScreen.style.display = "none";
-	};
-	if(window.location.protocol == "file:") {
-		path = "https://halait.github.io/js-physics-game/";
-		inputTexture.style.display = "block";
-		inputTexture.onchange = () => {
-			inputTexture.style.display = "none";
-			let rd = new FileReader();
-			rd.onload = (e) => {img.src = e.target.result;};
-			rd.readAsDataURL(inputTexture.files[0]);
-		}
-	} else {
-		img.src = "newestTex.png";
+	if(path) {
+		img.crossOrigin = "";
+		imgPath = path + imgPath;
 	}
-})();
-
-function createTexture(pixels){
-	const texture = pw.gl.createTexture();
-	pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);
-	
-	pw.gl.texImage2D(pw.gl.TEXTURE_2D, 0, pw.gl.RGBA, pw.gl.RGBA, pw.gl.UNSIGNED_BYTE, pixels);
-	//pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
-	pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.NEAREST);
-	pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.NEAREST);
-	pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_S, pw.gl.CLAMP_TO_EDGE);
-	pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_T, pw.gl.CLAMP_TO_EDGE);
-	pw.gl.activeTexture(pw.gl.TEXTURE0);
-	pw.gl.uniform1i(pw.U_SAMPLER, 0);
-
-	//new
-	//pw.gl.disable(pw.gl.DEPTH_TEST);
-	//pw.gl.enable(pw.gl.BLEND);
-	//pw.gl.blendFunc(pw.gl.SRC_ALPHA, pw.gl.ONE);
-	//return texture;
+	img.onload = () => {
+		loadingScreen.style.display = "none";
+		let texture = pw.gl.createTexture();
+		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);
+		pw.gl.texImage2D(pw.gl.TEXTURE_2D, 0, pw.gl.RGBA, pw.gl.RGBA, pw.gl.UNSIGNED_BYTE, img);
+		pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
+		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.NEAREST);
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.LINEAR);
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_S, pw.gl.CLAMP_TO_EDGE);
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_T, pw.gl.CLAMP_TO_EDGE);
+		pw.gl.activeTexture(pw.gl.TEXTURE0);
+		pw.gl.uniform1i(pw.U_SAMPLER, 0);
+		console.log(pw.gl.getError());
+		//new
+		//pw.gl.disable(pw.gl.DEPTH_TEST);
+		//pw.gl.enable(pw.gl.BLEND);
+		//pw.gl.blendFunc(pw.gl.SRC_ALPHA, pw.gl.ONE_MINUS_SRC_ALPHA);
+	}
+	img.src = imgPath;
 }
-
+createTexture("newestTex.png");
 
 pw.positions = new Float32Array(6000);
 pw.texCoords = new Float32Array(6000);
