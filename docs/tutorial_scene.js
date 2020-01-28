@@ -10,7 +10,7 @@ const tutorialScene = {
 		this.removeCurrentEventListener();
 		++this.step;
 		this.events[this.step].target.addEventListener(this.events[this.step].type, this.events[this.step].callback);
-		this.img.src = this.step + "tut.png";
+		this.img.src = "tutorials/" + this.step + "tut.png";
 		this.ui.style.display = "block";
 	},
 	suspend(){

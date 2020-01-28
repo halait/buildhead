@@ -27,7 +27,7 @@ let fragmentShaderSource = `
 	varying vec2 v_tex_coords;
 	void main() {
 		gl_FragColor = texture2D(u_sampler, v_tex_coords);
-		if(gl_FragColor.a == 0.0) discard;
+		if(gl_FragColor.a < 0.8) discard;
 	}
 `;
 
@@ -82,8 +82,8 @@ function createTexture(imgPath){
 		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);
 		pw.gl.texImage2D(pw.gl.TEXTURE_2D, 0, pw.gl.RGBA, pw.gl.RGBA, pw.gl.UNSIGNED_BYTE, img);
 		pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
-		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.NEAREST_MIPMAP_NEAREST);
-		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.NEAREST);
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.LINEAR_MIPMAP_NEAREST);
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.LINEAR);
 		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_S, pw.gl.CLAMP_TO_EDGE);
 		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_T, pw.gl.CLAMP_TO_EDGE);
 		pw.gl.activeTexture(pw.gl.TEXTURE0);
