@@ -187,6 +187,11 @@ class Circle extends GameObject{
 
 class Obround extends GameObject {
 	constructor(def){
+		let dx = def.vertices[0][0] - def.vertices[1][0];
+		let dy = def.vertices[0][1] - def.vertices[1][1];
+		if(Math.sqrt(dx * dx + dy * dy) < pw.MIN_PLANE_LEN){
+			def.vertices[1][0] = def.vertices[0][0] + pw.MIN_PLANE_LEN * 1.01;
+		}
 		super(def);
 		this.vertex0ConnectedObjectsEnd = 0;
 		if(def.userFloats[H_IS_JOINABLE]){
@@ -194,6 +199,11 @@ class Obround extends GameObject {
 			let len = joinables.length
 			this.vertex0ConnectedObjectsEnd = len;
 			if(len){
+				dx = joinables[0].x - def.vertices[1][0];
+				dy = joinables[0].y - def.vertices[1][1];
+				if(Math.sqrt(dx * dx + dy * dy) < pw.MIN_PLANE_LEN) {
+					this.setVertex(1, joinables[0].x + pw.MIN_PLANE_LEN * 1.01, joinables[0].y);
+				}
 				this.setVertex(0, joinables[0].x, joinables[0].y);
 				for(const j of joinables){
 					this.connectedObjects.push(j.gameObject);
@@ -498,7 +508,6 @@ const sceneManager = {
 		this.history.push(scene);
 		this.current = scene;
 		this.current.start();
-		console.warn("push trace")
 	},
 
 	pop(){

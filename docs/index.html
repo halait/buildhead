@@ -161,7 +161,6 @@
 				position: absolute;
 				top: 40px;
 				cursor: crosshair;
-				width: 100%;
 				background: radial-gradient(100% 60% at 50% 100%, #11a, 10%, #002);
 			}
 			#logo{
@@ -216,16 +215,41 @@
 				font-size: 40px;
 				position: absolute;
 				z-index: 1;
-				line-height: 100vh;
-				box-sizing: border-box;
+				//line-height: 100vh;
+				//box-sizing: border-box;
 				height: 100%;
 				width: 100%;
-				text-align: center;
+				//text-align: center;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#loadingSvg {
+				width: 12.5%;
+			}
+			#loadingCircle {
+				animation-duration: 1s;
+				animation-name: load;
+				animation-iteration-count: infinite;
+				animation-direction: alternate;
+			}
+			@keyframes load {
+				from {
+					fill: #000;
+				}
+				to {
+					fill: #fff;
+				}
 			}
 		</style>
 	</head>
 	<body>
-		<div id="loadingScreen">Loading...</div>
+		<div id="loadingScreen">
+			<svg id="loadingSvg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<circle id="loadingCircle" cx="50" cy="50" r="50"/>
+			</svg>
+
+		</div>
 		<canvas id="game"></canvas>
 		<div id="sandboxToolbar" class="toolbar"></div>
 		<div id="assemblySceneBtnsDiv" class="toolbar"></div>

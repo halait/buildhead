@@ -27,7 +27,7 @@ let fragmentShaderSource = `
 	varying vec2 v_tex_coords;
 	void main() {
 		gl_FragColor = texture2D(u_sampler, v_tex_coords);
-		if(gl_FragColor.a < 0.8) discard;
+		if(gl_FragColor.a < 0.85) discard;
 	}
 `;
 
@@ -77,7 +77,9 @@ function createTexture(imgPath){
 		imgPath = path + imgPath;
 	}
 	img.onload = () => {
+
 		loadingScreen.style.display = "none";
+
 		let texture = pw.gl.createTexture();
 		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);
 		pw.gl.texImage2D(pw.gl.TEXTURE_2D, 0, pw.gl.RGBA, pw.gl.RGBA, pw.gl.UNSIGNED_BYTE, img);

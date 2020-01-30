@@ -40,7 +40,7 @@ var simulationScene = {
 	simulate(now) {
 		if(isSimulating) {
 			requestAnimationFrame(simulationScene.simulate);
-			if(now - simulationScene.before < 32) return;
+			if(now - simulationScene.before < 25) return;
 			simulationScene.before = now;
 			//if(isRenderFrame) {
 				//pw.render();
