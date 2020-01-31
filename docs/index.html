@@ -133,6 +133,9 @@
 			.closeBtn:hover{
 				background-color: #b00;
 			}
+			#menuUi{
+				display: block;
+			}
 			#tutorialUi{
 				top: 60px;
 				transform: translateX(-50%) translateY(0%);
@@ -201,54 +204,48 @@
 				}
 			}
 			*/
-
-			#inputTexture{
-				position: absolute;
-				z-index: 2;
-				display: none;
-				top: 50%;
-				left: 50%;
-			}
 			#loadingScreen{
 				background-color: #000;
-				color: white;
-				font-size: 40px;
 				position: absolute;
 				z-index: 1;
-				//line-height: 100vh;
-				//box-sizing: border-box;
 				height: 100%;
 				width: 100%;
-				//text-align: center;
 				display: flex;
 				align-items: center;
 				justify-content: center;
+				font-size: 40px;
+				color: #fff;
 			}
+			/*
 			#loadingSvg {
 				width: 12.5%;
+				display: block;
 			}
 			#loadingCircle {
-				animation-duration: 1s;
-				animation-name: load;
-				animation-iteration-count: infinite;
-				animation-direction: alternate;
+				animation: 1s infinite load alternate;
+			}
+			*/
+			#loadingP {
+				animation: 1s infinite load alternate;
 			}
 			@keyframes load {
 				from {
-					fill: #000;
+					color: #000;
 				}
 				to {
-					fill: #fff;
+					color: #fff;
 				}
 			}
 		</style>
 	</head>
 	<body>
 		<div id="loadingScreen">
+			<p id="loadingP">Loading...</p>
+			<!--
 			<svg id="loadingSvg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 				<circle id="loadingCircle" cx="50" cy="50" r="50"/>
 			</svg>
-
+			-->
 		</div>
 		<canvas id="game"></canvas>
 		<div id="sandboxToolbar" class="toolbar"></div>
@@ -543,9 +540,6 @@
 			</svg>
 			-->
 		</div>
-
-		<input id="inputTexture" type="file" accept="image/png"/>
-
 		<script src="physics.js"></script>
 		<script src="render.js"></script>
 		<script src="event_manager.js"></script>

@@ -531,9 +531,16 @@ const sceneManager = {
 		}
 	}
 };
-sceneManager.push(menuScene);
 window.onresize();
+sceneManager.push(menuScene);
+/*
+let loadingScreen = document.getElementById("loadingScreen");
+let loadingCircle = document.getElementById("loadingCircle");
+showLoadingScreen(){
+	loadingScreen.style.display = "block";
 
+}
+*/
 function create(def){
 	if(def.form == pw.CIRCLE_FORM) {
 		return new Circle(def);

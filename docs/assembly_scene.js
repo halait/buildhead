@@ -21,7 +21,7 @@ var assemblyScene = {
 		this.levelNum = parseInt(levelPath[7]);
 		if(path) levelPath = path + levelPath;
 		console.log("path: " + levelPath);
-		loadingScreen.style.display = "block";
+		loadingScreen.style.display = "flex";
 		let response = null;
 		try {
 			response = await fetch(levelPath);
