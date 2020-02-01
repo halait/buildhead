@@ -1,8 +1,4 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
+﻿/.vs
 /docs/game_objects(old).js
 /docs/textureCreator.html
 /docs/code_graveyard.js

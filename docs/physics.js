@@ -1,24 +1,21 @@
 "use strict";
+// PRE-ALPHA
 /* TODO
 	- implement block solver for multiple contacts
 	- consolidate physics object PLANE_FORM into POLYGON_FORM for simplification purposes
 */
-// PRE-ALPHA
 /* GLOSSARY
 	- physics object: actual objects that are simulated by the physics engine. For now this is circles, planes and convex polygons.
 */
 
-
-
-
 /*
 	This physics engine is made specifically for use in the browser and thus written in JS (perhaps ported to WASM in the future).
-	Due to most JS engines being slow accessing variables inside objects relative to native running code I am experimenting
-	using a large typedArray (Float64Array) to store data rather than objects to improve performance. There is ~20% speed boost in
-	V8 so I am sticking with it for now. I emulated C/C++ style of manual memory management with typedArray serving as memory. For
-	each physics object and constraint created elements (floats) are allocated in a contiguous block in the typedArray and assigned
-	a pointer which is simply the index of the first element of the allocated elements that can be used to hold arbitrary floats.
-	The pointer plus an offset is used to access elements.
+	Due to most JS engines being slow accessing variables relative to native running code I am experimenting using a large typedArray 
+	(Float64Array) to store data rather than objects to improve performance. There is ~20% speed boost in V8 so I am sticking with it 
+	for now. I emulated C/C++ style of manual memory management with the typedArray serving as memory. For each physics object and 
+	constraint created elements are allocated in a contiguous block in the typedArray and assigned a pointer which is simply the index 
+	of the first element of the allocated elements that can be used to hold arbitrary floats. The pointer plus an offset is used to 
+	access elements. The following are different offsets.
 */
 // physics object offsets
 // temp
@@ -115,25 +112,6 @@ const C_RTA = 19;
 const C_RTB = 20;
 const C_MT = 21;
 
-/*
-const C_ACTIVE = 22;
-const C_NX = 23;
-const C_NY = 24;
-const C_DIST = 25;
-const C_RAX = 26;
-const C_RAY = 27;
-const C_RBX = 28;
-const C_RBY = 29;
-const C_JN = 30;
-const C_JT = 31;
-const C_RNA = 32;
-const C_RNB = 33;
-const C_M = 34;
-const C_RTA = 35;
-const C_RTB = 36;
-const C_MT = 37;
-*/
-
 // JOINT_FORM only
 const C_LAX = 13;
 const C_LAY = 14;
@@ -146,81 +124,6 @@ const C_SUM_T = 20;
 const C_M_I = 21;
 const C_JX = 22;
 const C_JY = 23;
-
-
-//const C_RMB = 19;
-//const C_RMA_INV = 20;
-//const C_RMA = 20;
-//const C_RMB_INV = 21;
-
-
-/*
-const C_FORM = 0;
-const C_TYPE = 1;
-const C_PO_PTR_A = 2;
-const C_PO_PTR_B = 3;
-const C_US = 4;
-const C_UK = 5;
-const C_NUM_
-
-
-
-
-
-const C_ACTIVE = 6;
-const C_RAX = 7;
-const C_RAY = 8;
-const C_RBX = 9;
-const C_RBY = 10;
-
-const C_JN = 11;
-const C_JT = 12;
-
-// this.COLLISION_FORM only
-const C_NX = 13;
-const C_NY = 14;
-const C_DIST = 15;
-const C_RNA = 16;
-const C_RNB = 17;
-const C_M = 18;
-const C_RTA = 19;
-const C_RTB = 20;
-const C_MT = 21;
-
-/*
-const C_ACTIVE = 22;
-const C_NX = 23;
-const C_NY = 24;
-const C_DIST = 25;
-const C_RAX = 26;
-const C_RAY = 27;
-const C_RBX = 28;
-const C_RBY = 29;
-const C_JN = 30;
-const C_JT = 31;
-const C_RNA = 32;
-const C_RNB = 33;
-const C_M = 34;
-const C_RTA = 35;
-const C_RTB = 36;
-const C_MT = 37;
-*/
-/*
-// revolute only
-const C_LAX = 13;
-const C_LAY = 14;
-const C_LBX = 15;
-const C_LBY = 16;
-const C_IS_MOTOR = 17;
-const C_MW = 18;
-const C_M_MAX_T = 19;
-const C_SUM_T = 20;
-const C_M_I = 21;
-//const C_RMB = 19;
-//const C_RMA_INV = 20;
-//const C_RMA = 20;
-//const C_RMB_INV = 21;
-*/
 
 
 class MemoryManager {
@@ -294,10 +197,8 @@ const pw = {
 	VELOCITY_ITERATIONS: 64,
 
 
-
 	//temp
 	POSITION_ITERATIONS: 0,
-
 
 
 	POLYGON_SKIN: 0.005,
@@ -423,15 +324,8 @@ const pw = {
 		for(this.unsolved = true; this.unsolved && iter < this.VELOCITY_ITERATIONS; ++iter){
 
 
-
-
-
 			// IMPORTANT EXPERIMENTAL
 			this.unsolved = false;
-
-
-
-
 
 
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
@@ -454,8 +348,9 @@ const pw = {
 						let jt = (M[C_NX + i] * vyRel - M[C_NY + i] * vxRel) * M[C_MT + i];
 						let oldJt = M[C_JT + i];
 						M[C_JT + i] += jt;
-						// clamp to max friction calculated by constraint coefficient of friction (only static for now) times accumulated normal impulse
+						// max friction
 						let maxJt = -M[C_JN + i] * M[C_US + si];
+						// clamp to max friction
 						if(Math.abs(M[C_JT + i]) > maxJt){
 							if(jt > 0) M[C_JT + i] = maxJt;
 							else M[C_JT + i] = -maxJt;
@@ -481,11 +376,9 @@ const pw = {
 						let jn = ((M[C_NX + i] * vxRel + M[C_NY + i] * vyRel) + M[C_DIST + i]) * M[C_M + i];
 						let oldJn = M[C_JN + i];
 						M[C_JN + i] += jn;
-						// clamp to insure accumulated normal impulse (M[C_JN + i]) stays negative (push only)
+						// clamp to insure accumulated normal impulse stays negative (push only)
 						if(M[C_JN + i] > 0) M[C_JN + i] = 0;
 						jn = M[C_JN + i] - oldJn;
-						/* It's somewhat likely oldJn was already 0 because there was never a negative impulse
-							(due to using speculative contacts), thus check jn to save unnecessary work. */
 						if(jn) {
 							this.unsolved = true;
 							// integrate impusle
@@ -512,7 +405,7 @@ const pw = {
 						let aa = M[O_W + asi] - M[O_W + bsi] - M[C_MW + si];
 						// compute motor impulse
 						let jm = aa * M[C_M_I + si];
-						// clamp impulse to max torque
+						// clamp to max impulse
 						let oldJm = M[C_SUM_T + si];
 						M[C_SUM_T + si] += jm;
 						if(Math.abs(M[C_SUM_T + si]) > M[C_M_MAX_T + si]) {
@@ -529,12 +422,10 @@ const pw = {
 					// if no relative velocity then done
 					if(!vxRel && !vyRel) continue;
 					this.unsolved = true;
-					// length of relative velocity vector
+					// relative velocity vector is the direction impulse is applied
 					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
-					// normalize vectors
 					vxRel /= vn;
 					vyRel /= vn;
-					// the cross product of radius vector and relative velocity vector
 					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
 					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
 					// total "mass" in constraint reference
@@ -545,8 +436,6 @@ const pw = {
 					let jx = j * vxRel;
 					let jy = j * vyRel;
 					// accumulate impulse
-					/* Unlike the collision constraint save impulses as vector (for warm-starting) rather than
-						scalar because the direction of the vector changes throughout the step. */
 					M[C_JX + si] += jx;
 					M[C_JY + si] += jy;
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -566,7 +455,6 @@ const pw = {
 
 		// integrate velocities
 		for(let i = 0, ptr = this.PO_PTRS[i], len = this.poTotal; i < len; ++i, ptr = this.PO_PTRS[i]){
-			//let ptr = this.PO_PTRS[i];
 			if(M[O_TYPE + ptr] == this.FIXED_TYPE) continue;
 			M[O_TX + ptr] += M[O_VX + ptr];
 			M[O_TY + ptr] += M[O_VY + ptr];
@@ -657,9 +545,7 @@ const pw = {
 					let rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
 					// total "mass" in the constraint reference
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-					//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
 					// tune?
-					//let j = (dist * 0.5) / mInv;
 					let j = dist / mInv;
 					let jx = j * nx;
 					let jy = j * ny;
@@ -724,23 +610,6 @@ const pw = {
 				this.M[V_UY + vPtr] = (this.M[V_WY + pPtr] - this.M[V_WY + vPtr]) * this.M[V_L_INV + vPtr];
 			}
 		}
-			/*
-			let nPtr = O_NUM_VERTICES + ptr + 1;
-			this.M[V_WX + nPtr] = (this.M[V_LX + nPtr] * this.M[O_COS + ptr] - this.M[V_LY + nPtr] * this.M[O_SIN + ptr]) + this.M[O_TX + ptr];
-			this.M[V_WY + nPtr] = (this.M[V_LY + nPtr] * this.M[O_COS + ptr] + this.M[V_LX + nPtr] * this.M[O_SIN + ptr]) + this.M[O_TY + ptr];
-			let vPtr = (this.M[O_NUM_VERTICES + ptr] - 1) * this.V_SIZE + nPtr;
-			for(let f = O_NUM_VERTICES + ptr + this.V_SIZE; vPtr > f; vPtr -= this.V_SIZE){
-				this.M[V_WX + vPtr] = (this.M[V_LX + vPtr] * this.M[O_COS + ptr] - this.M[V_LY + vPtr] * this.M[O_SIN + ptr]) + this.M[O_TX + ptr];
-				this.M[V_WY + vPtr] = (this.M[V_LY + vPtr] * this.M[O_COS + ptr] + this.M[V_LX + vPtr] * this.M[O_SIN + ptr]) + this.M[O_TY + ptr];
-				this.M[V_UX + vPtr] = (this.M[V_WX + nPtr] - this.M[V_WX + vPtr]) * this.M[V_L_INV + vPtr];
-				this.M[V_UY + vPtr] = (this.M[V_WY + nPtr] - this.M[V_WY + vPtr]) * this.M[V_L_INV + vPtr];
-				nPtr = vPtr;
-			}
-			this.M[V_UX + vPtr] = (this.M[V_WX + nPtr] - this.M[V_WX + vPtr]) * this.M[V_L_INV + vPtr];
-			this.M[V_UY + vPtr] = (this.M[V_WY + nPtr] - this.M[V_WY + vPtr]) * this.M[V_L_INV + vPtr];
-		}
-		*/
-
 	},
 
 
@@ -1122,12 +991,7 @@ const pw = {
 		this.poTotal = 0;
 		this.POMM.freeAll();
 	},
-	// Forms for quick evaluation of object type
-	// Plane form is not just a plane its just the best word I could find
-	// Plane form can be imagined as a tic tac with arbitrary length and width, its described with two vertices 
-	// that are connected by mass with specified width, at the vertices themselves there exists two circular 
-	// masses that have a diameter equal to the specified width
-
+	// forms for quick evaluation of data type
 	PLANE_FORM: 0,
 	CIRCLE_FORM: 1,
 	AABB_FORM: 2,
@@ -1148,11 +1012,7 @@ const pw = {
 	//PO_SIZES: new Uint8Array([34, 22, 25, 22, 22, 38, 22,   22, 38, 38, 22]),
 	PO_SIZES: new Uint8Array([34, 22, 25, 22, 22, 38, 24,   22, 38, 38, 22]),
 
-
-	// For now two types of physics objects, maybe more in the future.
-	// Fixed objects simulate extremely massive objects, these do not move, perfect for ground platforms.
 	FIXED_TYPE: 0,
-	// Movable objects simulate regular objects, these are affected by forces, density is required in the definition of these objects
 	MOVABLE_TYPE: 1,
 	
 	// change to contiguos
@@ -1175,15 +1035,10 @@ const pw = {
 
 			let aForm = this.M[O_FORM + def.poPtrA];
 			let bForm = this.M[O_FORM + def.poPtrB];
-			//console.log("aForm = " + aForm + "  this.CIRCLE_FORM = " + this.CIRCLE_FORM);
 			if(aForm == this.CIRCLE_FORM){
 				if(bForm == this.PLANE_FORM) def.form = this.POINT_SURFACE_FORM;
 				else if(bForm == this.CIRCLE_FORM) def.form = this.POINTS_FORM;
-
-
 				else if(bForm == this.POLYGON_FORM) def.form = this.POINT_POLYGON_FORM;
-
-
 				else console.error("Unhandled form: " + bForm);
 			} else if(aForm == this.PLANE_FORM){
 				if(bForm == this.CIRCLE_FORM){
@@ -1193,34 +1048,27 @@ const pw = {
 					def.form = this.POINT_SURFACE_FORM;
 				} else if(bForm == this.PLANE_FORM) {
 					def.form = this.SURFACES_FORM;
-
 				} else if(bForm == this.POLYGON_FORM) {
 					def.form = this.SURFACE_POLYGON_FORM;
-
 				} else {
 					throw "Unhandled form: " + bForm;
 				}
-
 			} else if(aForm == this.POLYGON_FORM){
 				if(bForm == this.CIRCLE_FORM){
 					let temp = def.poPtrA;
 					def.poPtrA = def.poPtrB;
 					def.poPtrB = temp;
 					def.form = this.POINT_POLYGON_FORM;
-
 				} else if(bForm == this.PLANE_FORM){
 					let temp = def.poPtrA;
 					def.poPtrA = def.poPtrB;
 					def.poPtrB = temp;
 					def.form = this.SURFACE_POLYGON_FORM;
-
 				} else if(bForm == this.POLYGON_FORM){
 					def.form = this.POLYGONS_FORM;
-
 				} else {
 					console.error("unhandled form: " + bForm);
 				}
-			
 			} else {
 				console.error("Unhandled form: " + aForm);
 				return;
@@ -1231,12 +1079,9 @@ const pw = {
 
 		// temp
 		if(def.form == this.POLYGONS_FORM || def.form == this.SURFACE_POLYGON_FORM || def.form == this.SURFACES_FORM){
-			console.log("resseting 2nd impulses");
 			this.M[C_JN + ptr + 16] = 0.0;
 			this.M[C_JT + ptr + 16] = 0.0;
 		}
-
-
 
 		this.M[C_JN + ptr] = 0.0;
 		this.M[C_JT + ptr] = 0.0;
@@ -1251,31 +1096,23 @@ const pw = {
 		if(def.type == this.JOINT_TYPE){
 			if(def.x === undefined || def.y === undefined) throw "Missing x and/or y (position).";
 			this.M[C_ACTIVE + ptr] = 1;
-			this.setJointPosition(ptr, def.x, def.y);
-
-
-			console.log("this.M[C_JX + ptr] = " + this.M[C_JX + ptr] + " this.M[C_JY + ptr] = " + this.M[C_JY + ptr] + " M[C_SUM_T + ptr] = " + this.M[C_SUM_T + ptr] + " C_JX + ptr = " + (C_JX + ptr));
-			console.log("resseting joint impulses");
-			this.M[C_JX + ptr] = 0.0;
-			this.M[C_JY + ptr] = 0.0;
-			this.M[C_SUM_T + ptr] = 0.0;
-
-
-
 			if(def.motorVelocity === undefined){
 				this.M[C_IS_MOTOR + ptr] = 0;
 			} else if(def.maxMotorTorque !== undefined){
 				this.M[C_IS_MOTOR + ptr] = 1;
 				this.M[C_MW + ptr] = def.motorVelocity;
 				this.M[C_M_MAX_T + ptr] = def.maxMotorTorque;
-				let motorInertia = this.M[O_I_INV + def.poPtrA] + this.M[O_I_INV + def.poPtrB];
-				if(motorInertia){
-					motorInertia = 1.0 / motorInertia;
-				}
-				this.M[C_M_I + ptr] = motorInertia;
+				//this.M[C_M_I + ptr] = this.M[O_I_INV + def.poPtrA] + this.M[O_I_INV + def.poPtrB];
+				//if(this.M[C_M_I + ptr]){
+					//this.M[C_M_I + ptr] = 1.0 / this.M[C_M_I + ptr];
+				//}
 			} else {
-				console.warn("Missing maxMotorTorque required to create motor joint.");
+				throw "Unable to create motor joint without maxMotorTorque";
 			}
+			this.setJointPosition(ptr, def.x, def.y);
+			this.M[C_JX + ptr] = 0.0;
+			this.M[C_JY + ptr] = 0.0;
+			this.M[C_SUM_T + ptr] = 0.0;
 			for(let i = this.cTotal - 1; i > -1; --i){
 				let cPtr = this.C_PTRS[i];
 				if(this.M[C_TYPE + cPtr] == this.COLLISION_TYPE){
@@ -1301,18 +1138,16 @@ const pw = {
 	destroyConstraint(cPtr){
 		this.POMM.free(cPtr);
 		let i = this.C_PTRS.indexOf(cPtr);
-		console.log("this.C_PTRS.indexOf(cPtr) = " + i)
 		if(i > -1) this.C_PTRS.copyWithin(i, i + 1, this.cTotal);
-		else console.error("Cannot destroy constraint with pointer at index: " + i);
+		else throw "Cannot destroy constraint with pointer at index: " + i;
 		--this.cTotal;
 		// unnecessary
 		this.C_PTRS[this.cTotal] = 0;
 	},
 
 	setJointPosition(jPtr, x, y){
-		if(!this.M[C_TYPE + jPtr] == this.JOINT_TYPE){
-			console.error("Cannot set joint position of non-JOINT_TYPE constraint.");
-			return;
+		if(this.M[C_TYPE + jPtr] != this.JOINT_TYPE) {
+			throw "Unable to set joint position of constraint type: " + this.M[C_TYPE + jPtr];
 		}
 		let asi = this.M[C_PO_PTR_A + jPtr];
 		let bsi = this.M[C_PO_PTR_B + jPtr];
@@ -1324,11 +1159,10 @@ const pw = {
 		this.M[C_LAY + jPtr] = day * this.M[O_COS + asi] - dax * this.M[O_SIN + asi];
 		this.M[C_LBX + jPtr] = dbx * this.M[O_COS + bsi] + dby * this.M[O_SIN + bsi];
 		this.M[C_LBY + jPtr] = dby * this.M[O_COS + bsi] - dbx * this.M[O_SIN + bsi];
-		let motorInertia = this.M[O_I_INV + asi] + this.M[O_I_INV + bsi];
-		if(motorInertia){
-			motorInertia = 1.0 / motorInertia;
+		if(this.M[C_IS_MOTOR + jPtr]){
+			this.M[C_M_I + jPtr] = this.M[O_I_INV + asi] + this.M[O_I_INV + bsi];
+			if(this.M[C_M_I + jPtr]) this.M[C_M_I + jPtr] = 1.0 / this.M[C_M_I + jPtr];
 		}
-		this.M[C_M_I + jPtr] = motorInertia;
 	},
 
 	resetAllImpulses(){
@@ -1352,8 +1186,7 @@ const pw = {
 		}
 		console.log("all impulses reset");
 	},
-	
-	
+
 	MIN_PLANE_LEN: 0.05,
 	MIN_AABB_LEN: 0.05,
 
@@ -1370,26 +1203,23 @@ const pw = {
 	create(def) {
 		if(this.poTotal > 198) throw "Unable to create physics object, maximum number of physics objects reached. Max is " + 200;
 		if(def.form === undefined || def.type === undefined) {
-			console.error("Missing form and/or type in PhysicsObject definition");
+			throw "Missing form and/or type in PhysicsObject definition";
 		}
 		if(def.type == this.MOVABLE_TYPE && (def.density === undefined)) {
-			console.error("Missing density in PhysicsObject definition of this.MOVABLE_TYPE");
+			throw "Missing density in PhysicsObject definition of this.MOVABLE_TYPE";
 		}
 		let size = this.PO_SIZES[def.form] + def.userFloats.length;
 
 		if(def.form === this.POLYGON_FORM){
 			if(def.vertices === undefined || def.vertices.length < 3){
-				console.error("Missing vertices or vertices length less than 3");
+				throw "Unable to create polygon with less than 3 vertices";
 			}
 			size += def.vertices.length * this.V_SIZE;
 		}
 
 		let ptr = this.POMM.alloc(size);
 
-
 		this.M[O_USERFLOATS_PTR + ptr] = ptr + this.PO_SIZES[def.form];
-
-
 
 		this.M[O_FORM + ptr] = def.form;
 		this.M[O_TYPE + ptr] = def.type;
@@ -1416,6 +1246,7 @@ const pw = {
 			this.M[O_I + ptr] = 0.0;
 			this.M[O_I_INV + ptr] = 0.0;
 		}
+
 		if(def.form == this.CIRCLE_FORM) {
 			if(def.radius === undefined || def.x === undefined|| def.y === undefined) {
 				console.error("Missing radius and/or position (x and y) in PhysicsObject definition of this.CIRCLE_FORM");
@@ -1432,6 +1263,7 @@ const pw = {
 				this.M[O_I + ptr] = 0.75 * mass * def.radius * def.radius;
 				this.M[O_I_INV + ptr] = 1.0 / this.M[O_I + ptr];
 			}
+
 		} else if(def.form == this.PLANE_FORM) {
 			if(def.vertices === undefined || def.vertices.length != 2){
 				console.error("Missing vertices or vertices not of length 2 in PhysicsObject def of this.PLANE_FORM");
@@ -1453,20 +1285,10 @@ const pw = {
 			this.M[O_MAX_X + ptr] = def.vertices[1][0];
 			this.M[O_MAX_Y + ptr] = def.vertices[1][1];
 			
-
-
-
-
-
 		} else if(def.form == this.POLYGON_FORM) {
 			console.log(def.vertices);
 			let numVertices = def.vertices.length;
-
-
 			this.M[O_USERFLOATS_PTR + ptr] += def.vertices.length * this.V_SIZE;
-			console.log("this.M[O_USERFLOATS_PTR + ptr] = " + this.M[O_USERFLOATS_PTR + ptr]);
-
-			if(numVertices < 3) throw "Unable to create polygon with less than 3 vertices";
 			this.M[O_NUM_VERTICES + ptr] = numVertices;
 			//let vPtr = O_NUM_VERTICES + ptr + 1 + (numVertices - 1) * this.V_SIZE;
 			for(let v = numVertices - 1, last = 0, vPtr = O_NUM_VERTICES + ptr + 1 + (numVertices - 1) * this.V_SIZE;
@@ -1548,89 +1370,28 @@ const pw = {
 
 			if(def.type == this.MOVABLE_TYPE) {
 				let m = def.density * area;
-				// is mass needed or only m_inv?
 				this.M[O_M + ptr] = m;
 				this.M[O_M_INV + ptr] = 1.0 / m;
 				let dSqd = (this.M[O_TX + ptr] - ox) * (this.M[O_TX + ptr] - ox) + (this.M[O_TY + ptr] - oy) * (this.M[O_TY + ptr] - oy);
 				// shift moment of area from origin to center of mass
 				this.M[O_I + ptr] -= area * dSqd;
-				console.log("this.M[O_I + ptr] = " + this.M[O_I + ptr]);
 				// change to mass moment of inertia and scale up
 				this.M[O_I + ptr] *= def.density * 1.5;
 				console.log("this.M[O_I + ptr] = " + this.M[O_I + ptr]);
-				
 				this.M[O_I_INV + ptr] = 1.0 / this.M[O_I + ptr];
 			}
-
 			for(let vPtr = O_NUM_VERTICES + ptr + 1, len = numVertices * this.V_SIZE + vPtr; vPtr < len; vPtr += this.V_SIZE){
 				this.M[V_LX + vPtr] = this.M[V_WX + vPtr] - this.M[O_TX + ptr];
 				this.M[V_LY + vPtr] = this.M[V_WY + vPtr] - this.M[O_TY + ptr];
 			}
-
-
 		} else {
 			console.error("Unhandled form: " + def.form);
 		}
 
 		this.setUserFloats(ptr, def.userFloats, 0);
-		// use Float32Array.prototype.set() instead
-		//if(def.userFloats !== undefined){
-			//for(let i = 0, ufi = this.PO_SIZES[def.form] + ptr, len = def.userFloats.length; i < len; ++i, ++ufi){
-				//this.M[ufi] = def.userFloats[i];
-			//}
-		//}
 		this.PO_PTRS[this.poTotal++] = ptr;
 		return ptr;
 	},
-
-	/*
-	pwGet(poId){
-		const SI = this.getStartingIndex(poId);
-		const PO = {
-
-			startingIndex: SI,
-			numFloats: this.M[O_NUM_FLOATS + SI],
-			form: this.M[O_FORM + SI],
-			type: this.M[O_TYPE + SI],
-			density: this.M[O_P + SI],
-			mass: this.M[O_M + SI],
-			massInverse: this.M[O_M_INV + SI],
-			rotationalMass: this.M[O_I + SI],
-			rotationalMassInverse: this.M[O_I_INV + SI],
-			group: this.M[O_GROUP + SI],
-			staticFriction: this.M[O_US + SI],
-			kineticFriction: this.M[O_UK + SI],
-			velocityResistance: 1.0 - this.M[O_VM + SI],
-			rotationalVelocityResistance: 1.0 - this.M[O_WM + SI],
-			velocityX: this.M[O_VX + SI],
-			velocityY: this.M[O_VY + SI],
-			rotationalVelocity: this.M[O_W + SI],
-			positionX: this.M[O_TX + SI],
-			positionY: this.M[O_TY + SI],
-			cosine: this.M[O_COS + SI],
-			sine: this.M[O_SIN + SI],
-			orientation: this.M[O_O + SI]
-		};
-		PO.userFloats = pwGetUserFloats(poId);
-		// this.CIRCLE_FORM CUSTOM PROPERTIES
-		PO.radius = this.M[O_RADIUS + SI];
-		// this.PLANE_FORM CUSTOM PROPERTIES
-		PO.length = this.M[O_L + SI];
-		PO.lengthInverse = this.M[O_L_INV + SI];
-		PO.local0X = this.M[O_L0X + SI];
-		PO.local0Y = this.M[O_L0Y + SI];
-		PO.local1X = this.M[O_L1X + SI];
-		PO.local1Y = this.M[O_L1Y + SI];
-		PO.world0X = this.M[O_W0X + SI];
-		PO.world0Y = this.M[O_W0Y + SI];
-		PO.world1X = this.M[O_W1X + SI];
-		PO.world1Y = this.M[O_W1Y + SI];
-		PO.unitVectorX = this.M[O_UX + SI];
-		PO.unitVectorY = this.M[O_UY + SI];
-		PO.halfWidth = this.M[O_HALF_WIDTH + SI];
-		return PO;
-	}
-	*/
 
 	destroy(poPtr){
 		this.POMM.free(poPtr);
@@ -1676,7 +1437,6 @@ const pw = {
 			for(let vPtr = O_NUM_VERTICES + poPtr + 1, len = this.M[O_NUM_VERTICES + poPtr] * this.V_SIZE + vPtr; vPtr < len; vPtr += this.V_SIZE){
 				let dx = x - this.M[V_WX + vPtr];
 				let dy = y - this.M[V_WY + vPtr];
-				console.log("vPtr = " + vPtr + "  len = " + len);
 				if(this.M[V_UX + vPtr] * dy - this.M[V_UY + vPtr] * dx < 0.0) return false;
 			}
 			return true;
@@ -1694,18 +1454,17 @@ const pw = {
 
 	isPenetrating(ptrA, ptrB){
 		if(ptrA == ptrB) throw "Comparing physics object with self";
-
 		if(this.M[O_FORM + ptrA] == this.CIRCLE_FORM){
 			if(pw.isPointInside(ptrB, this.M[O_TX + ptrA], this.M[O_TY + ptrA], this.M[O_RADIUS + ptrA])){
 				return true;
 			}
 			return false;
-
 		} else if(this.M[O_FORM + ptrA] == this.PLANE_FORM){
 			let collisionData = false;
 			if(this.M[O_FORM + ptrB] == this.CIRCLE_FORM){
 				if(pw.isPointInside(ptrA, this.M[O_TX + ptrB], this.M[O_TY + ptrB], this.M[O_RADIUS + ptrB])) return true;
 				return false;
+
 			} else if(this.M[O_FORM + ptrB] == this.PLANE_FORM){
 				let xr = this.M[O_W1X + ptrA] - this.M[O_W0X + ptrA];
 				let yr = this.M[O_W1Y + ptrA] - this.M[O_W0Y + ptrA];
@@ -1724,11 +1483,8 @@ const pw = {
 				return false;
 
 			} else if(this.M[O_FORM + ptrB] == this.POLYGON_FORM){
-			
-
 				// temp
 				return false;
-
 
 			} else {
 				console.error("Unhandled form: " + this.M[O_FORM + ptrB]);
@@ -1740,7 +1496,7 @@ const pw = {
 	},
 
 	isWithinAABB(AABB_Ptr, poPtr){
-		if(!this.M[O_FORM + AABB_Ptr] == this.AABB_FORM) consle.error("First argument is not reference to AABB_FORM");
+		if(this.M[O_FORM + AABB_Ptr] != this.AABB_FORM) throw "First argument is not reference to AABB_FORM";
 		let bForm = this.M[O_FORM + poPtr];
 
 		if(bForm == this.CIRCLE_FORM){
@@ -1923,6 +1679,7 @@ const pw = {
 		return this.M.slice(begin, end);
 	},
 
+	// TODO check overflow
 	setUserFloats(poPtr, source, start){
 		//if(arguments.length == 2) startingIndex = 0;
 		//let ufStart = this.PO_SIZES[this.M[O_FORM + poPtr]] + poPtr + start;
@@ -1934,8 +1691,12 @@ const pw = {
 	},
 
 	getWorldVertices(poPtr){
-		if(this.M[O_FORM + poPtr] == this.PLANE_FORM) return [[this.M[O_W0X + poPtr], this.M[O_W0Y + poPtr]], [this.M[O_W1X + poPtr], this.M[O_W1Y + poPtr]]];
-		if(this.M[O_FORM + poPtr] == this.AABB_FORM) return [[this.M[O_MIN_X + poPtr], this.M[O_MIN_Y + poPtr]], [this.M[O_MAX_X + poPtr], this.M[O_MAX_Y + poPtr]]];
+		if(this.M[O_FORM + poPtr] == this.PLANE_FORM) {
+			return [[this.M[O_W0X + poPtr], this.M[O_W0Y + poPtr]], [this.M[O_W1X + poPtr], this.M[O_W1Y + poPtr]]];
+		}
+		if(this.M[O_FORM + poPtr] == this.AABB_FORM) {
+			return [[this.M[O_MIN_X + poPtr], this.M[O_MIN_Y + poPtr]], [this.M[O_MAX_X + poPtr], this.M[O_MAX_Y + poPtr]]];
+		}
 		if(this.M[O_FORM + poPtr] == this.POLYGON_FORM){
 			let result = [];
 			for(let v = O_NUM_VERTICES + 1 + poPtr, len = this.M[O_NUM_VERTICES + poPtr] * this.V_SIZE + v; v < len; v += this.V_SIZE){
@@ -1943,21 +1704,19 @@ const pw = {
 			}
 			return result;
 		}
-		console.error("Unhandled form: " + this.M[O_FORM + poPtr] + ".");
+		throw "Unhandled form: " + this.M[O_FORM + poPtr];
 	},
 
 	getLength(poPtr){
 		if(this.M[O_FORM + poPtr] != this.PLANE_FORM) {
-			console.error("Cannot get length of form: " + this.M[O_FORM + poPtr] + ".");
-			return;
+			throw "Unable to get length of form: " + this.M[O_FORM + poPtr];
 		}
 		return this.M[O_L + poPtr];
 	},
 
 	getRadius(poPtr){
 		if(this.M[O_FORM + poPtr] != this.CIRCLE_FORM) {
-			console.error("Cannot get radius of non-CIRCLE_FORM physics object.");
-			return;
+			throw "Unable to get radius of form: " + this.M[O_FORM + poPtr];
 		}
 		return this.M[O_RADIUS + poPtr];
 	},
