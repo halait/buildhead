@@ -146,7 +146,7 @@ class Circle extends GameObject{
 	}
 
 	setFinalProperties(){
-		if(!this.isLegalPosition()) {
+		if(!sandboxMode && !this.isLegalPosition()) {
 			this.destroy();
 			pw.render();
 			return;
@@ -238,7 +238,7 @@ class Obround extends GameObject {
 	}
 
 	setFinalProperties(join){
-		if(!this.isLegalPosition()) {
+		if(!sandboxMode && !this.isLegalPosition()) {
 			this.destroy();
 			pw.render();
 			return;

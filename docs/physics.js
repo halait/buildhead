@@ -633,6 +633,10 @@ const pw = {
 		let nx = ax - bx;
 		let ny = ay - by;
 		let dist = Math.sqrt(nx * nx + ny * ny);
+
+		//debugPoints.push([ax, ay]);
+		//debugPoints.push([bx, by]);
+
 		let results = [nx / dist, ny / dist, ax, ay, bx, by, dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi]];
 		
 		ax = this.M[O_W1X + asi];
@@ -648,12 +652,16 @@ const pw = {
 			dot = (ax - bx) * this.M[O_UX + asi] + (ay - by) * this.M[O_UY + asi];
 			if(dot < 0) dot = 0.0;
 			else if(dot > this.M[O_L + asi]) dot = this.M[O_L + asi];
-			ax += dot * this.M[O_UX + asi];
-			ay += dot * this.M[O_UY + asi];
+			ax -= dot * this.M[O_UX + asi];
+			ay -= dot * this.M[O_UY + asi];
 		}
 		nx = ax - bx;
 		ny = ay - by;
 		dist = Math.sqrt(nx * nx + ny * ny);
+
+		//debugPoints.push([ax, ay]);
+		//debugPoints.push([bx, by]);
+
 		results.push(nx / dist, ny / dist, ax, ay, bx, by, dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi]);
 		return results;
 	},
@@ -728,8 +736,8 @@ const pw = {
 				ny /= dist;
 				cx -= nx * M[O_RADIUS + cPtr];
 				cy -= ny * M[O_RADIUS + cPtr];
-				debugPoints.push([px, py]);
-				debugPoints.push([cx, cy]);
+				//debugPoints.push([px, py]);
+				//debugPoints.push([cx, cy]);
 				return [nx, ny, cx, cy, px, py, dist - M[O_RADIUS + cPtr] - this.POLYGON_SKIN];
 			}
 		}
@@ -752,6 +760,221 @@ const pw = {
 		else if(form == this.POINT_POLYGON_FORM) return this.getCirclePolygonCollisionData(aPtr, bPtr);
 
 		else if(form == this.SURFACE_POLYGON_FORM){
+			let sx0 = 0;
+			let sy0 = 0;
+			let px0 = 0;
+			let py0 = 0;
+			let nx0 = 0;
+			let ny0 = 0;
+			let dist0 = 99;
+
+			let vp0 = 0;
+
+			let sx1 = 0;
+			let sy1 = 0;
+			let px1 = 0;
+			let py1 = 0;
+			let nx1 = 0;
+			let ny1 = 0;
+			let dist1 = 99;
+
+			let vp1 = 0;
+
+			for(let v = O_NUM_VERTICES + 1 + bPtr, len = M[O_NUM_VERTICES + bPtr] * this.V_SIZE + v; v < len;	v += this.V_SIZE){
+				let px = M[V_WX + v];
+				let py = M[V_WY + v];
+				let sx = M[O_W0X + aPtr];
+				let sy = M[O_W0Y + aPtr];
+				let dot = (sx - px) * M[V_UX + v] + (sy - py) * M[V_UY + v];
+				if(dot < M[V_L + v]) {
+
+					let nx = M[V_UY + v];
+					let ny = -M[V_UX + v];
+
+					if(dot < 0) dot = 0;
+					px += dot * M[V_UX + v];
+					py += dot * M[V_UY + v];
+					if(!dot) {
+						dot = (px - sx) * M[O_UX + aPtr] + (py - sy) * M[O_UY + aPtr];
+						if(dot < 0) dot = 0;
+						else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
+						sx += dot * M[O_UX + aPtr];
+						sy += dot * M[O_UY + aPtr];
+						if(dot && dot != M[O_L + aPtr]) {
+							if((sx - M[O_TX + bPtr]) * M[O_UY + aPtr] - (sy - M[O_TY + bPtr]) * M[O_UX + aPtr] > 0){
+								nx = M[O_UY + aPtr];
+								ny = -M[O_UX + aPtr];
+							} else {
+								nx = -M[O_UY + aPtr];
+								ny = M[O_UX + aPtr];
+							}
+						}
+					}
+					let dx = sx - px;
+					let dy = sy - py;
+					let d = dx * dx + dy * dy;
+					if(d < dist0){
+						dist0 = d;
+						nx0 = nx;
+						ny0 = ny;
+						sx0 = sx;
+						sy0 = sy;
+						px0 = px;
+						py0 = py;
+						vp0 = v;
+					}
+					/*
+					if(d < dist1){
+						if(d < dist0){
+							dist1 = dist0;
+							nx1 = nx0;
+							ny1 = ny0;
+							sx1 = sx0;
+							sy1 = sy0;
+							px1 = px0;
+							py1 = py0;
+
+							vp1 = vp0;
+
+							dist0 = d;
+							nx0 = nx;
+							ny0 = ny;
+							sx0 = sx;
+							sy0 = sy;
+							px0 = px;
+							py0 = py;
+
+							vp0 = v;
+
+						} else {
+							dist1 = d;
+							nx1 = nx;
+							ny1 = ny;
+							sx1 = sx;
+							sy1 = sy;
+							px1 = px;
+							py1 = py;
+
+							vp1 = v;
+
+						}
+					}
+					*/
+				}
+				px = M[V_WX + v];
+				py = M[V_WY + v];
+				sx = M[O_W1X + aPtr];
+				sy = M[O_W1Y + aPtr];
+				dot = (sx - px) * M[V_UX + v] + (sy - py) * M[V_UY + v];
+				if(dot < M[V_L + v]) {
+					
+					let nx = M[V_UY + v];
+					let ny = -M[V_UX + v];
+
+					if(dot < 0) dot = 0;
+					px += dot * M[V_UX + v];
+					py += dot * M[V_UY + v];
+					if(!dot) {
+						dot = (sx - px) * M[O_UX + aPtr] + (sy - py) * M[O_UY + aPtr];
+						if(dot < 0) dot = 0;
+						else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
+						sx -= dot * M[O_UX + aPtr];
+						sy -= dot * M[O_UY + aPtr];
+						if(dot && dot != M[O_L + aPtr]) {
+							if((sx - M[O_TX + bPtr]) * M[O_UY + aPtr] - (sy - M[O_TY + bPtr]) * M[O_UX + aPtr] > 0){
+								nx = M[O_UY + aPtr];
+								ny = -M[O_UX + aPtr];
+							} else {
+								nx = -M[O_UY + aPtr];
+								ny = M[O_UX + aPtr];
+							}
+						}
+					}
+					let dx = sx - px;
+					let dy = sy - py;
+					let d = dx * dx + dy * dy;
+
+					if(d < dist1){
+						dist1 = d;
+						nx1 = nx;
+						ny1 = ny;
+						sx1 = sx;
+						sy1 = sy;
+						px1 = px;
+						py1 = py;
+						vp1 = v;
+					}
+
+					/*
+					if(d < dist1){
+						if(d < dist0){
+							dist1 = dist0;
+							nx1 = nx0;
+							ny1 = ny0;
+							sx1 = sx0;
+							sy1 = sy0;
+							px1 = px0;
+							py1 = py0;
+
+							vp1 = vp0;
+
+							dist0 = d;
+							nx0 = nx;
+							ny0 = ny;
+							sx0 = sx;
+							sy0 = sy;
+							px0 = px;
+							py0 = py;
+
+							vp0 = v;
+
+						} else {
+							dist1 = d;
+							nx1 = nx;
+							ny1 = ny;
+							sx1 = sx;
+							sy1 = sy;
+							px1 = px;
+							py1 = py;
+
+							vp1 = v;
+
+						}
+					}
+					*/
+				}
+			}
+
+
+			debugPoints.push([px0, py0]);
+			debugPoints.push([sx0, sy0]);
+			debugPoints.push([px1, py1]);
+			debugPoints.push([sx1, sy1]);
+
+			dist0 = Math.sqrt(dist0);
+			//nx0 /= dist0;
+			//ny0 /= dist0;
+
+			dist1 = Math.sqrt(dist1);
+			//nx1 /= dist1;
+			//ny1 /= dist1;
+			
+			if((sx0 - M[O_TX + bPtr]) * (sx0 - px0) + (sy0 - M[O_TY + bPtr]) * (sy0 - py0) < 0){
+				dist0 = -dist0;
+			}
+
+			if((sx1 - M[O_TX + bPtr]) * (sx1 - px1) + (sy1 - M[O_TY + bPtr]) * (sy1 - py1) < 0){
+				dist1 = -dist1;
+			}
+			
+			return [
+				nx0, ny0, sx0, sy0, px0, py0, dist0 - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN,
+				nx1, ny1, sx1, sy1, px1, py1, dist1 - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN
+			];
+
+
+
+		/*
 			let dist = 99;
 			let vPtr = 0;
 			for(let v = O_NUM_VERTICES + 1 + bPtr, len = M[O_NUM_VERTICES + bPtr] * this.V_SIZE + vPtr; vPtr < len; vPtr += this.V_SIZE) {
@@ -769,7 +992,7 @@ const pw = {
 				}
 			}
 			let dot = (M[V_W0X + aPtr] - M[V_WX + vPtr]) * M[V_UX + vPtr] + (M[V_W0Y + aPtr] - M[O_W0Y + vPtr]) * M[O_UY + vPtr];
-
+		*/
 		
 		
 		} else if(form == this.POLYGONS_FORM){

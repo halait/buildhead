@@ -40,11 +40,12 @@ var simulationScene = {
 	simulate(now) {
 		if(isSimulating) {
 			requestAnimationFrame(simulationScene.simulate);
-			if(now - simulationScene.before < 25) return;
+			let dt = now - simulationScene.before;
+			if(dt < 25) return;
+			if(dt > 34) console.log("frame drop"); 
 			simulationScene.before = now;
-			//if(isRenderFrame) {
-				//pw.render();
-			//} else {
+			pw.update();
+			pw.render();
 				if(successPending){
 					let success = true;
 					for(let i = 0, len = targets.length; i != len; ++i){
@@ -67,10 +68,6 @@ var simulationScene = {
 						sceneManager.float(successScene);
 					}
 				}
-				pw.update();
-				pw.render();
-			//}
-			//isRenderFrame = !isRenderFrame;
 		} else {
 			pw.resetAllImpulses();
 			for(const o of gameObjects){
