@@ -98,10 +98,9 @@ const C_RAY = 8;
 const C_RBX = 9;
 const C_RBY = 10;
 
+// COLLISION_FORM only
 const C_JN = 11;
 const C_JT = 12;
-
-// COLLISION_FORM only
 const C_NX = 13;
 const C_NY = 14;
 const C_DIST = 15;
@@ -113,6 +112,8 @@ const C_RTB = 20;
 const C_MT = 21;
 
 // JOINT_FORM only
+const C_DX = 11;
+const C_DY = 12;
 const C_LAX = 13;
 const C_LAY = 14;
 const C_LBX = 15;
@@ -232,7 +233,8 @@ const pw = {
 				let collisionData = this.getCollisionData(si, asi, bsi);
 				// temp
 				let cdLen = 7;
-				if(collisionData.length == 14) cdLen = 14;
+				//if(collisionData.length == 14) cdLen = 14;
+				if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) cdLen = 14;
 				// never updated to accomadate C_JT
 				for(let i = si, c = 0; c < cdLen; i += 16, c += 7){
 																																// tune
@@ -298,6 +300,9 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
+				M[C_DX + si] = M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi];
+				M[C_DY + si] = M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi];
+
 				if(this.warmStarting){
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
 						M[O_VX + asi] -= M[C_JX + si] * M[O_M_INV + asi];
@@ -322,16 +327,9 @@ const pw = {
 		// solve velocity constraints
 		let iter = 0
 		for(this.unsolved = true; this.unsolved && iter < this.VELOCITY_ITERATIONS; ++iter){
-
-
-			// IMPORTANT EXPERIMENTAL
-			this.unsolved = false;
-
-
+			this.unsolved = false
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 				let si = this.C_PTRS[ptr];
-
-
 				let asi = M[C_PO_PTR_A + si];
 				let bsi = M[C_PO_PTR_B + si];
 				if(M[C_TYPE + si] === this.COLLISION_TYPE){
@@ -402,9 +400,7 @@ const pw = {
 					if(M[C_IS_MOTOR + si]){
 						// solve motor sub-constraint
 						// relative angular velocity minus desired velocity
-						let aa = M[O_W + asi] - M[O_W + bsi] - M[C_MW + si];
-						// compute motor impulse
-						let jm = aa * M[C_M_I + si];
+						let jm = (M[O_W + asi] - M[O_W + bsi] - M[C_MW + si]) * M[C_M_I + si];
 						// clamp to max impulse
 						let oldJm = M[C_SUM_T + si];
 						M[C_SUM_T + si] += jm;
@@ -415,12 +411,22 @@ const pw = {
 						// integrate impusle
 						M[O_W + asi] -= jm * M[O_I_INV + asi];
 						M[O_W + bsi] += jm * M[O_I_INV + bsi];
+					} else {
+						let jm = (M[O_W + asi] - M[O_W + bsi]) * M[C_M_I + si];
+						M[C_SUM_T + si] += jm;
+						M[O_W + asi] -= jm * M[O_I_INV + asi];
+						M[O_W + bsi] += jm * M[O_I_INV + bsi];
 					}
-					// relative velocity at joint vertices
-					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si];
-					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si];
+
+
+
+
+
+					// relative velocity at joint vertices plus distance
+					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si] + M[C_DX + si];
+					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si] + M[C_DY + si];
 					// if no relative velocity then done
-					if(!vxRel && !vyRel) continue;
+					if(Math.abs(vxRel) < 0.000001 && Math.abs(vyRel) < 0.000001) continue;
 					this.unsolved = true;
 					// relative velocity vector is the direction impulse is applied
 					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
@@ -430,6 +436,7 @@ const pw = {
 					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
 					// total "mass" in constraint reference
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
+					//let j = vn / mInv;
 					let j = vn / mInv;
 					// TODO implement revolute friction?
 					// integrate impulse
@@ -451,7 +458,7 @@ const pw = {
 				}
 			}
 		}
-		//console.log("vi = " + iter);
+		console.log("vi = " + iter);
 
 		// integrate velocities
 		for(let i = 0, ptr = this.PO_PTRS[i], len = this.poTotal; i < len; ++i, ptr = this.PO_PTRS[i]){
@@ -760,6 +767,107 @@ const pw = {
 		else if(form == this.POINT_POLYGON_FORM) return this.getCirclePolygonCollisionData(aPtr, bPtr);
 
 		else if(form == this.SURFACE_POLYGON_FORM){
+			let vp0 = 0;
+			let vp1 = 0;
+
+			let nx0 = M[O_W0X + aPtr] - M[O_TX + bPtr];
+			let ny0 = M[O_W0Y + aPtr] - M[O_TY + bPtr];
+			let nx1 = M[O_W1X + aPtr] - M[O_TX + bPtr];
+			let ny1 = M[O_W1Y + aPtr] - M[O_TY + bPtr];
+
+			for(let v = O_NUM_VERTICES + 1 + bPtr, len = M[O_NUM_VERTICES + bPtr] * this.V_SIZE + v; v < len;	v += this.V_SIZE){
+				if(vp0 === 0){
+					let dots = this.computeLineIntersect(
+						M[O_TX + bPtr], M[O_TY + bPtr],
+						nx0, ny0,
+						M[V_WX + v], M[V_WY + v],
+						M[V_UX + v], M[V_UY + v]
+					);
+					if(dots[0] > 0 && dots[1] > 0 && dots[1] < M[V_L + v]){
+
+						debugPoints.push([dots[1] * M[V_UX + v] + M[V_WX + v], dots[1] * M[V_UY + v] + M[V_WY + v]]);
+
+						if(dots[0] > 1) vp0 = v;
+						else vp0 = false;
+						if(vp1 !== 0) break;
+					}
+				}
+				if(vp1 === 0){
+					let dots = this.computeLineIntersect(
+						M[O_TX + bPtr], M[O_TY + bPtr],
+						nx1, ny1,
+						M[V_WX + v], M[V_WY + v],
+						M[V_UX + v], M[V_UY + v]
+					);
+					if(dots[0] > 0 && dots[1] > 0 && dots[1] < M[V_L + v]){
+						
+						debugPoints.push([dots[1] * M[V_UX + v] + M[V_WX + v], dots[1] * M[V_UY + v] + M[V_WY + v]]);
+
+						if(dots[0] > 1) vp1 = v;
+						else vp1 = false;
+						if(vp0 !== 0) break;
+					}
+				}
+			}
+			let results = [];
+			if(vp0){
+				let px = M[V_WX + vp0];
+				let py = M[V_WY + vp0];
+				let sx = M[O_W0X + aPtr];
+				let sy = M[O_W0Y + aPtr];
+				let dot = (sx - px) * M[V_UX + vp0] + (sy - py) * M[V_UY + vp0];
+				if(dot < 0) dot = 0;
+				else if(dot > M[V_L + vp0]) dot = M[V_L + vp0];
+				px += dot * M[V_UX + vp0];
+				py += dot * M[V_UY + vp0];
+				if(!dot || dot == M[V_L + vp0]) {
+					dot = (px - sx) * M[O_UX + aPtr] + (py - sy) * M[O_UY + aPtr];
+					if(dot < 0) dot = 0;
+					else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
+					sx += dot * M[O_UX + aPtr];
+					sy += dot * M[O_UY + aPtr];
+				}
+				let nx = px - sx;
+				let ny = py - sy;
+				let dist = Math.sqrt(nx * nx + ny * ny);
+
+				debugPoints.push([sx, sy]);
+				debugPoints.push([px, py]);
+
+				results.push(nx / dist, ny / dist, sx, sy, px, py, -dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN);
+			} else {
+				results.push(0, 0, 0, 0, 0, 0, 99);
+			}
+			if(vp1){
+				let px = M[V_WX + vp1];
+				let py = M[V_WY + vp1];
+				let sx = M[O_W1X + aPtr];
+				let sy = M[O_W1Y + aPtr];
+				let dot = (sx - px) * M[V_UX + vp1] + (sy - py) * M[V_UY + vp1];
+				if(dot < 0) dot = 0;
+				else if(dot > M[V_L + vp1]) dot = M[V_L + vp1];
+				px += dot * M[V_UX + vp1];
+				py += dot * M[V_UY + vp1];
+				if(!dot || dot == M[V_L + vp1]) {
+					dot = (sx - px) * M[O_UX + aPtr] + (sy - py) * M[O_UY + aPtr];
+					if(dot < 0) dot = 0;
+					else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
+					sx -= dot * M[O_UX + aPtr];
+					sy -= dot * M[O_UY + aPtr];
+				}
+				let nx = px - sx;
+				let ny = py - sy;
+				let dist = Math.sqrt(nx * nx + ny * ny);
+
+				debugPoints.push([sx, sy]);
+				debugPoints.push([px, py]);
+
+				results.push(nx / dist, ny / dist, sx, sy, px, py, -dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN);
+			} else {
+				results.push(0, 0, 0, 0, 0, 0, 99);
+			}
+			return results;
+		/*
 			let sx0 = 0;
 			let sy0 = 0;
 			let px0 = 0;
@@ -796,17 +904,20 @@ const pw = {
 					py += dot * M[V_UY + v];
 					if(!dot) {
 						dot = (px - sx) * M[O_UX + aPtr] + (py - sy) * M[O_UY + aPtr];
-						if(dot < 0) dot = 0;
-						else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
-						sx += dot * M[O_UX + aPtr];
-						sy += dot * M[O_UY + aPtr];
-						if(dot && dot != M[O_L + aPtr]) {
-							if((sx - M[O_TX + bPtr]) * M[O_UY + aPtr] - (sy - M[O_TY + bPtr]) * M[O_UX + aPtr] > 0){
-								nx = M[O_UY + aPtr];
-								ny = -M[O_UX + aPtr];
-							} else {
-								nx = -M[O_UY + aPtr];
-								ny = M[O_UX + aPtr];
+						//if(dot < 0) dot = 0;
+						//else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
+						if(dot < M[O_L + aPtr]){
+							if(dot < 0) dot = 0;
+							sx += dot * M[O_UX + aPtr];
+							sy += dot * M[O_UY + aPtr];
+							if(dot && dot != M[O_L + aPtr]) {
+								if((sx - M[O_TX + bPtr]) * M[O_UY + aPtr] - (sy - M[O_TY + bPtr]) * M[O_UX + aPtr] > 0){
+									nx = M[O_UY + aPtr];
+									ny = -M[O_UX + aPtr];
+								} else {
+									nx = -M[O_UY + aPtr];
+									ny = M[O_UX + aPtr];
+								}
 							}
 						}
 					}
@@ -823,43 +934,6 @@ const pw = {
 						py0 = py;
 						vp0 = v;
 					}
-					/*
-					if(d < dist1){
-						if(d < dist0){
-							dist1 = dist0;
-							nx1 = nx0;
-							ny1 = ny0;
-							sx1 = sx0;
-							sy1 = sy0;
-							px1 = px0;
-							py1 = py0;
-
-							vp1 = vp0;
-
-							dist0 = d;
-							nx0 = nx;
-							ny0 = ny;
-							sx0 = sx;
-							sy0 = sy;
-							px0 = px;
-							py0 = py;
-
-							vp0 = v;
-
-						} else {
-							dist1 = d;
-							nx1 = nx;
-							ny1 = ny;
-							sx1 = sx;
-							sy1 = sy;
-							px1 = px;
-							py1 = py;
-
-							vp1 = v;
-
-						}
-					}
-					*/
 				}
 				px = M[V_WX + v];
 				py = M[V_WY + v];
@@ -876,17 +950,20 @@ const pw = {
 					py += dot * M[V_UY + v];
 					if(!dot) {
 						dot = (sx - px) * M[O_UX + aPtr] + (sy - py) * M[O_UY + aPtr];
-						if(dot < 0) dot = 0;
-						else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
-						sx -= dot * M[O_UX + aPtr];
-						sy -= dot * M[O_UY + aPtr];
-						if(dot && dot != M[O_L + aPtr]) {
-							if((sx - M[O_TX + bPtr]) * M[O_UY + aPtr] - (sy - M[O_TY + bPtr]) * M[O_UX + aPtr] > 0){
-								nx = M[O_UY + aPtr];
-								ny = -M[O_UX + aPtr];
-							} else {
-								nx = -M[O_UY + aPtr];
-								ny = M[O_UX + aPtr];
+						//if(dot < 0) dot = 0;
+						//else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
+						if(dot < M[O_L + aPtr]){
+							if(dot < 0) dot = 0;
+							sx -= dot * M[O_UX + aPtr];
+							sy -= dot * M[O_UY + aPtr];
+							if(dot && dot != M[O_L + aPtr]) {
+								if((sx - M[O_TX + bPtr]) * M[O_UY + aPtr] - (sy - M[O_TY + bPtr]) * M[O_UX + aPtr] > 0){
+									nx = M[O_UY + aPtr];
+									ny = -M[O_UX + aPtr];
+								} else {
+									nx = -M[O_UY + aPtr];
+									ny = M[O_UX + aPtr];
+								}
 							}
 						}
 					}
@@ -904,44 +981,6 @@ const pw = {
 						py1 = py;
 						vp1 = v;
 					}
-
-					/*
-					if(d < dist1){
-						if(d < dist0){
-							dist1 = dist0;
-							nx1 = nx0;
-							ny1 = ny0;
-							sx1 = sx0;
-							sy1 = sy0;
-							px1 = px0;
-							py1 = py0;
-
-							vp1 = vp0;
-
-							dist0 = d;
-							nx0 = nx;
-							ny0 = ny;
-							sx0 = sx;
-							sy0 = sy;
-							px0 = px;
-							py0 = py;
-
-							vp0 = v;
-
-						} else {
-							dist1 = d;
-							nx1 = nx;
-							ny1 = ny;
-							sx1 = sx;
-							sy1 = sy;
-							px1 = px;
-							py1 = py;
-
-							vp1 = v;
-
-						}
-					}
-					*/
 				}
 			}
 
@@ -959,11 +998,11 @@ const pw = {
 			//nx1 /= dist1;
 			//ny1 /= dist1;
 			
-			if((sx0 - M[O_TX + bPtr]) * (sx0 - px0) + (sy0 - M[O_TY + bPtr]) * (sy0 - py0) < 0){
+			if(nx0 * (sx0 - px0) + ny0 * (sy0 - py0) < 0){
 				dist0 = -dist0;
 			}
 
-			if((sx1 - M[O_TX + bPtr]) * (sx1 - px1) + (sy1 - M[O_TY + bPtr]) * (sy1 - py1) < 0){
+			if(nx1 * (sx1 - px1) + ny1 * (sy1 - py1) < 0){
 				dist1 = -dist1;
 			}
 			
@@ -1382,10 +1421,11 @@ const pw = {
 		this.M[C_LAY + jPtr] = day * this.M[O_COS + asi] - dax * this.M[O_SIN + asi];
 		this.M[C_LBX + jPtr] = dbx * this.M[O_COS + bsi] + dby * this.M[O_SIN + bsi];
 		this.M[C_LBY + jPtr] = dby * this.M[O_COS + bsi] - dbx * this.M[O_SIN + bsi];
-		if(this.M[C_IS_MOTOR + jPtr]){
+		//if(this.M[C_IS_MOTOR + jPtr]){
+			//this.M[C_M_I + jPtr] = this.M[O_I_INV + asi] + this.M[O_I_INV + bsi];
 			this.M[C_M_I + jPtr] = this.M[O_I_INV + asi] + this.M[O_I_INV + bsi];
 			if(this.M[C_M_I + jPtr]) this.M[C_M_I + jPtr] = 1.0 / this.M[C_M_I + jPtr];
-		}
+		//}
 	},
 
 	resetAllImpulses(){
