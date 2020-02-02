@@ -42,8 +42,8 @@ canvas.addEventListener('wheel', (e) => {
 let toolbars = document.getElementsByClassName("toolbar");
 var aspectRatio = 0.0;
 window.onresize = () => {
-	let w = Math.round(window.innerWidth * window.devicePixelRatio);
-	let h = Math.round(window.innerHeight * window.devicePixelRatio - 40);
+	let w = Math.round(document.documentElement.clientWidth * window.devicePixelRatio);
+	let h = Math.round(document.documentElement.clientHeight * window.devicePixelRatio - 40);
 	if(w < 640) w = 640;
 	for(const t of toolbars){
 		t.style.width = w + "px";

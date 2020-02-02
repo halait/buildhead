@@ -49,6 +49,7 @@
 				background-color: #222;
 				display: none;
 				justify-content: space-between;
+				min-width: 640px;
 			}
 			.toolbarBtn{
 				border-radius: 100%;
@@ -67,6 +68,7 @@
 			}
 			.overlay{
 				width: 100%;
+				min-width: 640px;
 				min-height: 100%;
 				display: none;
 				position: absolute;
@@ -165,6 +167,7 @@
 				top: 40px;
 				cursor: crosshair;
 				background: radial-gradient(100% 60% at 50% 100%, #11a, 10%, #002);
+				min-width: 640px;
 			}
 			#logo{
 				margin: 5% auto;
@@ -172,7 +175,7 @@
 				width: 80%;
 				max-width: 800px;
 				background-color: #000;
-				border-radius: 5px;
+				border-radius: 10px;
 			}
 			#logoText:hover{
 				fill: #f80;
@@ -206,10 +209,7 @@
 			*/
 			#loadingScreen{
 				background-color: #000;
-				position: absolute;
 				z-index: 1;
-				height: 100%;
-				width: 100%;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -239,13 +239,8 @@
 		</style>
 	</head>
 	<body>
-		<div id="loadingScreen">
+		<div id="loadingScreen" class="overlay">
 			<p id="loadingP">Loading...</p>
-			<!--
-			<svg id="loadingSvg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-				<circle id="loadingCircle" cx="50" cy="50" r="50"/>
-			</svg>
-			-->
 		</div>
 		<canvas id="game"></canvas>
 		<div id="sandboxToolbar" class="toolbar"></div>
