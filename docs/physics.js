@@ -411,12 +411,12 @@ const pw = {
 						// integrate impusle
 						M[O_W + asi] -= jm * M[O_I_INV + asi];
 						M[O_W + bsi] += jm * M[O_I_INV + bsi];
-					} else {
+					}/* else {
 						let jm = (M[O_W + asi] - M[O_W + bsi]) * M[C_M_I + si];
 						M[C_SUM_T + si] += jm;
 						M[O_W + asi] -= jm * M[O_I_INV + asi];
 						M[O_W + bsi] += jm * M[O_I_INV + bsi];
-					}
+					}*/
 
 
 
