@@ -35,7 +35,7 @@ var assemblyScene = {
 		}
 		try {
 			loadLevelScene.load(await response.json());
-		} catch {
+		} catch(e) {
 			exceptionScene.throw("Unable to parse level file.");
 			return;
 		}
