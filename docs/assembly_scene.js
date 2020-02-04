@@ -25,7 +25,7 @@ var assemblyScene = {
 		let response = null;
 		try {
 			response = await fetch(levelPath);
-		} catch() {
+		} catch(e) {
 			exceptionScene.throw("Unable to load level, check your internet connection.");
 			return;
 		}
