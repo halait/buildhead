@@ -458,7 +458,7 @@ const pw = {
 				}
 			}
 		}
-		console.log("vi = " + iter);
+		//console.log("vi = " + iter);
 
 		// integrate velocities
 		for(let i = 0, ptr = this.PO_PTRS[i], len = this.poTotal; i < len; ++i, ptr = this.PO_PTRS[i]){
