@@ -1,7 +1,7 @@
 "use strict";
 var canvas = document.getElementById("game");
 
-pw.gl = canvas.getContext("webgl");
+pw.gl = canvas.getContext("webgl2");
 let noWebGlErr = "Sorry, this game cannot be played here because WebGl is not supported.";
 if(!pw.gl) {
 	throw noWebGlErr;
