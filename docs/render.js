@@ -1,9 +1,8 @@
 "use strict";
-var canvas = document.getElementById("game");
 
 pw.gl = canvas.getContext("webgl");
-let noWebGlErr = "Sorry, this game cannot be played here because WebGl is not supported.";
 if(!pw.gl) {
+	let noWebGlErr = "Sorry, this game cannot be played here because WebGl is not supported.";
 	exceptionScene.throw(noWebGlErr);
 	throw noWebGlErr;
 }
@@ -67,8 +66,6 @@ pw.U_TRANSLATE_LOCATION = pw.gl.getUniformLocation(program, "u_translate");
 pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 
 let loadingScreen = document.getElementById("loadingScreen");
-let path = false;
-if(window.location.protocol == "file:") path = "https://halait.github.io/js-physics-game/";
 
 function createTexture(imgPath){
 	let img = document.createElement("img");
@@ -76,9 +73,15 @@ function createTexture(imgPath){
 		img.crossOrigin = "";
 		imgPath = path + imgPath;
 	}
+	img.onerror = () => {
+		exceptionScene.throw("Unable to play game because texture could not be loaded.");
+		window.onresize();
+		throw "Unable to load texture";
+	}
 	img.onload = () => {
-
 		loadingScreen.style.display = "none";
+		window.onresize();
+		sceneManager.push(menuScene);
 
 		let texture = pw.gl.createTexture();
 		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);
@@ -149,6 +152,9 @@ const ORANGE_TC  = [0.875, 0.161, 0.875, 0.161];
 const DARK_ORANGE_TC  = [0.875, 0.196, 0.875, 0.196];
 const BLUE_TC = [0.875, 0.232, 0.875, 0.232];
 //const DR_TC  = [];
+
+const tempPolygon = [];
+const debugPoints = [];
 
 pw.render = function() {
 	this.gl.clear(this.gl.COLOR_BUFFER_BIT);

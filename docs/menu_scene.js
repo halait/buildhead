@@ -1,16 +1,14 @@
 "use strict";
-var menuScene = {
+const menuScene = {
 	start(){
 		sandboxMode = false;
 		resetCanvas();
 		this.ui.style.display = "block";
 
-		if(tutorialScene.step != -1){
+		if(tutorialStep != -1){
 			tutorialScene.removeCurrentEventListener();
-			tutorialScene.step = -1;
+			tutorialStep = -1;
 		}
-
-
 	},
 	suspend(){
 		this.ui.style.display = "none";
@@ -33,7 +31,12 @@ var menuScene = {
 			sceneManager.float(tutorialScene);
 		};
 		for(let i = 1, len = menuScene.levelBtns.length; i < len; ++i){
-			if(localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i);
+
+
+
+			// remove path
+			if(!path && localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i);
+			else menuScene.unlockLevel(i);
 		}
 	}
 }

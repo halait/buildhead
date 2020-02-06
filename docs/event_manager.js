@@ -1,9 +1,17 @@
 "use strict";
+const canvas = document.getElementById("game");
+var sandboxMode = false;
+var isSimulating = false;
+let tutorialStep = -1;
 
 var isMousedown = false;
 var xSub = 0.0;
 var widthMultiplier = 0.0;
 var heightMultiplier = 0.0;
+
+let path = false;
+if(window.location.protocol == "file:") path = "https://halait.github.io/js-physics-game/";
+
 canvas.addEventListener('mousedown', (e) => {
 	if(sceneManager.currentFloat && sceneManager.currentFloat != tutorialScene) {
 		sceneManager.unfloat();
@@ -42,8 +50,8 @@ canvas.addEventListener('wheel', (e) => {
 let toolbars = document.getElementsByClassName("toolbar");
 var aspectRatio = 0.0;
 window.onresize = () => {
-	let w = Math.round(document.documentElement.clientWidth * window.devicePixelRatio);
-	let h = Math.round(document.documentElement.clientHeight * window.devicePixelRatio - 40);
+	let w = Math.round(window.innerWidth * window.devicePixelRatio);
+	let h = Math.round(window.innerHeight * window.devicePixelRatio - 40);
 	if(w < 640) w = 640;
 	for(const t of toolbars){
 		t.style.width = w + "px";
@@ -129,7 +137,6 @@ const backBtn = document.querySelector(".backBtn");
 const closeBtn = document.querySelector(".closeBtn");
 
 const polygonBtn = document.querySelector(".polygonBtn");
-
 
 
 function addBtn(node, parentNode, eventHandler){
@@ -538,5 +545,42 @@ var polygonBtnEventHandler = {
 		}
 	},
 	handleActiveMouseup(){
+	},
+};
+
+
+// scene management
+const sceneManager = {
+	history: [],
+	current: null,
+	currentFloat: false,
+
+	push(scene){
+		this.unfloat();
+		if(this.current) this.current.suspend();
+		this.history.push(scene);
+		this.current = scene;
+		this.current.start();
+	},
+
+	pop(){
+		this.unfloat();
+		this.current.suspend();
+		this.history.pop();
+		this.current = this.history[this.history.length - 1];
+		this.current.start();
+	},
+
+	float(scene, arg){
+		this.unfloat();
+		scene.start(arg);
+		this.currentFloat = scene;
+	},
+
+	unfloat(){
+		if(this.currentFloat){
+			this.currentFloat.suspend();
+			this.currentFloat = false;
+		}
 	},
 };

@@ -42,7 +42,7 @@ var simulationScene = {
 			requestAnimationFrame(simulationScene.simulate);
 			let dt = now - simulationScene.before;
 			if(dt < 25) return;
-			if(dt > 34) console.log("frame drop"); 
+			//if(dt > 34) console.log("frame drop"); 
 			simulationScene.before = now;
 			pw.update();
 			pw.render();
@@ -57,7 +57,10 @@ var simulationScene = {
 					if(success) {
 						successPending = false;
 						let nextLevel = assemblyScene.levelNum + 1;
-						localStorage.setItem(nextLevel + "isPlayable", true);
+
+
+						// remove
+						if(!path) localStorage.setItem(nextLevel + "isPlayable", true);
 						menuScene.unlockLevel(nextLevel, true);
 						successScene.nextLevelBtn.onclick = () => {
 							sceneManager.unfloat();

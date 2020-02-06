@@ -1,6 +1,5 @@
 "use strict";
 const tutorialScene = {
-	step: -1,
 	ui: document.getElementById("tutorialUi"),
 	img: document.getElementById("tutorialImg"),
 	loadingMsg: document.getElementById("tutImgLoadingMsg"),
@@ -8,17 +7,17 @@ const tutorialScene = {
 		this.img.style.display = "none";
 		this.loadingMsg.style.display = "block";
 		this.removeCurrentEventListener();
-		++this.step;
-		this.events[this.step].target.addEventListener(this.events[this.step].type, this.events[this.step].callback);
-		this.img.src = "tutorials/" + this.step + "tut.png";
+		++tutorialStep;
+		this.events[tutorialStep].target.addEventListener(this.events[tutorialStep].type, this.events[tutorialStep].callback);
+		this.img.src = "tutorials/" + tutorialStep + "tut.png";
 		this.ui.style.display = "block";
 	},
 	suspend(){
 		this.ui.style.display = "none";
 	},
 	removeCurrentEventListener(){
-		if(this.step != -1) {
-			this.events[this.step].target.removeEventListener(this.events[this.step].type, this.events[this.step].callback);
+		if(tutorialStep != -1) {
+			this.events[tutorialStep].target.removeEventListener(this.events[tutorialStep].type, this.events[tutorialStep].callback);
 			console.log("current evtlist remooved");
 		}
 	},
@@ -41,18 +40,11 @@ const tutorialScene = {
 			target: canvas,
 			type: "mouseup",
 			callback: () => {
-				console.log("heyy");
 				let last = gameObjects[gameObjects.length - 1];
 				if(last.def.form == pw.PLANE_FORM && last.joints.length == 2){
-				console.log("heyy again");
 					let j0 = last.joints[0];
 					let j1 = last.joints[1];
-					if(
-						j0.gameObjectA != j1.gameObjectA &&
-						(j0.gameObjectA.def.target || j1.gameObjectA.def.target) &&
-						j0.def.va == 0 && j1.def.va == 0 &&
-						(j0.def.motorVelocity || j1.def.motorVelocity)
-					){
+					if(j0.gameObjectA != j1.gameObjectA && (j0.gameObjectA.def.target || j1.gameObjectA.def.target) && j0.def.va == 0 && j1.def.va == 0){
 						sceneManager.float(tutorialScene);
 					}
 				}

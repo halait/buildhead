@@ -4,11 +4,8 @@
 	- perhaps encapsulate all game logic
 */
 
-var isSimulating = false;
 var assemblyField = false;
 var goalField = false;
-var debugPoints = [];
-var sandboxMode = false;
 // constants
 const MAX_SNAP_DIST = 0.025;
 
@@ -71,8 +68,6 @@ const H_B = 3;
 const NON_JOINABLE = 0;
 const JOINABLE = 1;
 //const MAX_JOINS = 15;
-
-let tempPolygon = [];
 
 var gameObjects = [];
 var targets = [];
@@ -494,53 +489,6 @@ function getHandlesNear(x, y, objToIgnore){
 	return joinables;
 }
 
-
-
-// scene management
-const sceneManager = {
-	history: [],
-	current: null,
-	currentFloat: false,
-
-	push(scene){
-		this.unfloat();
-		if(this.current) this.current.suspend();
-		this.history.push(scene);
-		this.current = scene;
-		this.current.start();
-	},
-
-	pop(){
-		this.unfloat();
-		this.current.suspend();
-		this.history.pop();
-		this.current = this.history[this.history.length - 1];
-		this.current.start();
-	},
-
-	float(scene, arg){
-		this.unfloat();
-		scene.start(arg);
-		this.currentFloat = scene;
-	},
-
-	unfloat(){
-		if(this.currentFloat){
-			this.currentFloat.suspend();
-			this.currentFloat = false;
-		}
-	}
-};
-window.onresize();
-sceneManager.push(menuScene);
-/*
-let loadingScreen = document.getElementById("loadingScreen");
-let loadingCircle = document.getElementById("loadingCircle");
-showLoadingScreen(){
-	loadingScreen.style.display = "block";
-
-}
-*/
 function create(def){
 	if(def.form == pw.CIRCLE_FORM) {
 		return new Circle(def);

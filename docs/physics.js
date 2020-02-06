@@ -195,7 +195,7 @@ class MemoryManager {
 const pw = {
 	G: -0.004,
 	//MIN_AA: 0.0,
-	VELOCITY_ITERATIONS: 64,
+	VELOCITY_ITERATIONS: 32,
 
 
 	//temp
@@ -300,8 +300,8 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				M[C_DX + si] = M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi];
-				M[C_DY + si] = M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi];
+				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.05;
+				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.05;
 
 				if(this.warmStarting){
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -426,7 +426,8 @@ const pw = {
 					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si] + M[C_DX + si];
 					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si] + M[C_DY + si];
 					// if no relative velocity then done
-					if(Math.abs(vxRel) < 0.000001 && Math.abs(vyRel) < 0.000001) continue;
+					//if(Math.abs(vxRel) < 0.00000001 && Math.abs(vyRel) < 0.00000001) continue;
+					if(!vxRel && !vyRel) continue;
 					this.unsolved = true;
 					// relative velocity vector is the direction impulse is applied
 					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
@@ -536,15 +537,10 @@ const pw = {
 					M[C_RAY + si] = M[C_LAY + si] * M[O_COS + asi] + M[C_LAX + si] * M[O_SIN + asi];
 					M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 					M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
-					let wax = M[C_RAX + si] + M[O_TX + asi];
-					let way = M[C_RAY + si] + M[O_TY + asi];
-					let wbx = M[C_RBX + si] + M[O_TX + bsi];
-					let wby = M[C_RBY + si] + M[O_TY + bsi];
-					if(wax == wbx && way == wby) continue;
+					let nx = M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi];
+					let ny = M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi];
+					if(Math.abs(nx) < 0.00000001 && Math.abs(ny) < 0.00000001) continue;
 					this.unsolved = true;
-
-					let nx = wax - wbx;
-					let ny = way - wby;
 					let dist = Math.sqrt(nx * nx + ny * ny);
 					nx /= dist;
 					ny /= dist;
@@ -1286,7 +1282,7 @@ const pw = {
 
 	createConstraint(def){
 		if(this.cTotal > 1998) throw "Unable to create constraint, maximum number of constraints reached. Max is " + 2000;
-		console.log("Creating constraint");
+		//console.log("Creating constraint");
 		if(def.poPtrA === undefined || def.poPtrB === undefined) console.error("Missing poPtrA and/or poPtrB.");
 		if(def.type === undefined) console.error("Missing constraint type.");
 		if(def.poPtrA === def.poPtrB) console.error("Cannot create constraint with one object, def.poPtrA === def.poPtrB.");
