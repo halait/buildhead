@@ -15,7 +15,7 @@ var sandboxScene = {
 	},
 
 	handleWheel(e) {
-		scaleCanvas(e.deltaY * 0.001);
+		//scaleCanvas(e.deltaY * 0.001);
 	},
 	
 

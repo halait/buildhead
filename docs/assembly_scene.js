@@ -14,7 +14,7 @@ var assemblyScene = {
 
 	handleWheel(e) {
 		//e.preventDefault();
-		scaleCanvas(e.deltaY * 0.001);
+		
 	},
 	
 	async startLevel(levelPath){

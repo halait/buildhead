@@ -62,7 +62,7 @@ canvas.addEventListener('pointermove', (e) => {
 		}
 		dx  = activePointers[0].x - activePointers[1].x;
 		dy  = activePointers[0].y - activePointers[1].y;
-		scaleCanvas(1 / (Math.sqrt(dx * dx + dy * dy) - od));
+		scaleCanvas((Math.sqrt(dx * dx + dy * dy) / od) * scale - scale);
 		return;
 	}
 	if(!sceneManager.current.eventHandler) return;
@@ -85,7 +85,8 @@ canvas.addEventListener('pointerleave', handlePointerEnd);
 
 canvas.addEventListener('wheel', (e) => {
 	e.preventDefault();
-	if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
+	scaleCanvas(-e.deltaY * 0.001);
+	//if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
 });
 
 
@@ -121,7 +122,7 @@ function dragCanvas(x, y){
 
 var scale = 0.0;
 function scaleCanvas(d){
-	scale = Math.min(Math.max(scale - d, 0.2), 8.0);
+	scale = Math.min(Math.max(scale + d, 0.2), 8.0);
 	pw.gl.uniform2f(pw.U_SCALE_LOCATION, aspectRatio * scale, scale);
 	if(!isSimulating) pw.render();
 }
