@@ -26,3 +26,12 @@ db.collection("levels").add({
     console.error("Error writing document: ", err);
 });
 */
+
+function hash(str){
+	let len = str.length;
+	let buffer = new Uint8Array(len);
+	for(let i = 0; i < len; ++i){
+		buffer[i] = str.charCodeAt(i);
+	}
+	console.log(buffer);
+}
