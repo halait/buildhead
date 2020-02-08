@@ -4,7 +4,7 @@ var sandboxMode = false;
 var isSimulating = false;
 let tutorialStep = -1;
 
-var isMousedown = false;
+//var isMousedown = false;
 var xSub = 0.0;
 var widthMultiplier = 0.0;
 var heightMultiplier = 0.0;
@@ -12,38 +12,43 @@ var heightMultiplier = 0.0;
 let path = false;
 if(window.location.protocol == "file:") path = "https://halait.github.io/js-physics-game/";
 
-canvas.addEventListener('mousedown', (e) => {
+canvas.addEventListener('pointerdown', (e) => {
 	if(sceneManager.currentFloat && sceneManager.currentFloat != tutorialScene) {
 		sceneManager.unfloat();
 		return;
 	}
+
+	/*
 	if(isMousedown || !sceneManager.current.eventHandler) {
 		console.log("eventHandler == false");
 		return;
 	}
 	isMousedown = true;
+	*/
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 	sceneManager.current.eventHandler.handleActivePress();
 });
-canvas.addEventListener('mousemove', (e) => {
-	if(!isMousedown || !sceneManager.current.eventHandler) return;
+canvas.addEventListener('pointermove', (e) => {
+	//if(!isMousedown || !sceneManager.current.eventHandler) return;
+	if(!sceneManager.current.eventHandler) return;
 
 
-	e.preventDefault();
+	//e.preventDefault();
 
 
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 	sceneManager.current.eventHandler.handleActiveDrag();
 });
-canvas.addEventListener('mouseup', () => {
+canvas.addEventListener('pointerup', () => {
 	canvas.style.cursor = "crosshair";
-	if(!isMousedown || !sceneManager.current.eventHandler) return;
-	isMousedown = false;
+	//if(!isMousedown || !sceneManager.current.eventHandler) return;
+	//isMousedown = false;
 	sceneManager.current.eventHandler.handleActiveMouseup();
 });
 canvas.addEventListener('wheel', (e) => {
+	e.preventDefault();
 	if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
 });
 

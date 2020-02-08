@@ -13,7 +13,7 @@ var assemblyScene = {
 	levelNum: 0,
 
 	handleWheel(e) {
-		e.preventDefault();
+		//e.preventDefault();
 		scaleCanvas(e.deltaY * 0.001);
 	},
 	

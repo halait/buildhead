@@ -85,7 +85,7 @@ var simulationScene = {
 	},
 	
 	handleWheel(e) {
-		e.preventDefault();
+		//e.preventDefault();
 		scaleCanvas((e.deltaY * 0.001));
 	},
 
