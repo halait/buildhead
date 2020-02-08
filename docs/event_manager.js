@@ -25,45 +25,43 @@ canvas.addEventListener('pointerdown', (e) => {
 	}
 	isMousedown = true;
 	*/
-	if(activePointers.length < 2) activePointers.push(e);
-	if(activePointers.length == 2) activePointers.splice(0);
+	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
+	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
+	if(activePointers.length < 2) {
+		activePointers.push({pointerId: e.pointerId, x: mx, y: my});
+		if(activePointers.length == 2) return;
+	} else if(activePointers.length == 2) {
+		activePointers.splice(0);
+	}
 	if(!sceneManager.current.eventHandler) {
 		console.log("eventHandler == false");
 		return;
 	}
-	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
-	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 	sceneManager.current.eventHandler.handleActivePress();
 });
 canvas.addEventListener('pointermove', (e) => {
 	//if(!isMousedown || !sceneManager.current.eventHandler) return;
-
-	if(activePointers.length == 2){
-		let dx  = activePointers[0].offsetX - activePointers[1].offsetX;
-		let dy  = activePointers[0].offsetY - activePointers[1].offsetY;
-		let od = dx * dx + dy * dy;
-		if(e.pointerId == activePointers[0].pointerId){
-			dx = e.offsetX - activePointers[1].offsetX;
-			dy = e.offsetY - activePointers[1].offsetY;
-		} else if(e.pointerId == activePointers[1].pointerId){
-			dx = activePointers[0].offsetX - e.offsetX;
-			dy = activePointers[0].offsetY - e.offsetY;
-		}
-		let d = od - (dx * dx + dy * dy);
-		scaleCanvas(d);
-
-		return;
-	}
-
-
-	if(!sceneManager.current.eventHandler) return;
-
-
 	//e.preventDefault();
-
-
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
+	if(activePointers.length == 2){
+		let dx  = activePointers[0].x - activePointers[1].x;
+		let dy  = activePointers[0].y - activePointers[1].y;
+		let od = dx * dx + dy * dy;
+		if(e.pointerId == activePointers[0].pointerId){
+			activePointers[0].x = mx;
+			activePointers[0].y = my;
+		} else if(e.pointerId == activePointers[1].pointerId){
+			activePointers[1].x = mx;
+			activePointers[1].y = my;
+		}
+		dx  = activePointers[0].x - activePointers[1].x;
+		dy  = activePointers[0].y - activePointers[1].y;
+		let d = od - (dx * dx + dy * dy);
+		scaleCanvas(d * 0.1);
+		return;
+	}
+	if(!sceneManager.current.eventHandler) return;
 	sceneManager.current.eventHandler.handleActiveDrag();
 });
 
