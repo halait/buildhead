@@ -50,7 +50,7 @@ canvas.addEventListener('pointermove', (e) => {
 			dy = activePointers[0].offsetY - e.offsetY;
 		}
 		let d = od - (dx * dx + dy * dy);
-		scaleCanvas(d * 100);
+		scaleCanvas(d);
 
 		return;
 	}
