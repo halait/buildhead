@@ -12,25 +12,46 @@ var heightMultiplier = 0.0;
 let path = false;
 if(window.location.protocol == "file:") path = "https://halait.github.io/js-physics-game/";
 
+let activePointers = [];
 canvas.addEventListener('pointerdown', (e) => {
+	/*
 	if(sceneManager.currentFloat && sceneManager.currentFloat != tutorialScene) {
 		sceneManager.unfloat();
 		return;
 	}
-
-	/*
 	if(isMousedown || !sceneManager.current.eventHandler) {
 		console.log("eventHandler == false");
 		return;
 	}
 	isMousedown = true;
 	*/
+	if(activePointers.length < 2) activePointers.push(e);
+	else return;
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 	sceneManager.current.eventHandler.handleActivePress();
 });
 canvas.addEventListener('pointermove', (e) => {
 	//if(!isMousedown || !sceneManager.current.eventHandler) return;
+
+	if(activePointers.length == 2){
+		let dx  = activePointers[0].offsetX - activePointers[1].offsetX;
+		let dy  = activePointers[0].offsetY - activePointers[1].offsetY;
+		let od = dx * dx + dy * dy;
+		if(e.pointerId == activePointers[0].pointerId){
+			dx = e.offsetX - activePointers[1].offsetX;
+			dy = e.offsetY - activePointers[1].offsetY;
+		} else if(e.pointerId == activePointers[1].pointerId){
+			dx = activePointers[0].offsetX - e.offsetX;
+			dy = activePointers[0].offsetY - e.offsetY;
+		}
+		let d = od - (dx * dx + dy * dy);
+		scaleCanvas(d);
+
+		return;
+	}
+
+
 	if(!sceneManager.current.eventHandler) return;
 
 
@@ -41,16 +62,24 @@ canvas.addEventListener('pointermove', (e) => {
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 	sceneManager.current.eventHandler.handleActiveDrag();
 });
-canvas.addEventListener('pointerup', () => {
+
+function handlePointerEnd(){
+	pointerDown.pop();
 	canvas.style.cursor = "crosshair";
 	//if(!isMousedown || !sceneManager.current.eventHandler) return;
 	//isMousedown = false;
+	if(!sceneManager.current.eventHandler) return;
 	sceneManager.current.eventHandler.handleActiveMouseup();
-});
+}
+
+canvas.addEventListener('pointerup', handlePointerEnd);
+canvas.addEventListener('pointerout', handlePointerEnd);
+
 canvas.addEventListener('wheel', (e) => {
 	e.preventDefault();
 	if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
 });
+
 
 var toolbars = document.getElementsByClassName("toolbar");
 var aspectRatio = 0.0;
