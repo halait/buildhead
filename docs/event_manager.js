@@ -27,11 +27,13 @@ canvas.addEventListener('pointerdown', (e) => {
 	*/
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
-	if(activePointers.length < 2) {
-		activePointers.push({pointerId: e.pointerId, x: mx, y: my});
-		if(activePointers.length == 2) return;
-	} else if(activePointers.length == 2) {
-		activePointers.splice(0);
+	if(e.pointerType == "touch" || e.pointerType == "pen"){
+		if(activePointers.length < 2) {
+			activePointers.push({pointerId: e.pointerId, x: mx, y: my});
+			if(activePointers.length == 2) return;
+		} else if(activePointers.length == 2) {
+			activePointers.splice(0);
+		}
 	}
 	if(!sceneManager.current.eventHandler) {
 		console.log("eventHandler == false");
@@ -39,15 +41,16 @@ canvas.addEventListener('pointerdown', (e) => {
 	}
 	sceneManager.current.eventHandler.handleActivePress();
 });
+
 canvas.addEventListener('pointermove', (e) => {
 	//if(!isMousedown || !sceneManager.current.eventHandler) return;
 	//e.preventDefault();
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
-	if(activePointers.length == 2){
+	if((e.pointerType == "touch" || e.pointerType == "pen") && activePointers.length == 2){
 		let dx  = activePointers[0].x - activePointers[1].x;
 		let dy  = activePointers[0].y - activePointers[1].y;
-		let od = dx * dx + dy * dy;
+		let od = Math.sqrt(dx * dx + dy * dy);
 		if(e.pointerId == activePointers[0].pointerId){
 			activePointers[0].x = mx;
 			activePointers[0].y = my;
@@ -57,8 +60,7 @@ canvas.addEventListener('pointermove', (e) => {
 		}
 		dx  = activePointers[0].x - activePointers[1].x;
 		dy  = activePointers[0].y - activePointers[1].y;
-		let d = od - (dx * dx + dy * dy);
-		scaleCanvas(d * 0.1);
+		scaleCanvas(od - Math.sqrt(dx * dx + dy * dy));
 		return;
 	}
 	if(!sceneManager.current.eventHandler) return;
