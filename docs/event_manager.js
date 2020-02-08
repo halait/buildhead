@@ -26,7 +26,11 @@ canvas.addEventListener('pointerdown', (e) => {
 	isMousedown = true;
 	*/
 	if(activePointers.length < 2) activePointers.push(e);
-	else return;
+	if(activePointers.length == 2) activePointers.splice(0);
+	if(!sceneManager.current.eventHandler) {
+		console.log("eventHandler == false");
+		return;
+	}
 	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
 	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 	sceneManager.current.eventHandler.handleActivePress();
@@ -64,7 +68,7 @@ canvas.addEventListener('pointermove', (e) => {
 });
 
 function handlePointerEnd(){
-	pointerDown.pop();
+	activePointers.pop();
 	canvas.style.cursor = "crosshair";
 	//if(!isMousedown || !sceneManager.current.eventHandler) return;
 	//isMousedown = false;
@@ -74,6 +78,8 @@ function handlePointerEnd(){
 
 canvas.addEventListener('pointerup', handlePointerEnd);
 canvas.addEventListener('pointerout', handlePointerEnd);
+canvas.addEventListener('pointercancel', handlePointerEnd);
+canvas.addEventListener('pointerleave', handlePointerEnd);
 
 canvas.addEventListener('wheel', (e) => {
 	e.preventDefault();
@@ -90,6 +96,7 @@ window.onresize = () => {
 	let h = Math.round(window.innerHeight * r);
 	game.style.width = w + "px";
 	game.style.height = h + "px";
+	h -= 40;
 	canvas.width = w;
 	canvas.height = h;
 	pw.gl.viewport(0, 0, w, h);
