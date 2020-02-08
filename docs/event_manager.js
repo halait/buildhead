@@ -62,7 +62,7 @@ canvas.addEventListener('pointermove', (e) => {
 		}
 		dx  = activePointers[0].x - activePointers[1].x;
 		dy  = activePointers[0].y - activePointers[1].y;
-		scaleCanvas(Math.sqrt(dx * dx + dy * dy) / od - 1);
+		scaleCanvas(1 / (Math.sqrt(dx * dx + dy * dy) - od));
 		return;
 	}
 	if(!sceneManager.current.eventHandler) return;
