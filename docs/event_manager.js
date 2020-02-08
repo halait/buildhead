@@ -1,5 +1,5 @@
 "use strict";
-const canvas = document.getElementById("game");
+const canvas = document.getElementById("canvas");
 var sandboxMode = false;
 var isSimulating = false;
 let tutorialStep = -1;
@@ -47,28 +47,24 @@ canvas.addEventListener('wheel', (e) => {
 	if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
 });
 
-let toolbars = document.getElementsByClassName("toolbar");
+var toolbars = document.getElementsByClassName("toolbar");
 var aspectRatio = 0.0;
+var game = document.getElementById("game");
 window.onresize = () => {
-	let w = Math.round(window.innerWidth * window.devicePixelRatio);
-	let h = Math.round(window.innerHeight * window.devicePixelRatio - 40);
-	if(w < 640) w = 640;
-	for(const t of toolbars){
-		t.style.width = w + "px";
-	}
-	canvas.style.width = w + "px";
-	canvas.style.height = h + "px";
+	let r = window.devicePixelRatio;
+	let w = Math.round(window.innerWidth * r);
+	let h = Math.round(window.innerHeight * r);
+	game.style.width = w + "px";
+	game.style.height = h + "px";
 	canvas.width = w;
 	canvas.height = h;
 	pw.gl.viewport(0, 0, w, h);
-	//maxScale = 256 / (h * 0.1);
 	aspectRatio = h / w;
 	xSub = 1.0 / aspectRatio;
 	widthMultiplier = 1.0 / (canvas.clientWidth * 0.5 * aspectRatio);
 	heightMultiplier = 1.0 / (canvas.clientHeight * 0.5);
-	scaleCanvas(0.0);
-	dragCanvas(0.0, 0.0);
-	//pw.gl.uniform1f(pw.U_CANVAS_HEIGHT_LOCATION, canvas.height);
+	//scaleCanvas(0.0);
+	//dragCanvas(0.0, 0.0);
 };
 
 var xTranslate = 0.0;
