@@ -62,15 +62,15 @@ canvas.addEventListener('pointermove', (e) => {
 		}
 		dx  = activePointers[0].x - activePointers[1].x;
 		dy  = activePointers[0].y - activePointers[1].y;
-		scaleCanvas((Math.sqrt(dx * dx + dy * dy) / od) * scale - scale);
+		scaleCanvas(Math.sqrt(dx * dx + dy * dy / od * scale - scale);
 		return;
 	}
 	if(!sceneManager.current.eventHandler) return;
 	sceneManager.current.eventHandler.handleActiveDrag();
 });
 
-function handlePointerEnd(){
-	activePointers.pop();
+function handlePointerEnd(e){
+	activePointers.splice();
 	canvas.style.cursor = "crosshair";
 	//if(!isMousedown || !sceneManager.current.eventHandler) return;
 	//isMousedown = false;
