@@ -65,11 +65,11 @@ const tutorialScene = {
 	hideImg(){
 		this.img.style.display = "none";
 		this.shrinkBtn.style.display = "none";
-		this.showBtn.style.display = "block";
+		this.showBtn.style.display = "inline-block";
 	},
 	showImg(){
 		this.img.style.display = "block";
-		this.shrinkBtn.style.display = "block";
+		this.shrinkBtn.style.display = "inline-block";
 		this.showBtn.style.display = "none";
 	},
 	init(){

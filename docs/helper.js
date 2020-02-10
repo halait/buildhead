@@ -4,6 +4,10 @@
 	- perhaps encapsulate all game logic
 */
 
+var key = localStorage.getItem("key");
+
+
+
 var assemblyField = false;
 var goalField = false;
 // constants

@@ -36,7 +36,7 @@ var createPolygonScene = {
 	suspend(){
 		this.toolbar.style.display = "none";
 		this.ui.style.display = "none";
-		tempPolygon = [];
+		tempPolygon.splice();
 	},
 
 	handleWheel(e) {

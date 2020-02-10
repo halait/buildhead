@@ -51,6 +51,11 @@ var assemblyScene = {
 		addBtn(cRodCreatorBtn.cloneNode(true), this.toolbar, cRodCreatorEventHandler);
 		addBtn(moveBtn.cloneNode(true), this.toolbar, moveEventHandler);
 		addBtn(removeBtn.cloneNode(true), this.toolbar, removeEventHandler);
+		addBtn(saveLevelBtn.cloneNode(true), this.toolbar, () => {
+			if(!key){
+				sceneManager.float(loginScene);
+			}
+		});
 		addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
 	}
 }
