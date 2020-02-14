@@ -3,11 +3,6 @@
 	- implement joints for polygon
 	- perhaps encapsulate all game logic
 */
-
-var key = localStorage.getItem("key");
-
-
-
 var assemblyField = false;
 var goalField = false;
 // constants
@@ -73,8 +68,8 @@ const NON_JOINABLE = 0;
 const JOINABLE = 1;
 //const MAX_JOINS = 15;
 
-var gameObjects = [];
-var targets = [];
+const gameObjects = [];
+const targets = [];
 class GameObject {
 	constructor(def){
 		let len = def.userFloats.length;
@@ -86,6 +81,7 @@ class GameObject {
 		this.connectedObjects = [];
 		this.originX = 0.0;
 		this.originY = 0.0;
+		this.levelObject = false;
 		gameObjects.push(this);
 		if(def.target) targets.push(this);
 		pw.render();
@@ -396,6 +392,8 @@ class Joint {
 		this.gameObjectB.joints.push(this);
 		this.gameObjectA.connectedObjects.push(this.gameObjectB);
 		this.gameObjectB.connectedObjects.push(this.gameObjectA);
+		this.levelObject = false;
+		if(this.sandboxMode) this.levelObject = true;
 		joints.push(this);
 	}
 
@@ -508,4 +506,16 @@ function create(def){
 		console.error(def);
 		return null;
 	}
+}
+
+function getJson(){
+	let json = '[{"JSON_LevelFile":true}';
+	for(const o of gameObjects){
+		if(sandboxMode || !o.levelObject) json += "," + o.toJson();
+	}
+	for(const j of joints){
+		if(sandboxMode || !o.levelObject) json += "," + j.toJson();
+	}
+	json += "]"
+	return json;
 }

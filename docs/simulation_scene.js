@@ -1,10 +1,5 @@
 "use strict";
-//var isRenderFrame = false;
 var successPending = true;
-//var dt = 0.0;
-//var before = 0.0;
-//var acc = 0.0;
-//ar counter = 0;
 var simulationScene = {
 	start(){
 		this.toolbar.style.display = "block";
@@ -24,12 +19,12 @@ var simulationScene = {
 		xDragStart: false,
 		yDragStart: false,
 		handleActivePress(){
-			this.xDragStart = mx;
-			this.yDragStart = my;
+			this.xDragStart = canvasEventManager.mx;
+			this.yDragStart = canvasEventManager.my;
 		},
 		handleActiveDrag(){
 			if(this.xDragStart){
-				dragCanvas(mx - this.xDragStart, my - this.yDragStart);
+				canvasEventManager.drag(canvasEventManager.mx - this.xDragStart, canvasEventManager.my - this.yDragStart);
 			}
 		},
 		handleActiveMouseup(){

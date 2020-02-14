@@ -1,4 +1,6 @@
 "use strict";
+
+// get rid of this
 const canvas = document.getElementById("canvas");
 var sandboxMode = false;
 var isSimulating = false;
@@ -12,145 +14,155 @@ var heightMultiplier = 0.0;
 let path = false;
 if(window.location.protocol == "file:") path = "https://halait.github.io/js-physics-game/";
 
-let activePointers = [];
-canvas.addEventListener('pointerdown', (e) => {
-	/*
-	if(sceneManager.currentFloat && sceneManager.currentFloat != tutorialScene) {
-		sceneManager.unfloat();
-		return;
-	}
-	if(isMousedown || !sceneManager.current.eventHandler) {
-		console.log("eventHandler == false");
-		return;
-	}
-	isMousedown = true;
-	*/
-	mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
-	my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
-	let len = activePointers.length;
-	if(len < 2) {
-		activePointers.push({pointerId: e.pointerId, x: mx, y: my});
-		if(len == 1) return;
-	} else if(len == 2) {
-		activePointers.splice(0);
-		return;
-	}
-	if(sceneManager.current.eventHandler) {
-		sceneManager.current.eventHandler.handleActivePress();
-	}
-});
+const canvasEventManager = {
+	activePointers: [],
+	centerX: 0,
+	centerY: 0,
+	width: 0,
+	height: 0,
+	heightM: 0,
+	widthM: 0,
+	xTranslate: 0,
+	yTranslate: 0,
+	aspectRatio: 0,
+	zoom: 0,
+	mx: 0,
+	my: 0,
+	game: document.getElementById("game"),
+	drag(x, y){
+		this.xTranslate += x;
+		this.yTranslate += y;
+		pw.gl.uniform2f(pw.U_TRANSLATE_LOCATION, this.xTranslate, this.yTranslate);
+		if(!isSimulating) pw.render();
+	},
+	scale(d){
+		this.zoom = Math.min(Math.max(this.zoom + d, 0.2), 8.0);
+		pw.gl.uniform2f(pw.U_SCALE_LOCATION, this.aspectRatio * this.zoom, this.zoom);
+		this.widthM = 1 / (canvas.clientWidth * 0.5 * this.aspectRatio * this.zoom);
+		this.heightM = 1 / (canvas.clientHeight * 0.5 * this.zoom);
+		if(!isSimulating) pw.render();
+	},
+	reset(){
+		pw.destroyAll();
+		gameObjects.splice(0);
+		joints.splice(0);
+		targets.splice(0);
+		goalField = false;
+		assemblyField = false;
+		debugPoints.splice(0);
+		this.zoom = 1.0;
+		this.scale(0.0);
+		this.xTranslate = 0.0;
+		this.yTranslate = 0.0;
+		this.drag(0.0, 0.0);
+		pw.render();
+		console.log("canvas cleared");
+	},
+	init(){
+		window.onresize = () => {
+			/*
+			const r = window.devicePixelRatio;
+			let w = Math.round(window.innerWidth * r);
+			let h = Math.round(window.innerHeight * r);
+			this.game.style.width = w + "px";
+			this.game.style.height = h + "px";
+			h -= 40;
+			canvas.width = w;
+			canvas.height = h;
+			*/
+			const r = window.devicePixelRatio;
+			const rect = canvas.getBoundingClientRect();
+			let w = rect.width;
+			let h = rect.height;
+			canvas.width = w * r;
+			canvas.height = h * r;
+			this.centerX = w * 0.5 + rect.left;
+			this.centerY = h * 0.5 + rect.top;
+			pw.gl.viewport(0, 0, w * r, h * r);
+			this.aspectRatio = h / w;
+			this.widthM = 1 / (w * 0.5 * this.aspectRatio * this.zoom);
+			this.heightM = 1 / (h * 0.5 * this.zoom);
+			this.scale(0);
+		};
+		canvas.addEventListener('pointerdown', (e) => {
+			this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
+			this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
 
-canvas.addEventListener('pointermove', (e) => {
-	//if(!isMousedown || !sceneManager.current.eventHandler) return;
-	//e.preventDefault();
-	let len = activePointers.length;
-	if(len){
-		mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
-		my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
-		if((e.pointerType == "touch" || e.pointerType == "pen") && len == 2){
-			let dx  = activePointers[0].x - activePointers[1].x;
-			let dy  = activePointers[0].y - activePointers[1].y;
-			let od = Math.sqrt(dx * dx + dy * dy);
-			if(e.pointerId == activePointers[0].pointerId){
-				activePointers[0].x = mx;
-				activePointers[0].y = my;
-			} else if(e.pointerId == activePointers[1].pointerId){
-				activePointers[1].x = mx;
-				activePointers[1].y = my;
-			} else {
+			const len = this.activePointers.length;
+			if(len < 2) {
+				this.activePointers.push({pointerId: e.pointerId, x: this.mx, y: this.my});
+				if(len == 1) return;
+			} else if(len == 2) {
+				this.activePointers.splice(0);
 				return;
 			}
-			dx  = activePointers[0].x - activePointers[1].x;
-			dy  = activePointers[0].y - activePointers[1].y;
-			scaleCanvas(Math.sqrt(dx * dx + dy * dy) / od * scale - scale);
-			return;
+			if(sceneManager.current.eventHandler) {
+				sceneManager.current.eventHandler.handleActivePress();
+			}
+		});
+
+		canvas.addEventListener('pointermove', (e) => {
+			//if(!isMousedown || !sceneManager.current.eventHandler) return;
+			//e.preventDefault();
+			const len = this.activePointers.length;
+			if(len){
+				//canvasEventManager.mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
+				//canvasEventManager.my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
+				this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
+				this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
+				if((e.pointerType == "touch" || e.pointerType == "pen") && len == 2){
+					let dx  = activePointers[0].x - activePointers[1].x;
+					let dy  = activePointers[0].y - activePointers[1].y;
+					let od = Math.sqrt(dx * dx + dy * dy);
+					if(e.pointerId == activePointers[0].pointerId){
+						activePointers[0].x = this.mx;
+						activePointers[0].y = this.my;
+					} else if(e.pointerId == activePointers[1].pointerId){
+						activePointers[1].x = this.mx;
+						activePointers[1].y = this.my;
+					} else {
+						return;
+					}
+					dx  = activePointers[0].x - activePointers[1].x;
+					dy  = activePointers[0].y - activePointers[1].y;
+					this.scale(Math.sqrt(dx * dx + dy * dy) / od * scale - scale);
+					return;
+				}
+				if(sceneManager.current.eventHandler) {
+					sceneManager.current.eventHandler.handleActiveDrag();
+				}
+			}
+		});
+		canvas.addEventListener('pointerup', this.handlePointerEnd);
+		canvas.addEventListener('pointerout', this.handlePointerEnd);
+		canvas.addEventListener('pointercancel', this.handlePointerEnd);
+		canvas.addEventListener('pointerleave', this.handlePointerEnd);
+
+
+		canvas.addEventListener('wheel', (e) => {
+			e.preventDefault();
+			this.scale(-e.deltaY * 0.001);
+			//if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
+		});
+
+
+	},
+	handlePointerEnd(e){
+		if(canvasEventManager.activePointers.length){
+			canvasEventManager.activePointers.splice(0);
+			this.style.cursor = "crosshair";
+			if(sceneManager.current.eventHandler) {
+				sceneManager.current.eventHandler.handleActiveMouseup();
+			}
 		}
-		if(sceneManager.current.eventHandler) {
-			sceneManager.current.eventHandler.handleActiveDrag();
-		}
-	}
-});
-
-function handlePointerEnd(e){
-	if(activePointers.length){
-		activePointers.splice(0);
-		canvas.style.cursor = "crosshair";
-		if(sceneManager.current.eventHandler) {
-			sceneManager.current.eventHandler.handleActiveMouseup();
-		}
-	}
-}
-
-canvas.addEventListener('pointerup', handlePointerEnd);
-canvas.addEventListener('pointerout', handlePointerEnd);
-canvas.addEventListener('pointercancel', handlePointerEnd);
-canvas.addEventListener('pointerleave', handlePointerEnd);
-
-canvas.addEventListener('wheel', (e) => {
-	e.preventDefault();
-	scaleCanvas(-e.deltaY * 0.001);
-	//if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
-});
-
-
-var toolbars = document.getElementsByClassName("toolbar");
-var aspectRatio = 0.0;
-var game = document.getElementById("game");
-window.onresize = () => {
-	let r = window.devicePixelRatio;
-	let w = Math.round(window.innerWidth * r);
-	let h = Math.round(window.innerHeight * r);
-	game.style.width = w + "px";
-	game.style.height = h + "px";
-	h -= 40;
-	canvas.width = w;
-	canvas.height = h;
-	pw.gl.viewport(0, 0, w, h);
-	aspectRatio = h / w;
-	xSub = 1.0 / aspectRatio;
-	widthMultiplier = 1.0 / (canvas.clientWidth * 0.5 * aspectRatio);
-	heightMultiplier = 1.0 / (canvas.clientHeight * 0.5);
-	//scaleCanvas(0.0);
-	//dragCanvas(0.0, 0.0);
+	},
 };
+canvasEventManager.init();
 
-var xTranslate = 0.0;
-var yTranslate = 0.0;
-function dragCanvas(x, y){
-	xTranslate += x;
-	yTranslate += y;
-	pw.gl.uniform2f(pw.U_TRANSLATE_LOCATION, xTranslate, yTranslate);
-	if(!isSimulating) pw.render();
-}
 
-var scale = 0.0;
-function scaleCanvas(d){
-	scale = Math.min(Math.max(scale + d, 0.2), 8.0);
-	pw.gl.uniform2f(pw.U_SCALE_LOCATION, aspectRatio * scale, scale);
-	if(!isSimulating) pw.render();
-}
 
-function resetCanvas(){
-	pw.destroyAll();
-	gameObjects.splice(0);
-	joints.splice(0);
-	targets.splice(0);
-	goalField = false;
-	assemblyField = false;
-
-	debugPoints.splice(0);
-
-	scale = 1.0;
-	scaleCanvas(0.0);
-	xTranslate = 0.0;
-	yTranslate = 0.0;
-	dragCanvas(0.0, 0.0);
-	pw.render();
-	console.log("canvas cleared");
-}
-
-var mx;
-var my;
+//var canvasEventManager.mx;
+//var canvasEventManager.my;
 var tempWheel = null;
 var tempRod = null;
 
@@ -197,8 +209,8 @@ var ccwWheelCreatorEventHandler = {
 		tempWheel = create({
 			form: pw.CIRCLE_FORM,
 			type: pw.MOVABLE_TYPE,
-			x: mx,
-			y: my,
+			x: canvasEventManager.mx,
+			y: canvasEventManager.my,
 			radius: DEFAULT_WHEEL_RADIUS,
 			density: DEFAULT_WHEEL_DENSITY,
 			group: COPLANAR_GROUP,
@@ -209,7 +221,7 @@ var ccwWheelCreatorEventHandler = {
 		});
 	},
 	handleActiveDrag(){
-		tempWheel.setPosition(mx, my, true);
+		tempWheel.setPosition(canvasEventManager.mx, canvasEventManager.my, true);
 	},
 	handleActiveMouseup(){
 		tempWheel.setFinalProperties(true);
@@ -222,8 +234,8 @@ var nWheelCreatorEventHandler = {
 		tempWheel = create({
 			form: pw.CIRCLE_FORM,
 			type: pw.MOVABLE_TYPE,
-			x: mx,
-			y: my,
+			x: canvasEventManager.mx,
+			y: canvasEventManager.my,
 			radius: DEFAULT_WHEEL_RADIUS,
 			density: DEFAULT_WHEEL_DENSITY,
 			group: COPLANAR_GROUP,
@@ -231,7 +243,7 @@ var nWheelCreatorEventHandler = {
 		});
 	},
 	handleActiveDrag(){
-		tempWheel.setPosition(mx, my, true);
+		tempWheel.setPosition(canvasEventManager.mx, canvasEventManager.my, true);
 	},
 	handleActiveMouseup(){
 		tempWheel.setFinalProperties(true);
@@ -244,8 +256,8 @@ var cwWheelCreatorEventHandler = {
 		tempWheel = create({
 			form: pw.CIRCLE_FORM,
 			type: pw.MOVABLE_TYPE,
-			x: mx,
-			y: my,
+			x: canvasEventManager.mx,
+			y: canvasEventManager.my,
 			radius: DEFAULT_WHEEL_RADIUS,
 			density: DEFAULT_WHEEL_DENSITY,
 			group: COPLANAR_GROUP,
@@ -257,7 +269,7 @@ var cwWheelCreatorEventHandler = {
 		});
 	},
 	handleActiveDrag(){
-		tempWheel.setPosition(mx, my, true);
+		tempWheel.setPosition(canvasEventManager.mx, canvasEventManager.my, true);
 	},
 	handleActiveMouseup(){
 		tempWheel.setFinalProperties(true);
@@ -284,12 +296,12 @@ var tWheelCreatorEventHandler = {
 			userFloats: [JOINABLE, 0.0, 0.5, 0.25, 0.75],
 			};
 		}
-		def.x = mx,
-		def.y = my,
+		def.x = canvasEventManager.mx,
+		def.y = canvasEventManager.my,
 		tempWheel = create(def);
 	},
 	handleActiveDrag(){
-		tempWheel.setPosition(mx, my, true);
+		tempWheel.setPosition(canvasEventManager.mx, canvasEventManager.my, true);
 	},
 	handleActiveMouseup(){
 		tempWheel.setFinalProperties(true);
@@ -302,7 +314,7 @@ var nRodCreatorEventHandler = {
 		tempRod = create({
 			form: pw.PLANE_FORM,
 			type: pw.MOVABLE_TYPE,
-			vertices: [[mx, my], [mx, my]],
+			vertices: [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx, canvasEventManager.my]],
 			width: DEFAULT_ROD_WIDTH,
 			density: DEFAULT_ROD_DENSITY,
 			group: NON_COPLANAR_GROUP,
@@ -310,7 +322,7 @@ var nRodCreatorEventHandler = {
 		});
 	},
 	handleActiveDrag(){
-		tempRod.setVertex(1, mx, my, true);
+		tempRod.setVertex(1, canvasEventManager.mx, canvasEventManager.my, true);
 	},
 	handleActiveMouseup(){
 		tempRod.setFinalProperties(true);
@@ -323,7 +335,7 @@ var cRodCreatorEventHandler = {
 		tempRod = new Obround({
 			form: pw.PLANE_FORM,
 			type: pw.MOVABLE_TYPE,
-			vertices: [[mx, my], [mx, my]],
+			vertices: [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx, canvasEventManager.my]],
 			width: DEFAULT_ROD_WIDTH,
 			density: DEFAULT_ROD_DENSITY,
 			group: COPLANAR_GROUP,
@@ -331,7 +343,7 @@ var cRodCreatorEventHandler = {
 		});
 	},
 	handleActiveDrag(){
-		tempRod.setVertex(1, mx, my, true);
+		tempRod.setVertex(1, canvasEventManager.mx, canvasEventManager.my, true);
 	},
 	handleActiveMouseup(){
 		tempRod.setFinalProperties(true);
@@ -357,11 +369,11 @@ var gRodCreatorEventHandler = {
 				userFloats: [JOINABLE, ...GRAY_TC],
 			};
 		}
-		def.vertices = [[mx, my], [mx, my]];
+		def.vertices = [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx, canvasEventManager.my]];
 		tempRod = create(def);
 	},
 	handleActiveDrag(){
-		tempRod.setVertex(1, mx, my, false);
+		tempRod.setVertex(1, canvasEventManager.mx, canvasEventManager.my, false);
 		pw.render();
 	},
 	handleActiveMouseup(){
@@ -386,28 +398,28 @@ var moveEventHandler = {
 	},
 
 	handleActivePress(){
-		if(sandboxMode || pw.isPointInside(assemblyField.ref, mx, my)){
-			this.gameObjectsMoving = getHandlesNear(mx, my);
+		if(sandboxMode || pw.isPointInside(assemblyField.ref, canvasEventManager.mx, canvasEventManager.my)){
+			this.gameObjectsMoving = getHandlesNear(canvasEventManager.mx, canvasEventManager.my);
 			if(this.gameObjectsMoving.length > 0){
 				this.objsOriginX = this.gameObjectsMoving[0].x;
 				this.objsOriginY = this.gameObjectsMoving[0].y;
 				for(const j of this.gameObjectsMoving){
 					let form = pw.getForm(j.gameObject.ref);
 					if(form == pw.CIRCLE_FORM){
-						let offset = pw.getLocalPosition(j.gameObject.ref, mx, my);
+						let offset = pw.getLocalPosition(j.gameObject.ref, canvasEventManager.mx, canvasEventManager.my);
 						j.x = offset[0];
 						j.y = offset[1];
 
 					} else if(form == pw.PLANE_FORM){
 						let wv = pw.getWorldVertices(j.gameObject.ref)[j.vertex];
-						j.x = mx - wv[0];
-						j.y = my - wv[1];
+						j.x = canvasEventManager.mx - wv[0];
+						j.y = canvasEventManager.my - wv[1];
 
 					} else if(form == pw.AABB_FORM) {
 						this.gameObjectsMoving = [j];
 						return;
 					} else if(form == pw.POLYGON_FORM){
-						let offset = pw.getLocalPosition(j.gameObject.ref, mx, my);
+						let offset = pw.getLocalPosition(j.gameObject.ref, canvasEventManager.mx, canvasEventManager.my);
 						j.x = offset[0];
 						j.y = offset[1];
 					}
@@ -426,9 +438,9 @@ var moveEventHandler = {
 							let offset = null;
 							if(form == pw.PLANE_FORM) {
 								let wv = pw.getWorldVertices(gO.ref)[v];
-								offset = [mx - wv[0], my - wv[1]];
+								offset = [canvasEventManager.mx - wv[0], canvasEventManager.my - wv[1]];
 							} else if(form == pw.CIRCLE_FORM) {
-								offset = pw.getLocalPosition(gO.ref, mx, my);
+								offset = pw.getLocalPosition(gO.ref, canvasEventManager.mx, canvasEventManager.my);
 							} else {
 								console.error("unhandled form: " + form);
 							}
@@ -447,8 +459,8 @@ var moveEventHandler = {
 				return;
 			}
 		}
-		this.xDragStart = mx;
-		this.yDragStart = my;
+		this.xDragStart = canvasEventManager.mx;
+		this.yDragStart = canvasEventManager.my;
 	},
 
 	handleActiveDrag(){
@@ -457,11 +469,11 @@ var moveEventHandler = {
 			for(const o of this.gameObjectsMoving){
 				let form = pw.getForm(o.gameObject.ref);
 				if(form == pw.CIRCLE_FORM || form == pw.POLYGON_FORM) {
-					if(!o.gameObject.setPosition(mx - o.x, my - o.y, false)) this.isLegalMove = false;
+					if(!o.gameObject.setPosition(canvasEventManager.mx - o.x, canvasEventManager.my - o.y, false)) this.isLegalMove = false;
 				} else if(form == pw.PLANE_FORM) {
-					if(!o.gameObject.setVertex(o.vertex, mx - o.x, my - o.y, false)) this.isLegalMove = false;
+					if(!o.gameObject.setVertex(o.vertex, canvasEventManager.mx - o.x, canvasEventManager.my - o.y, false)) this.isLegalMove = false;
 				} else if(form == pw.AABB_FORM){
-					pw.setVertex(o.gameObject.ref, o.vertex, mx, my);
+					pw.setVertex(o.gameObject.ref, o.vertex, canvasEventManager.mx, canvasEventManager.my);
 				} else {
 					console.error("Unhandles form: " + form);
 				}
@@ -470,7 +482,7 @@ var moveEventHandler = {
 			if(this.isLegalMove) canvas.style.cursor = "crosshair";
 			else canvas.style.cursor = "no-drop";
 		} else if(this.xDragStart){
-			dragCanvas(mx - this.xDragStart, my - this.yDragStart);
+			canvasEventManager.drag(canvasEventManager.mx - this.xDragStart, canvasEventManager.my - this.yDragStart);
 		}
 	},
 
@@ -511,10 +523,10 @@ var removeEventHandler = {
 	handleActivePress(){},
 	handleActiveDrag(){},
 	handleActiveMouseup(){
-		if(sandboxMode || pw.isPointInside(assemblyField.ref, mx, my)){
+		if(sandboxMode || pw.isPointInside(assemblyField.ref, canvasEventManager.mx, canvasEventManager.my)){
 			for(let i = gameObjects.length - 1; i > -1; --i){
 				if(sandboxMode || (pw.getType(gameObjects[i].ref) !== pw.FIXED_TYPE && !gameObjects[i].def.target)){
-					if(pw.isPointInside(gameObjects[i].ref, mx, my)){
+					if(pw.isPointInside(gameObjects[i].ref, canvasEventManager.mx, canvasEventManager.my)){
 						gameObjects[i].destroy();
 						pw.render();
 						return;
@@ -530,14 +542,14 @@ var assemblyFieldCreatorEventHandler = {
 		create({
 			form: pw.AABB_FORM,
 			type: pw.FIXED_TYPE,
-			vertices: [[mx, my], [mx + 0.05, my + 0.05]],
+			vertices: [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx + 0.05, canvasEventManager.my + 0.05]],
 			userFloats: [NON_JOINABLE, ...BLUE_TC],
 			id: ASSEMBLY_FIELD_ID
 		});
 	},
 	handleActiveDrag(){
 		if(assemblyField) {
-			pw.setVertex(assemblyField.ref, 1, mx, my);
+			pw.setVertex(assemblyField.ref, 1, canvasEventManager.mx, canvasEventManager.my);
 			pw.render();
 		}
 	},
@@ -550,14 +562,14 @@ var goalFieldCreatorEventHandler = {
 		create({
 			form: pw.AABB_FORM,
 			type: pw.FIXED_TYPE,
-			vertices: [[mx, my], [mx + 0.05, my + 0.05]],
+			vertices: [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx + 0.05, canvasEventManager.my + 0.05]],
 			userFloats: [NON_JOINABLE, ...ORANGE_TC],
 			id: GOAL_FIELD_ID
 		});
 	},
 	handleActiveDrag(){
 		if(goalField) {
-			pw.setVertex(goalField.ref, 1, mx, my);
+			pw.setVertex(goalField.ref, 1, canvasEventManager.mx, canvasEventManager.my);
 			pw.render();
 		}
 	},
@@ -576,14 +588,14 @@ var polygonBtnEventHandler = {
 		create({
 			form: pw.POLYGON_FORM,
 			type: pw.MOVABLE_TYPE,
-			vertices: [[mx, my], [mx + 0.05, my + 0.05]],
+			vertices: [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx + 0.05, canvasEventManager.my + 0.05]],
 			userFloats: [NON_JOINABLE, ...ORANGE_TC],
 			id: GOAL_FIELD_ID
 		});
 	},
 	handleActiveDrag(){
 		if(goalField) {
-			pw.setVertex(goalField.ref, 1, mx, my);
+			pw.setVertex(goalField.ref, 1, canvasEventManager.mx, canvasEventManager.my);
 			pw.render();
 		}
 	},

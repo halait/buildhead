@@ -16,7 +16,7 @@ var loadLevelScene = {
 	},
 
 	load(defs){
-		resetCanvas();
+		canvasEventManager.reset();
 		for(let i = 1, len = defs.length; i < len; ++i){
 			if(create(defs[i]) === null) {
 				exceptionScene.throw(

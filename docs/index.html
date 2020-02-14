@@ -111,7 +111,6 @@
 			width: 100px;
 			margin: 10px;
 			border-radius: 5%;
-			cursor: default;
 			background-color: #666;
 		}
 
@@ -168,7 +167,7 @@
 		
 		.btn {
 			font-size: 18px;
-			display: inline-block;
+			display: table;
 			background-color: #000;
 			color: #fff;
 			border-radius: 10px;
@@ -177,12 +176,24 @@
 			border: none;
 		}
 
+		.smallBtn {
+			font-size: 14px;
+			border-radius: 5px;
+			margin: 5px 0;
+			padding: 4px;
+			border: none;
+		}
+
 		.btn:hover {
-			background-color: #111;
+			background-color: #222;
 		}
 
 		.message {
 			font-size: 18px;
+		}
+
+		.errMessage {
+			color: #f44;
 		}
 
 		#menuUi {
@@ -246,6 +257,16 @@
 		}
 
 
+		#profileBtn {
+			display: none;
+		}
+
+		.center {
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+
 
 /*
 		@media (max-width: 800px){
@@ -276,6 +297,32 @@
 			justify-content: center;
 			font-size: 40px;
 			color: #fff;
+		}
+		#levelBrowserUi {
+			width: 66%;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 18px;
+			border: none;
+			padding: 2px;
+			text-align: center;
+		}
+		tbody:hover {
+			cursor: pointer;
+		}
+		tr:nth-child(odd) {
+			background-color: #222;
+		}
+		tr:hover {
+			background-color: #555;
+		}
+		td:empty {
+			padding: 0px;
+		}
+		th {
+			background-color: #000;
 		}
 
 		/*
@@ -328,7 +375,10 @@
       <svg id="logo" preserveAspectRatio="xMinYMin meet" viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg">
         <text id="logoText" text-anchor="middle" x="60" y="17" font-family="sans-serif" font-size="20"
           fill="white">BUILDHEAD</text>
-      </svg>
+			</svg>
+			<span id="profileBtn" class="btn center"></span>
+			<span id="loginBtn" class="btn center">Login</span>
+			<span id="levelBrowserBtn" class="btn center">View User Levels</span>
       <svg class="levelBtn unlockedLevelBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
         xmlns="http://www.w3.org/2000/svg">
         <text text-anchor="middle" x="50" y="70" font-family="sans-serif" font-size="60" fill="white">0</text>
@@ -390,11 +440,13 @@
 
 
     <div id="saveLevelUI" class="popup">
-			<p class="popupHeader">Save Level</p>
-      Enter file name: <input id="saveText" type="text" />
-      <button id="saveBtn">Save</button><br>
-      <p id="saveMessageP"></p>
-			<a id="downloadlink" download style="display: none">Download</a><br>
+			<p class="popupHeader">Save As</p>
+			<form id="saveForm">
+      	<label>Name<br><input id="saveText" type="text" required></label>
+				<input id="saveBtn" class="btn" type="submit" value="Save">
+			</form>
+			<p id="saveMessageP" class="message"></p>
+			<!--<a id="downloadlink" download style="display: none">Download</a><br>-->
     </div>
 
     <div id="loadLevelUI" class="popup">
@@ -431,8 +483,10 @@
 		<div id="loginUi" class="popup">
 			<p class="popupHeader">Login</p>
 			<form id="loginForm">
-				<label>Email<br><input id="registerEmail" type="email" /></label>
-				<label>Password<br><input id="registerPassword0" type="password" /></label>
+				<label>Email Address<br><input id="loginEmail" type="email" required></label>
+				<label>Password<br><input id="loginPassword" type="password" required minlength="6" maxlength="128"></label>
+				<span id="showPasswordBtn" class="smallBtn btn">Show Password</span><br>
+				<p id="loginMessage" class="message errMessage"></p>
 				<input class="btn" type="submit" value="Login">
 			</form>
 			<p class="message">Don't have an account?</p>
@@ -442,13 +496,97 @@
     <div id="registerUi" class="popup">
 			<p class="popupHeader">Create Account</p>
 			<form id="registerForm">
-				<label>Email<br><input id="registerEmail" type="email" /></label>
-				<label>Password<br><input id="registerPassword0" type="password" /></label>
-				<label>Re-enter password<br><input id="registerPassword1" type="password" /></label>
+				<label>Email<br><input id="registerEmail" type="email" required></label>
+				<p id="registerEmailMessage" class="message errMessage"></p>
+				<label>Username<br><input id="registerName" type="text" required></label>
+				<p id="registerNameMessage" class="message errMessage"></p>
+				<label>Password<br><input id="registerPassword0" type="password" required minlength="6" maxlength="128"></label>
+				<label>Confirm Password<br><input id="registerPassword1" type="password" required minlength="6" maxlength="128"></label>
+				<p id="registerPasswordMessage" class="message errMessage"></p>
+				<span id="showPasswordsBtn" class="smallBtn btn">Show Password</span><br>
 				<input class="btn" type="submit" value="Submit">
 			</form>
 		</div>
+
+		<div id="profileUi" class="popup">
+			<p class="popupHeader">Profile</p>
+			<span id="logoutBtn" class="btn">Logout</span>
+		</div>
 		
+		<div id="levelBrowserUi" class="popup">
+			<p class="popupHeader">Level Browser</p>
+			<table id="levelBrowser">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Author</th>
+						<th>Date Created</th>
+						<th>Likes</th>
+						<th>Dislikes</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+					<tr>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+						<td>Lol</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+
   </div>
 
 
@@ -618,6 +756,7 @@
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
 	<!-- TODO: Add SDKs for Firebase products that you want to use -->
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-auth.js"></script>
 	<script src="firebase.js"></script>
 
 	<script src="physics.js"></script>
@@ -636,9 +775,9 @@
 	<script src="login_scene.js"></script>
 	<script src="register_scene.js"></script>
 	<script src="success_scene.js"></script>
-
+	<script src="profile_scene.js"></script>
 	<script src="tutorial_scene.js"></script>
-  <script src="levels.js"></script>
+	<script src="level_browser_scene.js"></script>
 </body>
 
 </html>

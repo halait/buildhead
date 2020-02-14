@@ -2,7 +2,7 @@
 const menuScene = {
 	start(){
 		sandboxMode = false;
-		resetCanvas();
+		canvasEventManager.reset();
 		this.ui.style.display = "block";
 
 		if(tutorialStep != -1){
@@ -23,6 +23,8 @@ const menuScene = {
 
 	levelBtns: document.getElementsByClassName("levelBtn"),
 	ui: document.getElementById("menuUI"),
+	loginBtn: document.getElementById("loginBtn"),
+	profileBtn: document.getElementById("profileBtn"),
 
 	init(){
 		this.ui.onkeydown = (e) => {if(e.key == "s") sceneManager.push(sandboxScene);};
@@ -38,6 +40,9 @@ const menuScene = {
 			if(!path && localStorage.getItem(i + "isPlayable")) menuScene.unlockLevel(i);
 			else menuScene.unlockLevel(i);
 		}
+		this.loginBtn.addEventListener("pointerdown", () => {sceneManager.float(loginScene);});
+		this.profileBtn.addEventListener("pointerdown", () => {sceneManager.float(profileScene);});
+		document.getElementById("levelBrowserBtn").addEventListener("pointerdown", () => {sceneManager.float(levelBrowserScene);});
 	}
 }
 menuScene.init();

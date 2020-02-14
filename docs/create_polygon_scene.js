@@ -6,18 +6,18 @@ var createPolygonScene = {
 		handleActivePress(){
 			let len = tempPolygon.length;
 			for(let v = 0, len = tempPolygon.length; v < len; ++v){
-				if(Math.abs(tempPolygon[v][0] - mx) < MAX_SNAP_DIST && Math.abs(tempPolygon[v][1] - my) < MAX_SNAP_DIST){
+				if(Math.abs(tempPolygon[v][0] - canvasEventManager.mx) < MAX_SNAP_DIST && Math.abs(tempPolygon[v][1] - canvasEventManager.my) < MAX_SNAP_DIST){
 					this.cv = v;
 					return;
 				}			
 			}
-			tempPolygon.push([mx, my]);
+			tempPolygon.push([canvasEventManager.mx, canvasEventManager.my]);
 			this.cv = len;
 			pw.render();
 		},
 		handleActiveDrag(){
-			tempPolygon[this.cv][0] = mx;
-			tempPolygon[this.cv][1] = my;
+			tempPolygon[this.cv][0] = canvasEventManager.mx;
+			tempPolygon[this.cv][1] = canvasEventManager.my;
 			pw.render();
 		},
 		handleActiveMouseup(){
@@ -38,12 +38,12 @@ var createPolygonScene = {
 		this.ui.style.display = "none";
 		tempPolygon.splice();
 	},
-
+/*
 	handleWheel(e) {
 		e.preventDefault();
 		scaleCanvas(e.deltaY * 0.001);
 	},
-
+*/
 
 
 	init(){
