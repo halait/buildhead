@@ -29,6 +29,8 @@ const canvasEventManager = {
 	mx: 0,
 	my: 0,
 	game: document.getElementById("game"),
+	now: 0,
+	before: 0,
 	drag(x, y){
 		this.xTranslate += x;
 		this.yTranslate += y;
@@ -100,8 +102,10 @@ const canvasEventManager = {
 				sceneManager.current.eventHandler.handleActivePress();
 			}
 		});
-
 		canvas.addEventListener('pointermove', (e) => {
+			this.now = e.timeStamp;
+			if(this.now - this.before <  16) return;
+			this.before = this.now;
 			//if(!isMousedown || !sceneManager.current.eventHandler) return;
 			//e.preventDefault();
 			const len = this.activePointers.length;
@@ -111,20 +115,20 @@ const canvasEventManager = {
 				this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
 				this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
 				if((e.pointerType == "touch" || e.pointerType == "pen") && len == 2){
-					let dx  = activePointers[0].x - activePointers[1].x;
-					let dy  = activePointers[0].y - activePointers[1].y;
+					let dx  = this.activePointers[0].x - this.activePointers[1].x;
+					let dy  = this.activePointers[0].y - this.activePointers[1].y;
 					let od = Math.sqrt(dx * dx + dy * dy);
-					if(e.pointerId == activePointers[0].pointerId){
-						activePointers[0].x = this.mx;
-						activePointers[0].y = this.my;
-					} else if(e.pointerId == activePointers[1].pointerId){
-						activePointers[1].x = this.mx;
-						activePointers[1].y = this.my;
+					if(e.pointerId == this.activePointers[0].pointerId){
+						this.activePointers[0].x = this.mx;
+						this.activePointers[0].y = this.my;
+					} else if(e.pointerId == this.activePointers[1].pointerId){
+						this.activePointers[1].x = this.mx;
+						this.activePointers[1].y = this.my;
 					} else {
 						return;
 					}
-					dx  = activePointers[0].x - activePointers[1].x;
-					dy  = activePointers[0].y - activePointers[1].y;
+					dx  = this.activePointers[0].x - this.activePointers[1].x;
+					dy  = this.activePointers[0].y - this.activePointers[1].y;
 					this.scale(Math.sqrt(dx * dx + dy * dy) / od * scale - scale);
 					return;
 				}
