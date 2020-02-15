@@ -80,7 +80,7 @@ function createTexture(imgPath){
 	}
 	img.onload = () => {
 		loadingScreen.style.display = "none";
-	//	window.onresize();
+		window.onresize();
 		sceneManager.push(menuScene);
 
 		let texture = pw.gl.createTexture();

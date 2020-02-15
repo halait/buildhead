@@ -35,6 +35,10 @@ var saveLevelScene = {
 		}
 	},
 	start(){
+		if(!user){
+			sceneManager.float(loginScene);
+			return;
+		}
 		this.ui.style.display = "block";
 	},
 	suspend(){
@@ -52,13 +56,27 @@ var saveLevelScene = {
 			if(e.keyCode == 13) saveLevelScene.save(true);
 		});
 		*/
-		document.addEventListener("submit", () => {
-			if(!user){
-				sceneManager.float(loginScene);
-				return;
-			}
-			const json = getJson();
-			fetch();
+		document.getElementById("loginForm").addEventListener("submit", () => {
+			this.saveMessageP = "Saving...";
+			let dbPath = "solutions";
+			if(sandboxMode) dbPath = "levels";
+			db.collection(dbPath).add({
+				name: this.saveText.value,
+				author: user.displayName,
+				authorId: user.uid,
+				dateCreated: new Date(),
+				likes: 0,
+				dislikes: 0,
+				json: getJson()
+			})
+			.then(() => {
+				this.saveMessageP = "";
+				sceneManager.unfloat();
+			})
+			.catch((err) => {
+				console.error(err);
+				exceptionScene.throw(err.message);
+			});
 		});
 	}
 }

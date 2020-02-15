@@ -52,6 +52,12 @@ const registerScene = {
 					firebase.auth().currentUser.updateProfile({displayName: username}).then(() => {
 						menuScene.profileBtn.textContent = username;
 					});
+					db.collection("users").doc(users.uid).set({
+						displayName: username,
+						emailAdress: emailInput.value,
+						dateRegistered: new Date(),
+						id: usernameMessage.uid,
+					});
 					sceneManager.unfloat();
 				})
 				.catch((err) => {
