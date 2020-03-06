@@ -30,7 +30,7 @@ const registerScene = {
 		const usernameMessage = document.getElementById("registerNameMessage");
 		const emailInput = document.getElementById("registerEmail");
 		const emailMessage = document.getElementById("registerEmailMessage");
-		emailInput.addEventListener("pointerdown", () => {emailMessage.textContent = ""});
+		emailInput.addEventListener("input", () => {emailMessage.textContent = "";});
 		usernameInput.addEventListener("input", () => {usernameMessage.textContent = "";});
 		form.addEventListener("submit", async (e) => {
 			e.preventDefault();
@@ -39,47 +39,41 @@ const registerScene = {
 				this.passwordMessage.textContent = "Both passwords must match, try agian";
 				return;
 			}
-			const username = usernameInput.value.trim();
-			console.log(username);
-			const ref = db.collection("users").doc(username);
-			const snap = await ref.get();
-			if(snap && snap.exists){
+			const desiredUsername = usernameInput.value.trim();
+			console.log(desiredUsername);
+			const exists = await (await fetch("https://us-central1-js-physics-game.cloudfunctions.net/userExists?username=" + desiredUsername)).text();
+			console.log(exists);
+			if(exists){
 				usernameMessage.textContent = "Username taken, choose a different username";
 				return;
 			}
-			firebase.auth().createUserWithEmailAndPassword(emailInput.value, password)
-				.then(() => {
-					firebase.auth().currentUser.updateProfile({displayName: username}).then(() => {
-						menuScene.profileBtn.textContent = username;
+			firebase.auth().createUserWithEmailAndPassword(emailInput.value, password).then(() => {
+				firebase.auth().currentUser.updateProfile({displayName: desiredUsername}).then(() => {
+					menuScene.profileBtn.textContent = desiredUsername;
+					console.log(user.displayName);
+					console.log(user.uid);
+					db.collection("users").doc(user.uid).set({
+						username: user.displayName
+					}).then(() => {
+						sceneManager.unfloat();
+					}).catch((err) => {
+						user.delete();
+						console.error(err);
+						exceptionScene.throw(err);
 					});
-					db.collection("users").doc(users.uid).set({
-						displayName: username,
-						emailAdress: emailInput.value,
-						dateRegistered: new Date(),
-						id: usernameMessage.uid,
-					});
-					sceneManager.unfloat();
-				})
-				.catch((err) => {
-					console.error(err);
-					const code = err.code;
-					if(code == "auth/email-already-in-use"){
-						emailMessage.textContent = "Email address taken, choose a different address";
-					} else if(code == "auth/invalid-email"){
-						emailMessage.textContent = "Email address incorrectly formatted";
-					} else {
-						exceptionScene.throw(err.message);
-					}
 				});
-			/*
-			fetch("https://us-central1-js-physics-game.cloudfunctions.net/handleNewUser", {
-				method: "POST",
-				body: `{"username":${username},"password":${password}}`
+			}).catch((err) => {
+				console.error(err);
+				const code = err.code;
+				if(code == "auth/email-already-in-use"){
+					emailMessage.textContent = "Email address taken, choose a different address";
+				} else if(code == "auth/invalid-email"){
+					emailMessage.textContent = "Email address incorrectly formatted";
+				} else {
+					exceptionScene.throw(err.message);
+				}
 			});
-			*/
 		});
-		
-
 	}
 }
 registerScene.init();
