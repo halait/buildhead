@@ -82,6 +82,7 @@ class GameObject {
 		this.originX = 0.0;
 		this.originY = 0.0;
 		this.levelObject = false;
+		if(sandboxMode) this.levelObject = true;
 		gameObjects.push(this);
 		if(def.target) targets.push(this);
 		pw.render();
@@ -507,14 +508,26 @@ function create(def){
 		return null;
 	}
 }
-
+/*
 function getJson(){
 	let json = '[{"JSON_LevelFile":true}';
 	for(const o of gameObjects){
 		if(sandboxMode || !o.levelObject) json += "," + o.toJson();
 	}
 	for(const j of joints){
-		if(sandboxMode || !o.levelObject) json += "," + j.toJson();
+		if(sandboxMode || !j.levelObject) json += "," + j.toJson();
+	}
+	json += "]"
+	return json;
+}
+*/
+function getJson(){
+	let json = '[{"JSON_LevelFile":true}';
+	for(const o of gameObjects){
+		json += "," + o.toJson();
+	}
+	for(const j of joints){
+		json += "," + j.toJson();
 	}
 	json += "]"
 	return json;

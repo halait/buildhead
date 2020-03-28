@@ -3,6 +3,7 @@ const levelBrowserScene = {
 	ui: document.getElementById("levelBrowserUi"),
 	start(){
 		this.ui.style.display = "block";
+		this.populate();
 	},
 	suspend(){
 		this.ui.style.display = "none";
@@ -10,7 +11,8 @@ const levelBrowserScene = {
 	rows: [],
 	cells: [],
 	maxLevels: 0,
-	populateLevelBrowser(levels){
+	populate(){
+		let levels = db.collection("levels").get().limit(maxLevels);
 		if(levels.length > this.maxLevels) throw("Too much");
 		for(let i = 0; i != this.maxLevels; ++i){
 			// use metadata to set eventlistener
@@ -22,6 +24,7 @@ const levelBrowserScene = {
 			this.cells[i][4] = levels[i].dislikes;
 		}
 	},
+
 	init(){
 		const sceneCloseBtn = closeBtn.cloneNode(true);
 		sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.unfloat();});
