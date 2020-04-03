@@ -78,45 +78,46 @@ const canvasEventManager = {
 		canvas.addEventListener('pointerdown', (e) => {
 			this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
 			this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
-			if(this.activePointers.length > 1) {
+			const len = this.activePointers.length;
+			if(len > 1) {
 				this.activePointers.splice(0);
 				return;
 			} else {
 				this.activePointers.push({pointerId: e.pointerId, x: this.mx, y: this.my});
+				if(len == 1) return;
 			}
 			if(sceneManager.current.eventHandler) {
 				sceneManager.current.eventHandler.handleActivePress();
 			}
 		});
 		canvas.addEventListener('pointermove', (e) => {
+			const len = this.activePointers.length;
+			if(!len) return;
 			this.now = e.timeStamp;
 			if(this.now - this.before <  16) return;
 			this.before = this.now;
-			const len = this.activePointers.length;
-			if(len){
-				this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
-				this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
-				if(len == 2 && (e.pointerType == "touch" || e.pointerType == "pen")){
-					let dx  = this.activePointers[0].x - this.activePointers[1].x;
-					let dy  = this.activePointers[0].y - this.activePointers[1].y;
-					const od = Math.sqrt(dx * dx + dy * dy);
-					if(e.pointerId == this.activePointers[0].pointerId){
-						this.activePointers[0].x = this.mx;
-						this.activePointers[0].y = this.my;
-					} else if(e.pointerId == this.activePointers[1].pointerId){
-						this.activePointers[1].x = this.mx;
-						this.activePointers[1].y = this.my;
-					} else {
-						return;
-					}
-					dx  = this.activePointers[0].x - this.activePointers[1].x;
-					dy  = this.activePointers[0].y - this.activePointers[1].y;
-					this.scale(Math.sqrt(dx * dx + dy * dy) / od * scale - scale);
+			this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
+			this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
+			if(len == 2 && (e.pointerType == "touch" || e.pointerType == "pen")){
+				let dx  = this.activePointers[0].x - this.activePointers[1].x;
+				let dy  = this.activePointers[0].y - this.activePointers[1].y;
+				const od = Math.sqrt(dx * dx + dy * dy);
+				if(e.pointerId == this.activePointers[0].pointerId){
+					this.activePointers[0].x = this.mx;
+					this.activePointers[0].y = this.my;
+				} else if(e.pointerId == this.activePointers[1].pointerId){
+					this.activePointers[1].x = this.mx;
+					this.activePointers[1].y = this.my;
+				} else {
 					return;
 				}
-				if(sceneManager.current.eventHandler) {
-					sceneManager.current.eventHandler.handleActiveDrag();
-				}
+				dx  = this.activePointers[0].x - this.activePointers[1].x;
+				dy  = this.activePointers[0].y - this.activePointers[1].y;
+				this.scale(Math.sqrt(dx * dx + dy * dy) / od * this.zoom - this.zoom);
+				return;
+			}
+			if(sceneManager.current.eventHandler) {
+				sceneManager.current.eventHandler.handleActiveDrag();
 			}
 		});
 		canvas.addEventListener('pointerup', this.handlePointerEnd);
@@ -144,11 +145,6 @@ const canvasEventManager = {
 	},
 };
 canvasEventManager.init();
-
-
-
-//var canvasEventManager.mx;
-//var canvasEventManager.my;
 var tempWheel = null;
 var tempRod = null;
 
