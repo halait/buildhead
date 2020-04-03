@@ -65,7 +65,7 @@ pw.U_SCALE_LOCATION = pw.gl.getUniformLocation(program, "u_scale");
 pw.U_TRANSLATE_LOCATION = pw.gl.getUniformLocation(program, "u_translate");
 pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 
-let loadingScreen = document.getElementById("loadingScreen");
+const loadingScreen = document.getElementById("loadingDiv");
 
 function createTexture(imgPath){
 	let img = document.createElement("img");
@@ -79,6 +79,7 @@ function createTexture(imgPath){
 		throw "Unable to load texture";
 	}
 	img.onload = () => {
+		loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 		loadingScreen.style.display = "none";
 		window.onresize();
 		sceneManager.push(menuScene);

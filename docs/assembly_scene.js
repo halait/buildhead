@@ -1,5 +1,5 @@
 "use strict";
-var assemblyScene = {
+const assemblyScene = {
 	start(){
 		this.toolbar.style.display = "flex";
 	},
@@ -20,7 +20,6 @@ var assemblyScene = {
 	async startLevel(levelPath){
 		this.levelNum = parseInt(levelPath[7]);
 		if(path) levelPath = path + levelPath;
-		loadingScreen.style.display = "flex";
 		let response = null;
 		try {
 			response = await fetch(levelPath);
@@ -39,7 +38,6 @@ var assemblyScene = {
 			return;
 		}
 		sceneManager.push(this);
-		loadingScreen.style.display = "none";
 	},
 
 	init(){

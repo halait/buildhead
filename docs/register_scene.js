@@ -11,17 +11,17 @@ const registerScene = {
 	password0: document.getElementById("registerPassword0"),
 	password1: document.getElementById("registerPassword1"),
 	hidePasswords(){
-		this.password0.type = "password";
-		this.password1.type = "password";
-		this.passwordMessage.textContent = "";
+		registerScene.password0.type = "password";
+		registerScene.password1.type = "password";
+		registerScene.passwordMessage.textContent = "";
 	},
 	init(){
 		let sceneCloseBtn = closeBtn.cloneNode(true);
 		sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.unfloat();});
 		this.ui.prepend(sceneCloseBtn);
 		let form = document.getElementById("registerForm");
-		this.password0.addEventListener("input", () => {this.hidePasswords();});
-		this.password1.addEventListener("input", () => {this.hidePasswords();});
+		this.password0.addEventListener("input", this.hidePasswords);
+		this.password1.addEventListener("input", this.hidePasswords);
 		document.getElementById("showPasswordsBtn").addEventListener("pointerdown", () => {
 			this.password0.type = "text";
 			this.password1.type = "text";
@@ -32,11 +32,14 @@ const registerScene = {
 		const emailMessage = document.getElementById("registerEmailMessage");
 		emailInput.addEventListener("input", () => {emailMessage.textContent = "";});
 		usernameInput.addEventListener("input", () => {usernameMessage.textContent = "";});
+
 		form.addEventListener("submit", async (e) => {
 			e.preventDefault();
+			loadingScreen.style.display = "flex";
 			const password = this.password0.value;
 			if(password != this.password1.value){
 				this.passwordMessage.textContent = "Both passwords must match, try agian";
+				loadingScreen.style.display = "none";
 				return;
 			}
 			const desiredUsername = usernameInput.value.trim();
@@ -45,24 +48,16 @@ const registerScene = {
 			console.log(exists);
 			if(exists){
 				usernameMessage.textContent = "Username taken, choose a different username";
+				loadingScreen.style.display = "none";
 				return;
 			}
-			firebase.auth().createUserWithEmailAndPassword(emailInput.value, password).then(() => {
-				firebase.auth().currentUser.updateProfile({displayName: desiredUsername}).then(() => {
-					menuScene.profileBtn.textContent = desiredUsername;
-					console.log(user.displayName);
-					console.log(user.uid);
-					db.collection("users").doc(user.uid).set({
-						username: user.displayName
-					}).then(() => {
-						sceneManager.unfloat();
-					}).catch((err) => {
-						user.delete();
-						console.error(err);
-						exceptionScene.throw(err);
-					});
-				});
-			}).catch((err) => {
+			try {
+				await firebase.auth().createUserWithEmailAndPassword(emailInput.value, password);
+				await firebase.auth().currentUser.updateProfile({displayName: desiredUsername});
+				changeUser(firebase.auth().currentUser);
+				await db.collection("users").doc(user.uid).set({username: user.displayName});
+				sceneManager.unfloat();
+			} catch(err) {
 				console.error(err);
 				const code = err.code;
 				if(code == "auth/email-already-in-use"){
@@ -72,7 +67,12 @@ const registerScene = {
 				} else {
 					exceptionScene.throw(err.message);
 				}
-			});
+				if(user){
+					db.collection("users").doc(user.uid).delete().catch();
+					user.delete().catch();
+				}
+			}
+			loadingScreen.style.display = "none";
 		});
 	}
 }

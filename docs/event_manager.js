@@ -57,21 +57,10 @@ const canvasEventManager = {
 		this.xTranslate = 0.0;
 		this.yTranslate = 0.0;
 		this.drag(0.0, 0.0);
-		pw.render();
 		console.log("canvas cleared");
 	},
 	init(){
 		window.onresize = () => {
-			/*
-			const r = window.devicePixelRatio;
-			let w = Math.round(window.innerWidth * r);
-			let h = Math.round(window.innerHeight * r);
-			this.game.style.width = w + "px";
-			this.game.style.height = h + "px";
-			h -= 40;
-			canvas.width = w;
-			canvas.height = h;
-			*/
 			const r = window.devicePixelRatio;
 			const rect = canvas.getBoundingClientRect();
 			let w = rect.width;
@@ -89,14 +78,11 @@ const canvasEventManager = {
 		canvas.addEventListener('pointerdown', (e) => {
 			this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
 			this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
-
-			const len = this.activePointers.length;
-			if(len < 2) {
-				this.activePointers.push({pointerId: e.pointerId, x: this.mx, y: this.my});
-				if(len == 1) return;
-			} else if(len == 2) {
+			if(this.activePointers.length > 1) {
 				this.activePointers.splice(0);
 				return;
+			} else {
+				this.activePointers.push({pointerId: e.pointerId, x: this.mx, y: this.my});
 			}
 			if(sceneManager.current.eventHandler) {
 				sceneManager.current.eventHandler.handleActivePress();
@@ -106,18 +92,14 @@ const canvasEventManager = {
 			this.now = e.timeStamp;
 			if(this.now - this.before <  16) return;
 			this.before = this.now;
-			//if(!isMousedown || !sceneManager.current.eventHandler) return;
-			//e.preventDefault();
 			const len = this.activePointers.length;
 			if(len){
-				//canvasEventManager.mx = (e.offsetX * widthMultiplier - xSub) / scale - xTranslate;
-				//canvasEventManager.my = -(e.offsetY * heightMultiplier - 1.0) / scale - yTranslate;
 				this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
 				this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
-				if((e.pointerType == "touch" || e.pointerType == "pen") && len == 2){
+				if(len == 2 && (e.pointerType == "touch" || e.pointerType == "pen")){
 					let dx  = this.activePointers[0].x - this.activePointers[1].x;
 					let dy  = this.activePointers[0].y - this.activePointers[1].y;
-					let od = Math.sqrt(dx * dx + dy * dy);
+					const od = Math.sqrt(dx * dx + dy * dy);
 					if(e.pointerId == this.activePointers[0].pointerId){
 						this.activePointers[0].x = this.mx;
 						this.activePointers[0].y = this.my;
@@ -614,12 +596,12 @@ const sceneManager = {
 	current: null,
 	currentFloat: false,
 
-	push(scene){
+	push(scene, args){
 		this.unfloat();
 		if(this.current) this.current.suspend();
 		this.history.push(scene);
 		this.current = scene;
-		this.current.start();
+		this.current.start(args);
 	},
 
 	pop(){
@@ -632,8 +614,8 @@ const sceneManager = {
 
 	float(scene, arg){
 		this.unfloat();
-		scene.start(arg);
 		this.currentFloat = scene;
+		scene.start(arg);
 	},
 
 	unfloat(){

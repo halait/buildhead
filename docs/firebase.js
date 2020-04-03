@@ -11,20 +11,20 @@ const firebaseConfig = {
   };
 firebase.initializeApp(firebaseConfig);
 let user = null;
-firebase.auth().onAuthStateChanged((currentUser) => {
+firebase.auth().onAuthStateChanged(changeUser);
+
+function changeUser(currentUser) {
 	console.log(currentUser);
 	if(currentUser) {
 		user = currentUser;
-		menuScene.loginBtn.style.display = "none";
-		menuScene.profileBtn.textContent = user.displayName;
-		menuScene.profileBtn.style.display = "table";
+		menuScene.accountBtn.textContent = user.displayName;
+		menuScene.accountBtn.onclick = () => {sceneManager.float(profileScene)};
 	} else {
 		user = null;
-		menuScene.loginBtn.style.display = "table";
-		menuScene.profileBtn.textContent = " ";
-		menuScene.profileBtn.style.display = "none";
+		menuScene.accountBtn.textContent = "Login";
+		menuScene.accountBtn.onclick = () => {sceneManager.float(loginScene)};
 	}
-});
+}
 
 const db = firebase.firestore();
 /*

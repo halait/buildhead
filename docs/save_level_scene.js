@@ -34,6 +34,7 @@ var saveLevelScene = {
 	},
 	suspend(){
 		this.ui.style.display = "none";
+		this.saveMessageP.textContent = "";
 	},
 
 	init(){
@@ -49,30 +50,32 @@ var saveLevelScene = {
 */
 		document.getElementById("saveForm").addEventListener("submit", async (e) => {
 			e.preventDefault();
-			this.saveMessageP.textContent = "Wait";
 			//let dbPath = "solutions";
 			//if(sandboxMode) dbPath = "levels";
 			const levelName = this.saveText.value;
 			const name = user.displayName + " - " + levelName;
 			try {
-				if((await db.collection("levelsMeta").doc(name).get()).exists){
-					this.saveMessageP.textContent = "A level with this name already exists, choose a different name";
-					return;
+				let collection = "userLevels";
+				if(user && user.displayName === "halait" && /^og/.test(levelName)){
+					collection = "originalLevels";
 				}
 
-				await db.collection("levelsMeta").doc(name).set({
+				if((await db.collection(collection).doc(name).get()).exists){
+					this.saveMessageP.textContent = "You already created a level with this name, choose a different name";
+					return;
+				}
+				await db.collection(collection).doc(name).set({
 					name: levelName,
 					author: user.displayName,
 					authorId: user.uid,
 					dateCreated: new Date(),
 					likes: 0,
-					dislikes: 0
+					difficulty: 0,
+					plays: 0,
+					json: this.getJson(),
+					level: sandboxMode
 				})
 
-				await db.collection("levelsJson").doc(name).set({
-					levelJson: getJson()
-				});
-				console.log("added");
 				this.saveMessageP.textContent = "";
 				sceneManager.unfloat();
 			} catch(e) {

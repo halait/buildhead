@@ -195,7 +195,7 @@ class MemoryManager {
 const pw = {
 	G: -0.004,
 	//MIN_AA: 0.0,
-	VELOCITY_ITERATIONS: 32,
+	VELOCITY_ITERATIONS: 64,
 
 
 	//temp
@@ -371,7 +371,7 @@ const pw = {
 						vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
 						// normal impulse
-						let jn = ((M[C_NX + i] * vxRel + M[C_NY + i] * vyRel) + M[C_DIST + i]) * M[C_M + i];
+						let jn = (M[C_NX + i] * vxRel + M[C_NY + i] * vyRel + M[C_DIST + i] * 0.5) * M[C_M + i];
 						let oldJn = M[C_JN + i];
 						M[C_JN + i] += jn;
 						// clamp to insure accumulated normal impulse stays negative (push only)
