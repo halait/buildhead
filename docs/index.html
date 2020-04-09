@@ -16,6 +16,7 @@
 			-moz-user-select: none;
 			-webkit-user-select: none;
 			outline: none;
+			font-size: 18px;
 		}
 
     #game {
@@ -23,13 +24,13 @@
       height: 100vh;
 			overflow: hidden;
 			--toolbar-height: 40px;
+			position: relative;
     }
 
 		label {
 			white-space: nowrap;
 			display: block;
 			margin: 5px 0;
-			font-size: 18px;
 		}
 
 		input {
@@ -162,20 +163,19 @@
 		}
 		
 		.btn {
-			font-size: 18px;
-			display: table;
+			width: max-content;
 			background-color: #000;
 			color: #fff;
 			border-radius: 8px;
-			margin: 8px 0;
+			margin: 8px auto;
 			padding: 8px;
 			border: none;
 		}
 
 		.smallBtn {
 			font-size: 14px;
-			border-radius: 5px;
-			margin: 5px 0;
+			border-radius: 4px;
+			margin: 4px auto;
 			padding: 4px;
 			border: none;
 		}
@@ -184,16 +184,8 @@
 			background-color: #222;
 		}
 
-		.message {
-			font-size: 18px;
-		}
-
 		.errMessage {
 			color: #f44;
-		}
-
-		#menuUi {
-			display: block;
 		}
 
 		#tutorialUi {
@@ -220,8 +212,8 @@
 			top: var(--toolbar-height);
 			cursor: crosshair;
 			background: radial-gradient(100% 60% at 50% 100%, #11a, 10%, #002);
-      width: 100vw;
-      height: calc(100vh - var(--toolbar-height));
+      width: 100%;
+      height: calc(100% - var(--toolbar-height));
 			touch-action: none;
 		}
 
@@ -238,16 +230,18 @@
 			fill: #f80;
 		}
 
+		/*
 		#nextLevelBtn {
 			height: 50px;
 			background-color: #06b;
 			border-radius: 10px;
+			display: block;
 		}
 
 		#nextLevelBtn:hover {
 			background-color: #08f;
 		}
-
+		*/
 		#input {
 			display: block;
 			margin-left: 20px;
@@ -255,11 +249,6 @@
 
 		#profileBtn {
 			display: none;
-		}
-
-		.center {
-			margin-left: auto;
-			margin-right: auto;
 		}
 
 		#loadingScreen {
@@ -282,11 +271,11 @@
 		tbody:hover {
 			cursor: pointer;
 		}
-		tr:nth-child(odd) {
-			background-color: #222;
+		tr {
+			background-color: #048;
 		}
 		tr:hover {
-			background-color: #555;
+			background-color: #06b;
 		}
 		td, th {
 			padding: 8px 16px;
@@ -297,6 +286,12 @@
 		}
 		th {
 			background-color: #000;
+		}
+		.completed-level {
+			background-color: #840;
+		}
+		.completed-level:hover {
+			background-color: #b60;
 		}
 		
 		#level-type-container {
@@ -318,6 +313,11 @@
 
 		.level-type-btns:hover {
 			background-color: #f80;
+		}
+
+		#points-widget {
+			display: inline-block;
+			text-align: center;
 		}
 
 		#loadingDiv {
@@ -389,7 +389,7 @@
       <svg id="logo" preserveAspectRatio="xMinYMin meet" viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg">
         <text id="logoText" text-anchor="middle" x="60" y="17" font-family="sans-serif" font-size="20" fill="#fff">BUILDHEAD</text>
 			</svg>
-			<span id="accountBtn" class="btn center">Login</span>
+			<div id="accountBtn" class="btn center">Login</div>
 			<div id="level-type-container">
 				<svg id="originalLevelsBtn" class="level-type-btns" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" fill="#fff"
         xmlns="http://www.w3.org/2000/svg">
@@ -504,11 +504,27 @@
     </div>
     
     <div id="successSceneDiv" class="popup">
-      <p class="popupHeader">Success</p>
-      <svg id="nextLevelBtn" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg"
+			<p class="popupHeader">Success</p>
+			<span id="points-widget">
+				<svg id="increment-btn" class="toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="#0f0" stroke="#0f0">
+					<title>Increment</title>
+					<polygon points="50 10, 15 45, 85 45"></polygon>
+					<line x1="50" y1="90" x2="50" y2="45" stroke-width="16"></line>
+				</svg>
+				<div id="rating"></div>
+				<svg id="decrement-btn" class="toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="#f00" stroke="#f00">
+					<title>Decrement</title>
+					<polygon points="50 90, 15 55, 85 55"></polygon>
+					<line x1="50" y1="10" x2="50" y2="55" stroke-width="16"></line>
+				</svg>
+			</span>
+      <!--<svg id="nextLevelBtn" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 100 30">
         <text x="5" y="22" font-family="sans-serif" font-size="19px" fill="black">Next Level</text>
-      </svg>
+			</svg>-->
+			<div id="nextLevelBtn" class="btn">Next Level</div>
+			<div id="exit-btn" class="btn">Exit</div>
+			
 		</div>
 		
 		<div id="loginUi" class="popup">
@@ -558,6 +574,20 @@
 					</tr>
 				</thead>
 				<tbody>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
 					<tr>
 						<td></td>
 						<td></td>
@@ -790,13 +820,13 @@
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-firestore.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-auth.js"></script>
+	<script src="menu_scene.js"></script>
 	<script src="firebase.js"></script>
 
 	<script src="physics.js"></script>
 	<script src="helper.js"></script>
 	<script src="event_manager.js"></script>
 	<script src="exception_scene.js"></script>
-	<script src="menu_scene.js"></script>
 	<script src="render.js"></script>
 	<script src="sandbox_scene.js"></script>
 	<script src="assembly_scene.js"></script>

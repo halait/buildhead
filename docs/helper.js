@@ -100,7 +100,8 @@ class GameObject {
 	}
 
 	isLegalPosition(){
-		if(!sandboxMode && !pw.isWithinAABB(assemblyField.ref, this.ref)) return false;
+		if(sandboxMode) return true;
+		if(!pw.isWithinAABB(assemblyField.ref, this.ref)) return false;
 		let group = pw.getGroup(this.ref);
 		for(const o of gameObjects){
 			if(o != this && !this.connectedObjects.includes(o) && GROUP_CONTACTS[group].includes(pw.getGroup(o.ref)) && pw.isPenetrating(this.ref, o.ref)){

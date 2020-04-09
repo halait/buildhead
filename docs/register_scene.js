@@ -52,9 +52,8 @@ const registerScene = {
 				return;
 			}
 			try {
-				await firebase.auth().createUserWithEmailAndPassword(emailInput.value, password);
-				await firebase.auth().currentUser.updateProfile({displayName: desiredUsername});
-				changeUser(firebase.auth().currentUser);
+				await auth.createUserWithEmailAndPassword(emailInput.value, password);
+				await auth.currentUser.updateProfile({displayName: desiredUsername});
 				await db.collection("users").doc(user.uid).set({username: user.displayName});
 				sceneManager.unfloat();
 			} catch(err) {

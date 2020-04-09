@@ -249,6 +249,10 @@ const pw = {
 					M[C_NY + i] = collisionData[1 + c];
 					// distance between collision vertices
 					M[C_DIST + i] = collisionData[6 + c];
+
+					if(M[C_DIST + i] < 0) M[C_DIST + i] *= 0.1;
+
+
 					// vectors from center of masses to collision vertex (radius vectors)
 					M[C_RAX + i] = collisionData[2 + c] - M[O_TX + asi];
 					M[C_RAY + i] = collisionData[3 + c] - M[O_TY + asi];
@@ -300,8 +304,8 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.1;
-				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.1;
+				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]);
+				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]);
 
 				if(this.warmStarting){
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -371,7 +375,7 @@ const pw = {
 						vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
 						// normal impulse
-						let jn = (M[C_NX + i] * vxRel + M[C_NY + i] * vyRel + M[C_DIST + i] * 0.5) * M[C_M + i];
+						let jn = (M[C_NX + i] * vxRel + M[C_NY + i] * vyRel + M[C_DIST + i]) * M[C_M + i];
 						let oldJn = M[C_JN + i];
 						M[C_JN + i] += jn;
 						// clamp to insure accumulated normal impulse stays negative (push only)
@@ -409,8 +413,11 @@ const pw = {
 							jm = M[C_SUM_T + si] - oldJm;
 						}
 						// integrate impusle
-						M[O_W + asi] -= jm * M[O_I_INV + asi];
-						M[O_W + bsi] += jm * M[O_I_INV + bsi];
+						if(jm){
+							this.unresolved = true;
+							M[O_W + asi] -= jm * M[O_I_INV + asi];
+							M[O_W + bsi] += jm * M[O_I_INV + bsi];
+						}
 					}/* else {
 						let jm = (M[O_W + asi] - M[O_W + bsi]) * M[C_M_I + si];
 						M[C_SUM_T + si] += jm;
@@ -422,15 +429,16 @@ const pw = {
 
 
 
-					// relative velocity at joint vertices plus distance
+					// relative velocity at joint vertices plus distance                                                                        new beta
 					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si] + M[C_DX + si];
 					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si] + M[C_DY + si];
 					// if no relative velocity then done
 					//if(Math.abs(vxRel) < 0.00000001 && Math.abs(vyRel) < 0.00000001) continue;
-					if(!vxRel && !vyRel) continue;
+					let vn = vxRel * vxRel + vyRel * vyRel;
+					if(!vn) continue;
 					this.unsolved = true;
 					// relative velocity vector is the direction impulse is applied
-					let vn = Math.sqrt(vxRel * vxRel + vyRel * vyRel);
+					vn = Math.sqrt(vn);
 					vxRel /= vn;
 					vyRel /= vn;
 					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
@@ -459,7 +467,7 @@ const pw = {
 				}
 			}
 		}
-		//console.log("vi = " + iter);
+		console.log("vi = " + iter);
 
 		// integrate velocities
 		for(let i = 0, ptr = this.PO_PTRS[i], len = this.poTotal; i < len; ++i, ptr = this.PO_PTRS[i]){
@@ -1674,27 +1682,27 @@ const pw = {
 		let maxDist = 0.0;
 		let px = 0.0;
 		let py = 0.0;
-
-		if(this.M[O_FORM + poPtr] == this.CIRCLE_FORM){
+		const form = this.M[O_FORM + poPtr];
+		if(form == this.CIRCLE_FORM){
 			px = this.M[O_TX + poPtr];
 			py = this.M[O_TY + poPtr];
 			maxDist = this.M[O_RADIUS + poPtr];
 
-		} else if(this.M[O_FORM + poPtr] == this.PLANE_FORM){
+		} else if(form == this.PLANE_FORM){
 			let dot = (x - this.M[O_W0X + poPtr]) * this.M[O_UX + poPtr] + (y - this.M[O_W0Y + poPtr]) * this.M[O_UY + poPtr];
 			dot = Math.max(0.0, Math.min(this.M[O_L + poPtr], dot));
 			px = this.M[O_UX + poPtr] * dot + this.M[O_W0X + poPtr];
 			py = this.M[O_UY + poPtr] * dot + this.M[O_W0Y + poPtr];
 			maxDist = this.M[O_HALF_WIDTH + poPtr];
 
-		} else if(this.M[O_FORM + poPtr] == this.AABB_FORM){
+		} else if(form == this.AABB_FORM){
 			if(x + radius < this.M[O_MIN_X + poPtr] || y + radius < this.M[O_MIN_Y + poPtr]) return false;
 			if(x - radius > this.M[O_MAX_X + poPtr] || y - radius > this.M[O_MAX_Y + poPtr]) return false;
 			return true;
 
 
 
-		} else if(this.M[O_FORM + poPtr] == this.POLYGON_FORM){
+		} else if(form == this.POLYGON_FORM){
 
 			for(let vPtr = O_NUM_VERTICES + poPtr + 1, len = this.M[O_NUM_VERTICES + poPtr] * this.V_SIZE + vPtr; vPtr < len; vPtr += this.V_SIZE){
 				let dx = x - this.M[V_WX + vPtr];
@@ -1704,7 +1712,7 @@ const pw = {
 			return true;
 
 		} else {
-			console.error("Unhandled form: " + this.M[O_FORM + poPtr] + ".");
+			console.error("Unhandled form: " + form + ".");
 		}
 		x -= px;
 		y -= py;

@@ -50,19 +50,6 @@ var simulationScene = {
 						}
 					}
 					if(success) {
-						successPending = false;
-						let nextLevel = assemblyScene.levelNum + 1;
-
-
-						// remove
-						if(!path) localStorage.setItem(nextLevel + "isPlayable", true);
-						menuScene.unlockLevel(nextLevel, true);
-						successScene.nextLevelBtn.onclick = () => {
-							sceneManager.unfloat();
-							sceneManager.pop();
-							sceneManager.pop();
-							menuScene.levelBtns[nextLevel].onclick();
-						}
 						sceneManager.float(successScene);
 					}
 				}

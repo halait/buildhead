@@ -23,7 +23,7 @@ const loginScene = {
 		document.getElementById("register").addEventListener("pointerdown", () => {sceneManager.float(registerScene);});
 		document.getElementById("loginForm").addEventListener("submit", (e) => {
 			e.preventDefault();
-			firebase.auth().signInWithEmailAndPassword(emailInput.value, passwordInput.value)
+			auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
 				.then(() => {
 					sceneManager.unfloat();
 				})

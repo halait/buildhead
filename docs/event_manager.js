@@ -65,11 +65,13 @@ const canvasEventManager = {
 			const rect = canvas.getBoundingClientRect();
 			let w = rect.width;
 			let h = rect.height;
-			canvas.width = w * r;
-			canvas.height = h * r;
+			//canvas.width = w * r;
+			//canvas.height = h * r;
+			canvas.width = w;
+			canvas.height = h;
 			this.centerX = w * 0.5 + rect.left;
 			this.centerY = h * 0.5 + rect.top;
-			pw.gl.viewport(0, 0, w * r, h * r);
+			pw.gl.viewport(0, 0, w, h);
 			this.aspectRatio = h / w;
 			this.widthM = 1 / (w * 0.5 * this.aspectRatio * this.zoom);
 			this.heightM = 1 / (h * 0.5 * this.zoom);
@@ -129,7 +131,6 @@ const canvasEventManager = {
 		canvas.addEventListener('wheel', (e) => {
 			e.preventDefault();
 			this.scale(-e.deltaY * 0.001);
-			//if(sceneManager.current.handleWheel(e)) sceneManager.current.handleWheel(e);
 		});
 
 

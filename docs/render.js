@@ -94,7 +94,9 @@ function createTexture(imgPath){
 		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_T, pw.gl.CLAMP_TO_EDGE);
 		pw.gl.activeTexture(pw.gl.TEXTURE0);
 		pw.gl.uniform1i(pw.U_SAMPLER, 0);
-		console.log(pw.gl.getError());
+		if(pw.gl.getError()) {
+			console.error(pw.gl.getError());
+		}
 		//new
 		//pw.gl.disable(pw.gl.DEPTH_TEST);
 		//pw.gl.enable(pw.gl.BLEND);

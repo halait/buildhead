@@ -13,7 +13,7 @@ var saveLevelScene = {
 			if(sandboxMode || !o.levelObject) json += "," + o.toJson();
 		}
 		for(const j of joints){
-			if(sandboxMode || !o.levelObject) json += "," + j.toJson();
+			if(sandboxMode || !j.levelObject) json += "," + j.toJson();
 		}
 		json += "]";
 		/*
@@ -52,14 +52,15 @@ var saveLevelScene = {
 			e.preventDefault();
 			//let dbPath = "solutions";
 			//if(sandboxMode) dbPath = "levels";
-			const levelName = this.saveText.value;
+			let levelName = this.saveText.value;
+			let collection = "userLevels";
+			const pre = /^og/;
+			if(user && user.displayName === "halait" && pre.test(levelName)){
+				collection = "originalLevels";
+				levelName = levelName.replace(pre, "");
+			}
 			const name = user.displayName + " - " + levelName;
 			try {
-				let collection = "userLevels";
-				if(user && user.displayName === "halait" && /^og/.test(levelName)){
-					collection = "originalLevels";
-				}
-
 				if((await db.collection(collection).doc(name).get()).exists){
 					this.saveMessageP.textContent = "You already created a level with this name, choose a different name";
 					return;

@@ -12,11 +12,6 @@ const assemblyScene = {
 	toolbar: document.getElementById("assemblySceneBtnsDiv"),
 	levelNum: 0,
 
-	handleWheel(e) {
-		//e.preventDefault();
-		
-	},
-	
 	async startLevel(levelPath){
 		this.levelNum = parseInt(levelPath[7]);
 		if(path) levelPath = path + levelPath;
