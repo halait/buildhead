@@ -23,8 +23,9 @@
       width: 100vw;
       height: 100vh;
 			overflow: hidden;
-			--toolbar-height: 40px;
 			position: relative;
+			--toolbar-height: 40px;
+			min-width: 240px;
     }
 
 		label {
@@ -37,10 +38,6 @@
 			border-radius: 10px;
 			padding-left: 5px;
 		}
-
-		//input[type=number] {
-			//width: 50%;
-		//}
 
 		input[type=radio] {
 			margin-left: 30px;
@@ -98,6 +95,7 @@
 			box-sizing: border-box;
 			max-height: 100%;
 			max-width: 100%;
+			min-width: inherit;
 		}
 
 		.popupHeader {
@@ -327,6 +325,17 @@
 			justify-content: center;
 		}
 
+		#play-btn {
+			background-color: #048;
+			font-size: 24px;
+			padding: 16px;
+			margin-bottom: 16px;
+		}
+
+		#play-btn:hover {
+			background-color: #06b;
+		}
+
 		#strob {
 			width: 50%;
 			max-width: 256px;
@@ -522,7 +531,7 @@
         viewBox="0 0 100 30">
         <text x="5" y="22" font-family="sans-serif" font-size="19px" fill="black">Next Level</text>
 			</svg>-->
-			<div id="nextLevelBtn" class="btn">Next Level</div>
+			<div id="next-level-btn" class="btn">Next Level</div>
 			<div id="exit-btn" class="btn">Exit</div>
 			
 		</div>
@@ -646,6 +655,12 @@
 					</tr>
 				</tbody>
 			</table>
+		</div>
+
+		<div id="mode-ui" class="popup">
+			<p class="popupHeader">Mode</p>
+			<div id="play-btn" class="btn">Play</div>
+			<div id="edit-btn" class="btn">Edit</div>
 		</div>
 		
 		<!--
@@ -841,6 +856,7 @@
 	<script src="profile_scene.js"></script>
 	<script src="tutorial_scene.js"></script>
 	<script src="level_browser_scene.js"></script>
+	<script src="popup_scenes.js"></script>
 </body>
 
 </html>

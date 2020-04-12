@@ -34,7 +34,6 @@ var loadLevelScene = {
 		let sceneCloseBtn = closeBtn.cloneNode(true);
 		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.unfloat();});
 		this.ui.prepend(sceneCloseBtn);
-		/*
 		this.fileInput.addEventListener('change', function(){
 			if(loadLevelScene.fileInput.files[0].type != "application/json"){
 				loadLevelScene.messageP.textContent = "";
@@ -67,7 +66,7 @@ var loadLevelScene = {
 			}
 			loadLevelScene.load(defs);
 		}
-		*/
+		
 	}
 }
 loadLevelScene.init();

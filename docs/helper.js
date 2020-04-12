@@ -47,9 +47,9 @@ const ASSEMBLY_FIELD_ID = 7;
 const GOAL_FIELD_ID = 8;
 const FIELD_COLORS = [[0.0, 0.5, 1.0, 1.0], [1.0, 0.5, 0.0, 1.0]];
 
-const DEFAULT_MOTOR_VELOCITY = 0.16;
+const DEFAULT_MOTOR_VELOCITY = 0.08;
 //const DEFAULT_MAX_MOTOR_TORQUE = 0.0016;
-const DEFAULT_MAX_MOTOR_TORQUE = 0.002;
+const DEFAULT_MAX_MOTOR_TORQUE = 0.001;
 
 // group definitions to set up collision constraints
 const FIXED_GROUP = 0;

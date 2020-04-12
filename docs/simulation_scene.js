@@ -1,6 +1,6 @@
 "use strict";
 var successPending = true;
-var simulationScene = {
+const simulationScene = {
 	start(){
 		this.toolbar.style.display = "block";
 		isSimulating = true;
@@ -35,24 +35,26 @@ var simulationScene = {
 	simulate(now) {
 		if(isSimulating) {
 			requestAnimationFrame(simulationScene.simulate);
+			pw.update();
 			let dt = now - simulationScene.before;
 			if(dt < 25) return;
-			//if(dt > 34) console.log("frame drop"); 
+			//if(dt > 34) console.log("frame drop");
 			simulationScene.before = now;
-			pw.update();
+			//pw.update();
 			pw.render();
-				if(successPending){
-					let success = true;
-					for(let i = 0, len = targets.length; i != len; ++i){
-						if(!pw.isWithinAABB(goalField.ref, targets[i].ref)) {
-							success = false;
-							break;
-						}
-					}
-					if(success) {
-						sceneManager.float(successScene);
+			if(successPending){
+				let success = true;
+				for(let i = 0, len = targets.length; i != len; ++i){
+					if(!pw.isWithinAABB(goalField.ref, targets[i].ref)) {
+						success = false;
+						break;
 					}
 				}
+				if(success) {
+					sceneManager.float(successScene);
+					successPending = false;
+				}
+			}
 		} else {
 			pw.resetAllImpulses();
 			for(const o of gameObjects){
@@ -64,11 +66,6 @@ var simulationScene = {
 			}
 			pw.render();
 		}
-	},
-	
-	handleWheel(e) {
-		//e.preventDefault();
-		//scaleCanvas((e.deltaY * 0.001));
 	},
 
 	init(){

@@ -54,7 +54,7 @@ var saveLevelScene = {
 			//if(sandboxMode) dbPath = "levels";
 			let levelName = this.saveText.value;
 			let collection = "userLevels";
-			const pre = /^og/;
+			const pre = /^og /;
 			if(user && user.displayName === "halait" && pre.test(levelName)){
 				collection = "originalLevels";
 				levelName = levelName.replace(pre, "");
@@ -70,7 +70,7 @@ var saveLevelScene = {
 					author: user.displayName,
 					authorId: user.uid,
 					dateCreated: new Date(),
-					likes: 0,
+					rating: 0,
 					difficulty: 0,
 					plays: 0,
 					json: this.getJson(),

@@ -17,7 +17,7 @@ var exceptionScene = {
 	},
 
 	init(){
-		let sceneCloseBtn = closeBtn.cloneNode(true);
+		const sceneCloseBtn = closeBtn.cloneNode(true);
 		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.unfloat();});
 		exceptionScene.ui.prepend(sceneCloseBtn);
 	}

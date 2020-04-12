@@ -149,7 +149,7 @@ class MemoryManager {
 				}
 				this.memory[ptr] = size;
 				this.memory[ptr + size - 1] = -size;
-				console.log(size + " floats allocated at adress: " + ptr);
+				console.log(size + " floats allocated at address: " + ptr);
 				return ++ptr;
 			}
 		}
@@ -193,7 +193,7 @@ class MemoryManager {
 }
 
 const pw = {
-	G: -0.004,
+	G: -0.002,
 	//MIN_AA: 0.0,
 	VELOCITY_ITERATIONS: 64,
 
