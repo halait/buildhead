@@ -8,11 +8,17 @@ var successScene = {
 	incrementBtn: document.getElementById("increment-btn"),
 	decrementBtn: document.getElementById("decrement-btn"),
 	ratingDiv: document.getElementById("rating"),
+	saveSolutionBtn: document.getElementById("save-solution-btn"),
 	start(){
 		this.ui.style.display = "block";
 		this.ratingDiv.textContent = levelBrowserScene.currentLevel.rating;
 		if(levelBrowserScene.currentLevel.review){
 			this.selectBtn(levelBrowserScene.currentLevel.review.rating);
+		}
+		if(/solutions$/.test(levelBrowserScene.refDef.collectionPath)){
+			this.saveSolutionBtn.style.display = "block";
+		} else {
+			this.saveSolutionBtn.style.display = "none";
 		}
 	},
 	suspend(){
@@ -45,21 +51,22 @@ var successScene = {
 		let ratingDelta = newRating;
 		if(levelBrowserScene.currentLevel.review){
 			ratingDelta -= levelBrowserScene.currentLevel.review.rating;
+		} else {
+			levelBrowserScene.currentLevel.review = {
+				rating: 0,
+				subjectPath: levelBrowserScene.currentLevel.path
+			};
 		}
-		console.log(ratingDelta);
+		if(ratingDelta > 2 || ratingDelta < -2) throw "ratingDelta > 2 || ratingDelta < -2";
 		levelBrowserScene.currentLevel.rating += ratingDelta;
-		if(!levelBrowserScene.currentLevel.review){
-			levelBrowserScene.currentLevel.review = {rating: 0};
-		}
 		levelBrowserScene.currentLevel.review.rating = newRating;
 		successScene.ratingDiv.textContent = levelBrowserScene.currentLevel.rating;
-		if(ratingDelta > 2 || ratingDelta < -2) throw "ratingDelta > 2 || ratingDelta < -2";
 		const levelId = levelBrowserScene.currentLevel.id;
 		const batch = db.batch();
 		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(levelId), {
 			rating: newRating
 		}, {merge: true});
-		batch.update(db.collection(levelBrowserScene.refDef.collection).doc(levelId), {
+		batch.update(db.doc(levelBrowserScene.currentLevel.path), {
 			rating: firebase.firestore.FieldValue.increment(ratingDelta)
 		});
 		batch.commit().catch((err) => {exceptionScene.throw(err.message)});
@@ -92,6 +99,14 @@ var successScene = {
 					exceptionScene.throw("No more levels you win");
 				}
 			}
+		});
+		document.getElementById("browse-solutions-btn").addEventListener("click", () => {
+			sceneManager.pop();
+			sceneManager.pop();
+			sceneManager.float(levelBrowserScene, {collectionPath: levelBrowserScene.currentLevel.path + "/solutions"});
+		});
+		saveSolutionBtn.addEventListener("click", () => {
+			sceneManager.float(saveScene);
 		});
 	}
 }

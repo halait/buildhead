@@ -304,8 +304,8 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]);
-				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]);
+				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.1;
+				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.1;
 
 				if(this.warmStarting){
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -467,7 +467,7 @@ const pw = {
 				}
 			}
 		}
-		console.log("vi = " + iter);
+		//console.log("vi = " + iter);
 
 		// integrate velocities
 		for(let i = 0, ptr = this.PO_PTRS[i], len = this.poTotal; i < len; ++i, ptr = this.PO_PTRS[i]){
@@ -547,7 +547,7 @@ const pw = {
 					M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 					let nx = M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi];
 					let ny = M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi];
-					if(Math.abs(nx) < 0.00000001 && Math.abs(ny) < 0.00000001) continue;
+					//if(Math.abs(nx) < 0.00000001 && Math.abs(ny) < 0.00000001) continue;
 					this.unsolved = true;
 					let dist = Math.sqrt(nx * nx + ny * ny);
 					nx /= dist;

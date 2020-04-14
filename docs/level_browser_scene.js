@@ -21,8 +21,11 @@ const levelBrowserScene = {
 	async populate(refDef){
 		this.levels.length = 0;
 		this.refDef = refDef;
-		let ref = db.collection(refDef.collection);
+		let ref = db.collection(refDef.collectionPath);
 		if(refDef.getNextBatch) {
+			if(!lastDoc){
+				throw "!lastDoc";
+			}
 			ref = ref.startAfter(this.lastDoc);
 		}
 		const levelsSnap = (await ref.limit(this.maxLevels).get()).docs;
@@ -32,8 +35,10 @@ const levelBrowserScene = {
 			const ids = [];
 			for(let i = 0; i != len; ++i){
 				const level = levelsSnap[i].data();
-				level.id = levelsSnap[i].id;
-				ids[i] = level.id;
+				const id = levelsSnap[i].id;
+				ids[i] = id;
+				level.id = id;
+				level.path = levelsSnap[i].ref.path;
 				this.levels[i] = level;
 			}
 			if(len && user){
@@ -53,8 +58,7 @@ const levelBrowserScene = {
 			for(let i = 0; i != len; ++i){
 				this.rows[i].style.display = "table-row";
 				this.rows[i].onpointerdown = () => {
-					this.loadLevel(i);
-					sceneManager.float(modeScene);
+					sceneManager.float(modeScene, i);
 				};
 				this.cells[i][0].textContent = this.levels[i].name;
 				this.cells[i][1].textContent = this.levels[i].author;
@@ -70,9 +74,6 @@ const levelBrowserScene = {
 		}
 
 		for(let i = len; i != this.maxLevels; ++i){
-			if(!this.rows[i].onpointerdown) {
-				break;
-			}
 			this.rows[i].style.display = "none";
 		}
 	},
@@ -88,12 +89,11 @@ const levelBrowserScene = {
 			throw e;
 		}
 		loadLevelScene.load(levelData);
-		db.collection(this.refDef.collection).doc(this.currentLevel.id)
-			.update({plays: firebase.firestore.FieldValue.increment(1)})
-			.catch((err) => {
+		db.doc(this.currentLevel.path).update({plays: firebase.firestore.FieldValue.increment(1)}).catch((err) => {
 				exceptionScene.throw(err);
 				throw err;
-			});
+			}
+		);
 	},
 
 	init(){

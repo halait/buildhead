@@ -27,10 +27,10 @@ const menuScene = {
 
 	init(){
 		document.getElementById("originalLevelsBtn").addEventListener("pointerdown", () => {
-			sceneManager.float(levelBrowserScene, {collection: "originalLevels"});
+			sceneManager.float(levelBrowserScene, {collectionPath: "originalLevels"});
 		});
 		document.getElementById("userLevelsBtn").addEventListener("pointerdown", () => {
-			sceneManager.float(levelBrowserScene, {collection: "userLevels"});
+			sceneManager.float(levelBrowserScene, {collectionPath: "userLevels"});
 		});
 		document.getElementById("sandboxBtn").addEventListener("pointerdown", () => {
 			sceneManager.push(sandboxScene);
