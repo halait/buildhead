@@ -16,14 +16,11 @@ const modeScene = {
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("play-btn").addEventListener("click", () => {
 			sceneManager.push(assemblyScene);
-			levelBrowserScene.loadLevel(this.currentIndex);
-			if(levelBrowserScene.currentLevel.id == "halait - 0 Tutorial"){
-				sceneManager.float(tutorialScene);
-			}
+			//levelBrowserScene.loadLevel(this.currentIndex);
 		});
 		document.getElementById("edit-btn").addEventListener("click", () => {
 			sceneManager.push(sandboxScene);
-			levelBrowserScene.loadLevel(this.currentIndex);
+			//levelBrowserScene.loadLevel(this.currentIndex);
 		});
 	}
 }
@@ -32,11 +29,19 @@ modeScene.init();
 const saveScene = {
 	ui: document.getElementById("save-ui"),
 	saveInfoP: document.getElementById("save-info-p"),
-	saveText: document.getElementById('save-text'),
+	nameInput: document.getElementById('name-input'),
+	tagInput: document.getElementById("tag-input"),
 	header: document.getElementById("save-header"),
 	start(){
 		if(!user){
 			sceneManager.float(loginScene);
+			return;
+		}
+		if(!isPlayable()){
+			exceptionScene.throw(
+				`Unable to save level because it is not playable, to be playable the level must have one assesmbly 
+				area (blue box), one goal area (orange box) and one or more targets (orange objects, usually circle).`
+			);
 			return;
 		}
 		if(sandboxMode){
@@ -66,7 +71,7 @@ const saveScene = {
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("save-form").addEventListener("submit", async (e) => {
 			e.preventDefault();
-			let docName = this.saveText.value;
+			let docName = this.nameInput.value.trim();
 			const pre = /^og /;
 			let docPath = "userLevels";
 			if(user && user.displayName === "halait" && pre.test(docName)){
@@ -83,6 +88,9 @@ const saveScene = {
 					this.saveInfoP.textContent = "You already used this name, choose a different name";
 					return;
 				}
+				const docTags = this.tagInput.value.split(" ");
+				docTags.push(docName);
+				docTags.push(user.displayName);
 				await db.doc(docPath).set({
 					name: docName,
 					author: user.displayName,
@@ -90,6 +98,7 @@ const saveScene = {
 					dateCreated: new Date(),
 					rating: 0,
 					plays: 0,
+					tags: docTags,
 					json: this.getJson()
 				});
 				this.saveInfoP.textContent = "";

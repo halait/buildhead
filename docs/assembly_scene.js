@@ -1,7 +1,11 @@
 "use strict";
 const assemblyScene = {
 	start(){
+		sandboxMode = false;
 		this.toolbar.style.display = "flex";
+		if(levelBrowserScene.currentLevel.id == "halait - 0 Tutorial"){
+			sceneManager.float(tutorialScene);
+		}
 	},
 	suspend(){
 		this.toolbar.style.display = "none";

@@ -58,7 +58,8 @@ const levelBrowserScene = {
 			for(let i = 0; i != len; ++i){
 				this.rows[i].style.display = "table-row";
 				this.rows[i].onpointerdown = () => {
-					sceneManager.float(modeScene, i);
+					this.loadLevel(i);
+					sceneManager.float(modeScene);
 				};
 				this.cells[i][0].textContent = this.levels[i].name;
 				this.cells[i][1].textContent = this.levels[i].author;
@@ -88,12 +89,23 @@ const levelBrowserScene = {
 			exceptionScene.throw("Level corrupted, could not deserialize");
 			throw e;
 		}
+		if(!/solutions$/.test(this.refDef.collectionPath)){
+			canvasEventManager.reset();
+		}
+		sandboxMode = true;
 		loadLevelScene.load(levelData);
-		db.doc(this.currentLevel.path).update({plays: firebase.firestore.FieldValue.increment(1)}).catch((err) => {
+		sandboxMode = false;
+		const batch = db.batch();
+		batch.update(db.doc(this.currentLevel.path), {plays: firebase.firestore.FieldValue.increment(1)});
+		if(!this.currentLevel.review){
+			this.currentLevel.review = {rating: 0};
+			batch.set(db.doc("users/" + user.uid + "/reviews/" + this.currentLevel.id), this.currentLevel.review);
+		}
+		batch.commit()
+			.catch((err) => {
 				exceptionScene.throw(err);
 				throw err;
-			}
-		);
+			});
 	},
 
 	init(){

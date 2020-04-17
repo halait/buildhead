@@ -16,11 +16,11 @@ var loadLevelScene = {
 	},
 
 	load(defs){
-		canvasEventManager.reset();
 		for(let i = 1, len = defs.length; i < len; ++i){
 			if(create(defs[i]) === null) {
 				exceptionScene.throw(
-					"This level file is corrupted and cannot be loaded. Try another level file or please consider sending feedback to have the issue solved, it will be apreciated."
+					`This level file is corrupted and cannot be loaded. Try another level file or please 
+					consider sending feedback to have the issue solved, it will be apreciated.`
 				);
 				return false;
 			}

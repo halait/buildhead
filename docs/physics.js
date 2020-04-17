@@ -1809,7 +1809,7 @@ const pw = {
 		return this.M[O_GROUP + poPtr];
 	},
 
-	setPosition(poPtr, x, y){
+	setPosition(poPtr, x, y) {
 		this.M[O_TX + poPtr] = x;
 		this.M[O_TY + poPtr] = y;
 		this.updateWorldPositions(poPtr);

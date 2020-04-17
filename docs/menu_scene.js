@@ -1,10 +1,8 @@
 "use strict";
 const menuScene = {
 	start(){
-		sandboxMode = false;
-		canvasEventManager.reset();
+		//canvasEventManager.reset();
 		this.ui.style.display = "block";
-
 		if(tutorialStep != -1){
 			tutorialScene.removeCurrentEventListener();
 			tutorialStep = -1;
@@ -33,6 +31,7 @@ const menuScene = {
 			sceneManager.float(levelBrowserScene, {collectionPath: "userLevels"});
 		});
 		document.getElementById("sandboxBtn").addEventListener("pointerdown", () => {
+			canvasEventManager.reset();
 			sceneManager.push(sandboxScene);
 		});
 	}

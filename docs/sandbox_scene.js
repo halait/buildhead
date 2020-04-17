@@ -7,7 +7,6 @@ var sandboxScene = {
 	start(){
 		sandboxMode = true;
 		this.toolbar.style.display = "flex";
-		pw.render();
 	},
 	suspend(){
 		this.toolbar.style.display = "none";

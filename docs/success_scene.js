@@ -12,13 +12,15 @@ var successScene = {
 	start(){
 		this.ui.style.display = "block";
 		this.ratingDiv.textContent = levelBrowserScene.currentLevel.rating;
+		let rating = 0;
 		if(levelBrowserScene.currentLevel.review){
-			this.selectBtn(levelBrowserScene.currentLevel.review.rating);
+			rating = levelBrowserScene.currentLevel.review.rating;
 		}
+		this.selectBtn(rating);
 		if(/solutions$/.test(levelBrowserScene.refDef.collectionPath)){
-			this.saveSolutionBtn.style.display = "block";
-		} else {
 			this.saveSolutionBtn.style.display = "none";
+		} else {
+			this.saveSolutionBtn.style.display = "block";
 		}
 	},
 	suspend(){
@@ -105,7 +107,7 @@ var successScene = {
 			sceneManager.pop();
 			sceneManager.float(levelBrowserScene, {collectionPath: levelBrowserScene.currentLevel.path + "/solutions"});
 		});
-		saveSolutionBtn.addEventListener("click", () => {
+		this.saveSolutionBtn.addEventListener("click", () => {
 			sceneManager.float(saveScene);
 		});
 	}

@@ -27,7 +27,6 @@
 			min-width: 240px;
     }
 		label {
-			white-space: nowrap;
 			display: block;
 			margin: 5px 0;
 		}
@@ -275,6 +274,9 @@
 		#play-btn:hover, #next-level-btn:hover {
 			background-color: #06b;
 		}
+		#save-ui {
+			max-width: 480px;
+		}
 		#strob {
 			width: 50%;
 			max-width: 256px;
@@ -375,8 +377,8 @@
     <div id="save-ui" class="modal">
 			<p id="save-header" class="modalHeader"></p>
 			<form id="save-form">
-				<label>Name<br><input id="save-text" type="text" required></label>
-				<label>Tags (keywords for use with search, optional)<br><input id="tag-input" type="text"></label>
+				<label>Name<br><input id="name-input" type="text" required></label>
+				<label>Tags (optional, space seperated keywords used for search, the name you enter above and your username will be added automatically)<br><input id="tag-input" type="text"></label>
 				<input id="save-btn" class="btn" type="submit" value="Save">
 			</form>
 			<p id="save-info-p" class="message"></p>

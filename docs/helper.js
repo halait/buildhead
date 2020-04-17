@@ -79,13 +79,12 @@ class GameObject {
 		if(def.group !== undefined) pw.createContacts(this.ref, GROUP_CONTACTS[def.group]);
 		this.joints = [];
 		this.connectedObjects = [];
-		this.originX = 0.0;
-		this.originY = 0.0;
-		this.levelObject = false;
-		if(sandboxMode) this.levelObject = true;
+		//this.originX = 0.0;
+		//this.originY = 0.0;
+		this.levelObject = sandboxMode;
 		gameObjects.push(this);
 		if(def.target) targets.push(this);
-		pw.render();
+		//pw.render();
 	}
 
 	destroy(){
@@ -133,7 +132,6 @@ class Circle extends GameObject{
 			}
 		}
 		pw.setPosition(this.ref, x, y);
-		pw.render();
 		if(!this.isLegalPosition()) {
 			canvas.style.cursor = "no-drop";
 			return false;
@@ -149,6 +147,8 @@ class Circle extends GameObject{
 			return;
 		}
 		let p = pw.getPosition(this.ref);
+		this.def.x = p[0];
+		this.def.y = p[1];
 		this.originX = p[0];
 		this.originY = p[1];
 		if(this.def.userFloats[H_IS_JOINABLE]){
@@ -175,9 +175,9 @@ class Circle extends GameObject{
 	}
 
 	toJson(){
-		let p = pw.getPosition(this.ref);
-		this.def.x = p[0];
-		this.def.y = p[1];
+		//let p = pw.getPosition(this.ref);
+		//this.def.x = p[0];
+		//this.def.y = p[1];
 		return JSON.stringify(this.def);
 	}
 }
@@ -225,7 +225,6 @@ class Obround extends GameObject {
 			}
 		}
 		pw.setVertex(this.ref, vertex, x, y);
-		pw.render();
 		if(!this.isLegalPosition()) {
 			canvas.style.cursor = "no-drop";
 			return false;
@@ -243,6 +242,9 @@ class Obround extends GameObject {
 		let p = pw.getPosition(this.ref);
 		this.originX = p[0];
 		this.originY = p[1];
+
+		this.def.vertices = pw.getWorldVertices(this.ref);
+
 		if(this.def.userFloats[H_IS_JOINABLE] && join){
 			this.connectedObjects.splice(0);
 			let wvs = pw.getWorldVertices(this.ref);
@@ -287,7 +289,7 @@ class Obround extends GameObject {
 	}
 
 	toJson(){
-		this.def.vertices = pw.getWorldVertices(this.ref);
+		//this.def.vertices = pw.getWorldVertices(this.ref);
 		return JSON.stringify(this.def);
 	}
 }
@@ -360,8 +362,21 @@ class AABB extends GameObject {
 		}
 	}
 
-	toJson(){
+	setVertex(vertex, x, y){
+		pw.setVertex(this.ref, vertex, x, y);
 		this.def.vertices = pw.getWorldVertices(this.ref);
+	}
+
+	destroy(){
+		if(this == assemblyField){
+			assemblyField = null;
+		} else if(this == goalField){
+			goalField = null;
+		}
+		super.destroy();
+	}
+
+	toJson(){
 		return JSON.stringify(this.def);
 	}
 }
@@ -508,6 +523,13 @@ function create(def){
 		console.error(def);
 		return null;
 	}
+}
+
+function isPlayable(){
+	if(targets.length && goalField && assemblyField){
+		return true;
+	}
+	return false;
 }
 /*
 function getJson(){

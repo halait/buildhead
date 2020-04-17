@@ -16,7 +16,6 @@ let user = null;
 firebase.auth().onAuthStateChanged(changeUser);
 function changeUser(currentUser) {
 	user = currentUser;
-	console.log(user);
 	if(user) {
 		menuScene.accountBtn.textContent = user.displayName;
 		menuScene.accountBtn.onclick = () => {sceneManager.float(profileScene)};
