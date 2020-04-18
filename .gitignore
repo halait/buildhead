@@ -4,3 +4,6 @@
 /docs/code_graveyard.js
 /docs/firebase
 server.js
+/functions
+.firebaserc
+firebase.json
