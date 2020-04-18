@@ -8,3 +8,4 @@ server.js
 .firebaserc
 firebase.json
 firebase-debug.log
+.firebase
