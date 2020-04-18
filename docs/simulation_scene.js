@@ -51,7 +51,7 @@ const simulationScene = {
 					}
 				}
 				if(success) {
-					sceneManager.float(successScene);
+					sceneManager.push(successScene);
 					successPending = false;
 				}
 			}

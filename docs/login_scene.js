@@ -20,7 +20,7 @@ const loginScene = {
 		});
 		emailInput.addEventListener("input", () => {message.textContent = "";});
 		document.getElementById("showPasswordBtn").addEventListener("pointerdown", () => {passwordInput.type = "text";});
-		document.getElementById("register").addEventListener("pointerdown", () => {sceneManager.float(registerScene);});
+		document.getElementById("register").addEventListener("pointerdown", () => {sceneManager.push(registerScene);});
 		document.getElementById("loginForm").addEventListener("submit", (e) => {
 			e.preventDefault();
 			auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)

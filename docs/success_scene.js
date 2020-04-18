@@ -105,10 +105,10 @@ var successScene = {
 		document.getElementById("browse-solutions-btn").addEventListener("click", () => {
 			sceneManager.pop();
 			sceneManager.pop();
-			sceneManager.float(levelBrowserScene, {collectionPath: levelBrowserScene.currentLevel.path + "/solutions"});
+			sceneManager.push(levelBrowserScene, {collectionPath: levelBrowserScene.currentLevel.path + "/solutions"});
 		});
 		this.saveSolutionBtn.addEventListener("click", () => {
-			sceneManager.float(saveScene);
+			sceneManager.push(saveScene);
 		});
 	}
 }

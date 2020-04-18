@@ -25,10 +25,12 @@ const menuScene = {
 
 	init(){
 		document.getElementById("originalLevelsBtn").addEventListener("pointerdown", () => {
-			sceneManager.float(levelBrowserScene, {collectionPath: "originalLevels"});
+			//sceneManager.float(levelBrowserScene, {collectionPath: "originalLevels"});
+			sceneManager.push(levelBrowserScene, {collectionPath: "originalLevels"});
 		});
 		document.getElementById("userLevelsBtn").addEventListener("pointerdown", () => {
-			sceneManager.float(levelBrowserScene, {collectionPath: "userLevels"});
+			//sceneManager.float(levelBrowserScene, {collectionPath: "userLevels"});
+			sceneManager.push(levelBrowserScene, {collectionPath: "userLevels"});
 		});
 		document.getElementById("sandboxBtn").addEventListener("pointerdown", () => {
 			canvasEventManager.reset();

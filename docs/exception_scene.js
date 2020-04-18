@@ -6,7 +6,7 @@ var exceptionScene = {
 	messageP: document.getElementById("exceptionMessageP"),
 	throw(message){
 		this.messageP.textContent = message;
-		sceneManager.float(this);
+		sceneManager.push(this);
 	},
 	start(){
 		loadingScreen.style.display = "none";

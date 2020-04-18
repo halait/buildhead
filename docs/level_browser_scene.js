@@ -1,9 +1,12 @@
 "use strict";
 const levelBrowserScene = {
 	ui: document.getElementById("levelBrowserUi"),
+	isModal:true,
 	async start(query){
 		loadingScreen.style.display = "flex";
-		await this.populate(query);
+		if(query){
+			await this.populate(query);
+		}
 		this.ui.style.display = "block";
 		loadingScreen.style.display ="none";
 	},
@@ -59,7 +62,7 @@ const levelBrowserScene = {
 				this.rows[i].style.display = "table-row";
 				this.rows[i].onpointerdown = () => {
 					this.loadLevel(i);
-					sceneManager.float(modeScene);
+					//sceneManager.float(modeScene);
 				};
 				this.cells[i][0].textContent = this.levels[i].name;
 				this.cells[i][1].textContent = this.levels[i].author;
@@ -79,7 +82,7 @@ const levelBrowserScene = {
 		}
 	},
 
-	loadLevel(index){
+	async loadLevel(index){
 		this.currentLevel = this.levels[index];
 		this.currentLevelIndex = index;
 		let levelData = null;
@@ -101,16 +104,17 @@ const levelBrowserScene = {
 			this.currentLevel.review = {rating: 0};
 			batch.set(db.doc("users/" + user.uid + "/reviews/" + this.currentLevel.id), this.currentLevel.review);
 		}
-		batch.commit()
+		await batch.commit()
 			.catch((err) => {
 				exceptionScene.throw(err);
 				throw err;
 			});
+		sceneManager.push(modeScene);
 	},
 
 	init(){
 		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.pop();});
 		this.ui.prepend(sceneCloseBtn);
 		const rowsLive = document.getElementById("levelBrowser").tBodies[0].rows;
 		const rowLen = rowsLive[0].cells.length;

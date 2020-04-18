@@ -5,6 +5,7 @@ var loadLevelScene = {
 	activeBtn: false,
 	activeBtnElement: false,
 	ui: document.getElementById("loadLevelUI"),
+	isModal: true,
 	backScene: false,
 	reader: new FileReader(),
 

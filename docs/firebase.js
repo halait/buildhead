@@ -18,10 +18,10 @@ function changeUser(currentUser) {
 	user = currentUser;
 	if(user) {
 		menuScene.accountBtn.textContent = user.displayName;
-		menuScene.accountBtn.onclick = () => {sceneManager.float(profileScene)};
+		menuScene.accountBtn.onclick = () => {sceneManager.push(profileScene)};
 	} else {
 		menuScene.accountBtn.textContent = "Login";
-		menuScene.accountBtn.onclick = () => {sceneManager.float(loginScene)};
+		menuScene.accountBtn.onclick = () => {sceneManager.push(loginScene)};
 	}
 }
 

@@ -26,8 +26,8 @@ var sandboxScene = {
 		addBtn(removeBtn.cloneNode(true), this.toolbar, removeEventHandler);
 		addBtn(assemblyFieldCreatorBtn.cloneNode(true), this.toolbar, assemblyFieldCreatorEventHandler);
 		addBtn(goalFieldCreatorBtn.cloneNode(true), this.toolbar, goalFieldCreatorEventHandler);
-		addBtn(saveLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.float(saveScene);});
-		addBtn(loadLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.float(loadLevelScene);});
+		addBtn(saveLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(saveScene);});
+		addBtn(loadLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(loadLevelScene);});
 		addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
 	}
 }

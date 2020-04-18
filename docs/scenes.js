@@ -2,6 +2,7 @@
 
 const modeScene = {
 	ui: document.getElementById("mode-ui"),
+	isModal: true,
 	currentIndex: 0,
 	start(index) {
 		this.ui.style.display = "block";
@@ -12,7 +13,7 @@ const modeScene = {
 	},
 	init() {
 		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", e => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("click", e => {sceneManager.pop();});
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("play-btn").addEventListener("click", () => {
 			sceneManager.push(assemblyScene);
@@ -28,13 +29,14 @@ modeScene.init();
 
 const saveScene = {
 	ui: document.getElementById("save-ui"),
+	isModal: true,
 	saveInfoP: document.getElementById("save-info-p"),
 	nameInput: document.getElementById('name-input'),
 	tagInput: document.getElementById("tag-input"),
 	header: document.getElementById("save-header"),
 	start(){
 		if(!user){
-			sceneManager.float(loginScene);
+			sceneManager.push(loginScene);
 			return;
 		}
 		if(!isPlayable()){
@@ -88,7 +90,12 @@ const saveScene = {
 					this.saveInfoP.textContent = "You already used this name, choose a different name";
 					return;
 				}
-				const docTags = this.tagInput.value.split(" ");
+				let docTags = null;
+				if(this.tagInput.value){
+					docTags = this.tagInput.value.split(" ");
+				} else {
+					docTags = [];
+				}
 				docTags.push(docName);
 				docTags.push(user.displayName);
 				await db.doc(docPath).set({
@@ -101,12 +108,13 @@ const saveScene = {
 					tags: docTags,
 					json: this.getJson()
 				});
-				this.saveInfoP.textContent = "";
 				sceneManager.unfloat();
 			} catch(e) {
 				console.error(e);
 				exceptionScene.throw(e.message);
 			}
+			this.saveInfoP.textContent = "";
+			this.nameInput.value = "";
 		});
 	}
 }

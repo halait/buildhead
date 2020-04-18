@@ -109,6 +109,10 @@ class GameObject {
 		}
 		return true;
 	}
+
+	setFinalProperties(){
+
+	}
 }
 
 class Circle extends GameObject{
@@ -140,18 +144,17 @@ class Circle extends GameObject{
 		return true;
 	}
 
-	setFinalProperties(){
+	setFinalProperties(join){
 		if(!sandboxMode && !this.isLegalPosition()) {
 			this.destroy();
-			pw.render();
-			return;
+			return false;
 		}
 		let p = pw.getPosition(this.ref);
 		this.def.x = p[0];
 		this.def.y = p[1];
 		this.originX = p[0];
 		this.originY = p[1];
-		if(this.def.userFloats[H_IS_JOINABLE]){
+		if(join && this.def.userFloats[H_IS_JOINABLE]){
 			this.connectedObjects.splice(0);
 			for(const j of getHandlesNear(p[0], p[1], this)){
 				let jointDef = {
@@ -172,6 +175,7 @@ class Circle extends GameObject{
 				create(jointDef);
 			}
 		}
+		return true;
 	}
 
 	toJson(){
@@ -236,8 +240,7 @@ class Obround extends GameObject {
 	setFinalProperties(join){
 		if(!sandboxMode && !this.isLegalPosition()) {
 			this.destroy();
-			pw.render();
-			return;
+			return false;
 		}
 		let p = pw.getPosition(this.ref);
 		this.originX = p[0];
@@ -245,7 +248,7 @@ class Obround extends GameObject {
 
 		this.def.vertices = pw.getWorldVertices(this.ref);
 
-		if(this.def.userFloats[H_IS_JOINABLE] && join){
+		if(join && this.def.userFloats[H_IS_JOINABLE]){
 			this.connectedObjects.splice(0);
 			let wvs = pw.getWorldVertices(this.ref);
 			for(const j of getHandlesNear(wvs[0][0], wvs[0][1], this)){
@@ -285,7 +288,7 @@ class Obround extends GameObject {
 				create(jointDef);
 			}
 		}
-		pw.render();
+		return true;
 	}
 
 	toJson(){
@@ -365,6 +368,7 @@ class AABB extends GameObject {
 	setVertex(vertex, x, y){
 		pw.setVertex(this.ref, vertex, x, y);
 		this.def.vertices = pw.getWorldVertices(this.ref);
+		return true;
 	}
 
 	destroy(){
@@ -409,8 +413,7 @@ class Joint {
 		this.gameObjectB.joints.push(this);
 		this.gameObjectA.connectedObjects.push(this.gameObjectB);
 		this.gameObjectB.connectedObjects.push(this.gameObjectA);
-		this.levelObject = false;
-		if(this.sandboxMode) this.levelObject = true;
+		this.levelObject = sandboxMode;
 		joints.push(this);
 	}
 

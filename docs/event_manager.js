@@ -209,7 +209,9 @@ const ccwWheelCreatorEventHandler = {
 		pw.render();
 	},
 	handleActiveMouseup(){
-		tempWheel.setFinalProperties(true);
+		if(!tempWheel.setFinalProperties(true)){
+			pw.render();
+		}
 		tempWheel = null;
 	}
 };
@@ -233,7 +235,9 @@ const nWheelCreatorEventHandler = {
 		pw.render();
 	},
 	handleActiveMouseup(){
-		tempWheel.setFinalProperties(true);
+		if(!tempWheel.setFinalProperties(true)){
+			pw.render();
+		}
 		tempWheel = null;
 	}
 };
@@ -261,7 +265,9 @@ const cwWheelCreatorEventHandler = {
 		pw.render();
 	},
 	handleActiveMouseup(){
-		tempWheel.setFinalProperties(true);
+		if(!tempWheel.setFinalProperties(true)){
+			pw.render();
+		}
 		tempWheel = null;
 	}
 };
@@ -269,7 +275,7 @@ const cwWheelCreatorEventHandler = {
 const tWheelCreatorEventHandler = {
 	handleEvent(e) {
 		setActiveBtn(e.currentTarget, this);
-		sceneManager.float(createCustomScene, pw.CIRCLE_FORM);
+		sceneManager.push(createCustomScene, pw.CIRCLE_FORM);
 	},
 
 	handleActivePress(){
@@ -295,7 +301,9 @@ const tWheelCreatorEventHandler = {
 		pw.render();
 	},
 	handleActiveMouseup(){
-		tempWheel.setFinalProperties(true);
+		if(!tempWheel.setFinalProperties(true)){
+			pw.render();
+		}
 		tempWheel = null;
 	}
 };
@@ -314,11 +322,13 @@ const nRodCreatorEventHandler = {
 		pw.render();
 	},
 	handleActiveDrag(){
-		tempRod.setVertex(1, canvasEventManager.mx, canvasEventManager.my);
+		tempRod.setVertex(1, canvasEventManager.mx, canvasEventManager.my, true);
 		pw.render();
 	},
 	handleActiveMouseup(){
-		tempRod.setFinalProperties(true);
+		if(!tempRod.setFinalProperties(true)){
+			pw.render();
+		}
 		tempRod = null;
 	},
 };
@@ -341,7 +351,9 @@ const cRodCreatorEventHandler = {
 		pw.render();
 	},
 	handleActiveMouseup(){
-		tempRod.setFinalProperties(true);
+		if(!tempRod.setFinalProperties(true)){
+			pw.render();
+		}
 		tempRod = null;
 	},
 };
@@ -349,7 +361,8 @@ const cRodCreatorEventHandler = {
 const gRodCreatorEventHandler = {
 	handleEvent(e){
 		setActiveBtn(e.currentTarget, this);
-		sceneManager.float(createCustomScene);
+		//sceneManager.float(createCustomScene);
+		sceneManager.push(createCustomScene);
 	},
 
 	handleActivePress(){
@@ -373,7 +386,9 @@ const gRodCreatorEventHandler = {
 		pw.render();
 	},
 	handleActiveMouseup(){
-		tempRod.setFinalProperties(true);
+		if(!tempRod.setFinalProperties(true)){
+			pw.render();
+		}
 		tempRod = null;
 	},
 };
@@ -469,7 +484,7 @@ const moveEventHandler = {
 				} else if(form == pw.PLANE_FORM) {
 					if(!o.gameObject.setVertex(o.vertex, canvasEventManager.mx - o.x, canvasEventManager.my - o.y)) this.isLegalMove = false;
 				} else if(form == pw.AABB_FORM){
-					pw.setVertex(o.gameObject.ref, o.vertex, canvasEventManager.mx, canvasEventManager.my);
+					o.gameObject.setVertex(o.vertex, canvasEventManager.mx, canvasEventManager.my);
 				} else {
 					console.error("Unhandles form: " + form);
 				}
@@ -486,7 +501,7 @@ const moveEventHandler = {
 		if(this.gameObjectsMoving.length > 0){
 			if(!this.isLegalMove){
 				for(const o of this.gameObjectsMoving){
-					let form = pw.getForm(o.gameObject.ref);
+					const form = pw.getForm(o.gameObject.ref);
 					if(form == pw.CIRCLE_FORM) {
 						o.gameObject.setPosition(this.objsOriginX - o.x, this.objsOriginY - o.y);
 					} else if(form == pw.PLANE_FORM) {
@@ -503,9 +518,7 @@ const moveEventHandler = {
 							pw.setJointPosition(j.ref, wv[0], wv[1]);
 						}
 					}
-					let p = pw.getPosition(o.gameObject.ref);
-					o.gameObject.originX = p[0];
-					o.gameObject.originY = p[1];
+					o.gameObject.setFinalProperties(false);
 				}
 			}
 			this.gameObjectsMoving.splice(0);
@@ -605,26 +618,39 @@ const polygonBtnEventHandler = {
 
 // scene management
 const sceneManager = {
-	history: [],
+	sceneHistory: [],
+	modalHistory: [],
 	current: null,
-	currentFloat: false,
+	currentModal: null,
 
 	push(scene, args){
-		this.unfloat();
-		if(this.current) this.current.suspend();
-		this.history.push(scene);
-		this.current = scene;
-		this.current.start(args);
+		if(scene.isModal){
+			if(this.currentModal){
+				this.currentModal.suspend();
+			}
+			this.modalHistory.push(scene);
+			this.currentModal = scene;
+			scene.start();
+		} else {
+			if(this.current){
+				this.current.suspend();
+			}
+			this.sceneHistory.push(scene);
+			this.current = scene;
+			scene.start(args);
+		}
 	},
 
 	pop(){
-		this.unfloat();
+		//this.unfloat();
 		this.current.suspend();
-		this.history.pop();
-		this.current = this.history[this.history.length - 1];
-		this.current.start();
+		const old = this.sceneHistory.pop();
+		this.current = this.sceneHistory[this.sceneHistory.length - 1];
+		if(!old.isModal || this.current.isModal){
+			this.current.start();
+		}
 	},
-
+	/*
 	float(scene, arg){
 		this.unfloat();
 		this.currentFloat = scene;
@@ -637,4 +663,5 @@ const sceneManager = {
 			this.currentFloat = false;
 		}
 	},
+	*/
 };
