@@ -1,5 +1,4 @@
 "use strict";
-
 const modeScene = {
 	ui: document.getElementById("mode-ui"),
 	isModal: true,
@@ -36,10 +35,11 @@ const saveScene = {
 	header: document.getElementById("save-header"),
 	start(){
 		if(!user){
-			sceneManager.push(loginScene);
+			sceneManager.pushModal(loginScene);
 			return;
 		}
 		if(!isPlayable()){
+			sceneManager.popModal();
 			exceptionScene.throw(
 				`Unable to save level because it is not playable, to be playable the level must have one assesmbly 
 				area (blue box), one goal area (orange box) and one or more targets (orange objects, usually circle).`
@@ -73,18 +73,17 @@ const saveScene = {
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("save-form").addEventListener("submit", async (e) => {
 			e.preventDefault();
-			let docName = this.nameInput.value.trim();
+			let nameIn = this.nameInput.value.trim();
 			const pre = /^og /;
-			let docPath = "userLevels";
-			if(user && user.displayName === "halait" && pre.test(docName)){
-				docPath = "originalLevels";
-				docName = docName.replace(pre, "");
+			let docPath = "community/";
+			if(!sandboxMode) {
+				console.log(levelBrowserScene.currentLevel.path);
+				docPath = levelBrowserScene.currentLevel.path + "/solutions/"; 
+			} else if(user && user.displayName === "halait" && pre.test(nameIn)){
+				docPath = "original/";
+				nameIn = nameIn.replace(pre, "");
 			}
-			if(sandboxMode) {
-				docPath += "/la=" + user.displayName + "+ln=" + docName; 
-			} else {
-				docPath = levelBrowserScene.currentLevel.path + "/solutions/" + levelBrowserScene.currentLevel.id + "+sa=" + user.displayName + "+sn=" + docName; 
-			}
+			docPath += `{"author:"${user.displayName}","name":"${nameIn}"}`;
 			try {
 				if((await db.doc(docPath).get()).exists){
 					this.saveInfoP.textContent = "You already used this name, choose a different name";
@@ -96,19 +95,21 @@ const saveScene = {
 				} else {
 					docTags = [];
 				}
-				docTags.push(docName);
+				docTags.push(nameIn);
 				docTags.push(user.displayName);
-				await db.doc(docPath).set({
-					name: docName,
-					author: user.displayName,
-					authorId: user.uid,
-					dateCreated: new Date(),
-					rating: 0,
-					plays: 0,
-					tags: docTags,
-					json: this.getJson()
-				});
-				sceneManager.unfloat();
+				for(let i = 0; i != 20; ++i){
+					await db.doc(docPath).set({
+						name: nameIn,
+						author: user.displayName,
+						authorId: user.uid,
+						dateCreated: new Date(),
+						rating: 0,
+						plays: 0,
+						tags: docTags,
+						json: this.getJson()
+					});
+					sceneManager.popModal();
+				}
 			} catch(e) {
 				console.error(e);
 				exceptionScene.throw(e.message);

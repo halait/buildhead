@@ -102,12 +102,12 @@ var createCustomScene = {
 			} else {
 				console.error("Unhandled texture");
 			}
-			sceneManager.unfloat();
+			sceneManager.popModal();
 			return false;
 		};
 		this.planeUi.appendChild(formElement);
 		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.popModal();});
 		this.planeUi.prepend(sceneCloseBtn);
 
 		formElement = this.customPropertiesForm.cloneNode(true);
@@ -160,12 +160,12 @@ var createCustomScene = {
 			} else if(this.circleDef.group != COPLANAR_GROUP){
 				console.error("assigning texture coordinates failed");
 			}
-			sceneManager.unfloat();
+			sceneManager.popModal();
 			return false;
 		};
 		this.circleUi.appendChild(formElement);
 		sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.popModal();});
 		this.circleUi.prepend(sceneCloseBtn);
 	}
 }

@@ -82,7 +82,7 @@ function createTexture(imgPath){
 		loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 		loadingScreen.style.display = "none";
 		window.onresize();
-		sceneManager.push(menuScene);
+		sceneManager.push(location.pathname);
 
 		let texture = pw.gl.createTexture();
 		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);

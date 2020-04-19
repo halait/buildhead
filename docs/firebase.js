@@ -16,6 +16,8 @@ let user = null;
 firebase.auth().onAuthStateChanged(changeUser);
 function changeUser(currentUser) {
 	user = currentUser;
+	routes["/"].onUserChanged();
+	/*
 	if(user) {
 		menuScene.accountBtn.textContent = user.displayName;
 		menuScene.accountBtn.onclick = () => {sceneManager.push(profileScene)};
@@ -23,6 +25,7 @@ function changeUser(currentUser) {
 		menuScene.accountBtn.textContent = "Login";
 		menuScene.accountBtn.onclick = () => {sceneManager.push(loginScene)};
 	}
+	*/
 }
 
 function computeAverage(arr){

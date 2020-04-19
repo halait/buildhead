@@ -9,7 +9,7 @@ const loginScene = {
   },
 	init(){
 		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", (e) => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("mousedown", (e) => {sceneManager.popModal();});
 		this.ui.prepend(sceneCloseBtn);
 		const passwordInput = document.getElementById("loginPassword");
 		const emailInput = document.getElementById("loginEmail");
@@ -25,7 +25,7 @@ const loginScene = {
 			e.preventDefault();
 			auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
 				.then(() => {
-					sceneManager.unfloat();
+					sceneManager.pop();
 				})
 				.catch((err) =>{
 					console.error(err);

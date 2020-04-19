@@ -558,3 +558,7 @@ function getJson(){
 	json += "]"
 	return json;
 }
+
+function stringToBase64(str){
+	return btoa(str).replace()
+}

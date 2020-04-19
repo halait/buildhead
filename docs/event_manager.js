@@ -275,7 +275,7 @@ const cwWheelCreatorEventHandler = {
 const tWheelCreatorEventHandler = {
 	handleEvent(e) {
 		setActiveBtn(e.currentTarget, this);
-		sceneManager.push(createCustomScene, pw.CIRCLE_FORM);
+		sceneManager.pushModal(createCustomScene, pw.CIRCLE_FORM);
 	},
 
 	handleActivePress(){
@@ -362,7 +362,7 @@ const gRodCreatorEventHandler = {
 	handleEvent(e){
 		setActiveBtn(e.currentTarget, this);
 		//sceneManager.float(createCustomScene);
-		sceneManager.push(createCustomScene);
+		sceneManager.pushModal(createCustomScene);
 	},
 
 	handleActivePress(){
@@ -618,50 +618,58 @@ const polygonBtnEventHandler = {
 
 // scene management
 const sceneManager = {
-	sceneHistory: [],
 	modalHistory: [],
 	current: null,
 	currentModal: null,
-
-	push(scene, args){
-		if(scene.isModal){
-			if(this.currentModal){
-				this.currentModal.suspend();
-			}
-			this.modalHistory.push(scene);
-			this.currentModal = scene;
-			scene.start();
+	push(pathname, args){
+		this.popAllModal();
+		if(this.current){
+			this.current.suspend();
+		}
+		const paths = parsePathname(pathname);
+		this.current = routes[paths.route];
+		this.current.start(paths.subpath);
+		history.pushState(args, "", pathname);
+	},
+	pushModal(modal, args){
+		if(this.currentModal){
+			this.currentModal.suspend();
+		}
+		this.currentModal = modal;
+		this.modalHistory.push(modal);
+		modal.start(args);
+	},
+	popModal(){
+		this.modalHistory.pop().suspend();
+		const i = this.modalHistory.length - 1;
+		if(i > -1) {
+			this.currentModal = this.modalHistory[i];
+			this.currentModal.start();
 		} else {
-			if(this.current){
-				this.current.suspend();
-			}
-			this.sceneHistory.push(scene);
-			this.current = scene;
-			scene.start(args);
+			this.currentModal = null;
 		}
 	},
-
-	pop(){
-		//this.unfloat();
-		this.current.suspend();
-		const old = this.sceneHistory.pop();
-		this.current = this.sceneHistory[this.sceneHistory.length - 1];
-		if(!old.isModal || this.current.isModal){
-			this.current.start();
+	popAllModal(){
+		for(let i = this.modalHistory.length - 1; i > -1; --i){
+			const modal = this.modalHistory.pop();
+			modal.suspend();
 		}
-	},
-	/*
-	float(scene, arg){
-		this.unfloat();
-		this.currentFloat = scene;
-		scene.start(arg);
-	},
-
-	unfloat(){
-		if(this.currentFloat){
-			this.currentFloat.suspend();
-			this.currentFloat = false;
-		}
-	},
-	*/
+		this.currentModal = null;
+	}
 };
+
+window.addEventListener("popstate", (e) => {
+	sceneManager.popAllModal();
+	console.log(window.location.pathname);
+	if(sceneManager.current){
+		sceneManager.current.suspend();
+	}
+	const paths = parsePathname(window.location.pathname);
+	sceneManager.current = routes[paths.route];
+	sceneManager.current.start(paths.subpath);	
+});
+
+function parsePathname(pathname){
+	const route = /\/[^\/]*/.exec(pathname);
+	return {route: route, subpath: pathname.replace(route, "")};
+}

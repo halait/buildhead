@@ -67,7 +67,6 @@ var loadLevelScene = {
 			}
 			loadLevelScene.load(defs);
 		}
-		
 	}
 }
 loadLevelScene.init();

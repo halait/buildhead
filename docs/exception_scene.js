@@ -6,7 +6,7 @@ var exceptionScene = {
 	messageP: document.getElementById("exceptionMessageP"),
 	throw(message){
 		this.messageP.textContent = message;
-		sceneManager.push(this);
+		sceneManager.pushModal(this);
 	},
 	start(){
 		loadingScreen.style.display = "none";
@@ -18,7 +18,7 @@ var exceptionScene = {
 
 	init(){
 		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.popModal();});
 		exceptionScene.ui.prepend(sceneCloseBtn);
 	}
 }
