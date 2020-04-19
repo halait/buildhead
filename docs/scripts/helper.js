@@ -548,5 +548,10 @@ function getJson(){
 }
 
 function stringToBase64(str){
-	return btoa(str).replace()
+	return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "~");
+}
+
+function base64ToString(base64){
+	console.log(base64.replace(/-/g, "+").replace(/_/g, "/").replace(/~/g, "="));
+	return atob(base64.replace(/-/g, "+").replace(/_/g, "/").replace(/~/g, "="));
 }

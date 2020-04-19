@@ -2,7 +2,6 @@
 // get rid of this
 const canvas = document.getElementById("canvas");
 var sandboxMode = false;
-var isSimulating = false;
 let tutorialStep = -1;
 
 //var isMousedown = false;
@@ -34,14 +33,14 @@ const canvasEventManager = {
 		this.xTranslate += x;
 		this.yTranslate += y;
 		pw.gl.uniform2f(pw.U_TRANSLATE_LOCATION, this.xTranslate, this.yTranslate);
-		if(!isSimulating) pw.render();
+		if(!simulationManager.isSimulating) pw.render();
 	},
 	scale(d){
 		this.zoom = Math.min(Math.max(this.zoom + d, 0.2), 8.0);
 		pw.gl.uniform2f(pw.U_SCALE_LOCATION, this.aspectRatio * this.zoom, this.zoom);
 		this.widthM = 1 / (canvas.clientWidth * 0.5 * this.aspectRatio * this.zoom);
 		this.heightM = 1 / (canvas.clientHeight * 0.5 * this.zoom);
-		if(!isSimulating) pw.render();
+		if(!simulationManager.isSimulating) pw.render();
 	},
 	reset(){
 		pw.destroyAll();
@@ -79,9 +78,9 @@ const canvasEventManager = {
 	handlePointerEnd(e){
 		if(canvasEventManager.activePointers.length){
 			canvasEventManager.activePointers.splice(0);
-			this.style.cursor = "crosshair";
-			if(this.currentHandler) {
-				this.currentHandler.handleActiveMouseup();
+			canvas.style.cursor = "crosshair";
+			if(canvasEventManager.currentHandler) {
+				canvasEventManager.currentHandler.handleActiveMouseup();
 			}
 		}
 	},
@@ -679,5 +678,5 @@ window.addEventListener("popstate", (e) => {
 
 function parsePathname(pathname){
 	const route = /\/[^\/]*/.exec(pathname);
-	return {route: route, subpath: pathname.replace(route, "")};
+	return {route: route, subpath: pathname.replace(route, "").slice(1)};
 }

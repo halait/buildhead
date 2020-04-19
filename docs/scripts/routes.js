@@ -85,30 +85,8 @@ const routes = {
 			const levelsSnap = (await ref.limit(this.maxLevels).get()).docs;
 			const len = levelsSnap.length;
 			if(len){
+				await this.normalizeLevels(levelsSnap);
 				this.lastDoc = levelsSnap[len - 1];
-				const ids = [];
-				for(let i = 0; i != len; ++i){
-					const level = levelsSnap[i].data();
-					const id = levelsSnap[i].id;
-					ids[i] = id;
-					level.id = id;
-					level.path = levelsSnap[i].ref.path;
-					this.levels[i] = level;
-				}
-				if(len && user){
-					const reviewSnap = (await db.collection("users").doc(user.uid).collection("reviews").where(firebase.firestore.FieldPath.documentId(), "in", ids).get()).docs;
-					const snapLen = reviewSnap.length;
-					for(let i = 0; i != len; ++i){
-						const id = this.levels[i].id;
-						for(let j = 0; j != snapLen; ++j){
-							if(id == reviewSnap[j].id){
-								this.levels[i].review = reviewSnap[j].data();
-								break;
-							}
-						}
-					}
-				}
-
 				for(let i = 0; i != len; ++i){
 					this.rows[i].style.display = "table-row";
 					this.rows[i].onpointerdown = () => {
@@ -129,6 +107,34 @@ const routes = {
 
 			for(let i = len; i != this.maxLevels; ++i){
 				this.rows[i].style.display = "none";
+			}
+		},
+
+		async normalizeLevels(docs){
+			const len = docs.length;
+			if(len){
+				const ids = [];
+				for(let i = 0; i != len; ++i){
+					const level = docs[i].data();
+					const id = docs[i].id;
+					ids[i] = id;
+					level.id = id;
+					level.path = docs[i].ref.path;
+					this.levels[i] = level;
+				}
+				if(user){
+					const reviewSnap = (await db.collection("users").doc(user.uid).collection("reviews").where(firebase.firestore.FieldPath.documentId(), "in", ids).get()).docs;
+					const snapLen = reviewSnap.length;
+					for(let i = 0; i != len; ++i){
+						const id = this.levels[i].id;
+						for(let j = 0; j != snapLen; ++j){
+							if(id == reviewSnap[j].id){
+								this.levels[i].review = reviewSnap[j].data();
+								break;
+							}
+						}
+					}
+				}
 			}
 		},
 
@@ -183,9 +189,17 @@ const routes = {
 	"/sandbox": {
 		toolbar: document.getElementById("sandboxToolbar"),
 
-		start(){
-			sandboxMode = true;
+		async start(docPath){
 			this.toolbar.style.display = "flex";
+			let level = history.state;
+			if(!level && docPath) {
+				await routes["/listing"].normalizeLevels([await db.doc(base64ToString(docPath)).get()]);
+				level = routes["/listing"].levels[0];
+			}
+			if(level){
+				await routes["/listing"].loadLevel(level);
+			}
+			sandboxMode = true;
 		},
 		suspend(){
 			this.toolbar.style.display = "none";
@@ -211,16 +225,24 @@ const routes = {
 		}
 	},
 	"/play": {
-		start(){
-			this.currentLevel = history.state;
-			if(!this.currentLevel){
-				this.currentLevel
-			}
-			routes["/listing"].loadLevel(this.currentLevel);
-			sandboxMode = false;
+		async start(docPath){
 			this.toolbar.style.display = "flex";
+			if(history.state){
+				this.currentLevel = history.state;
+			} else if(docPath) {
+				await routes["/listing"].normalizeLevels([await db.doc(base64ToString(docPath)).get()]);
+				this.currentLevel = routes["/listing"].levels[0];
+			} else {
+				exceptionScene.throw("This url is incorrectly formatted");
+				return;
+			}
+			await routes["/listing"].loadLevel(this.currentLevel);
+			sandboxMode = false;
 		},
 		suspend(){
+			if(simulationManager.isSimulating){
+				simulationManager.end();
+			}
 			this.toolbar.style.display = "none";
 		},
 		toolbar: document.getElementById("assemblySceneBtnsDiv"),

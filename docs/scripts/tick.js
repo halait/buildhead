@@ -8,21 +8,23 @@ const simulationManager = {
 		this.oldBtn = canvasEventManager.currentBtn;
 		this.oldHandler = canvasEventManager.currentHandler;
 		canvasEventManager.setHandler(this.eventHandler);
-		isSimulating = true;
+		this.isSimulating = true;
 		this.successPending = !sandboxMode;
 		requestAnimationFrame(this.simulate);
 	},
 	end(){
-		isSimulating = false;
+		this.isSimulating = false;
 		this.toolbar.style.display = "none";
 		this.caller.toolbar.style.display = "flex";
 		canvasEventManager.setHandler(this.oldHandler, this.oldBtn);
+		sceneManager.popAllModal();
 	},
 	
 	caller: null,
 	oldBtn: null,
 	oldHandler: null,
 	toolbar: document.getElementById("simulationSceneBtnsDiv"),
+	isSimulating: false,
 
 
 	eventHandler: {
@@ -44,10 +46,10 @@ const simulationManager = {
 	successPending: false,
 	before: 0,
 	simulate(now) {
-		if(isSimulating) {
+		if(simulationManager.isSimulating) {
 			requestAnimationFrame(simulationManager.simulate);
 			pw.update();
-			let dt = now - simulationManager.before;
+			const dt = now - simulationManager.before;
 			if(dt < 25) return;
 			//if(dt > 34) console.log("frame drop");
 			simulationManager.before = now;
@@ -62,8 +64,8 @@ const simulationManager = {
 					}
 				}
 				if(success) {
-					sceneManager.pushModal(successScene);
 					simulationManager.successPending = false;
+					sceneManager.pushModal(successScene, simulationManager.caller.currentLevel);
 				}
 			}
 		} else {
@@ -241,6 +243,7 @@ const tempPolygon = [];
 const debugPoints = [];
 
 pw.render = function() {
+	const M = this.M;
 	this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
 	let p = 0;
@@ -261,49 +264,49 @@ pw.render = function() {
 
 	for(let i = 0, len = this.poTotal; i < len; ++i){
 		let si = this.PO_PTRS[i];
-		if(this.M[O_FORM + si] == this.CIRCLE_FORM){
-			let rc = this.M[O_RADIUS + si] * this.M[O_COS + si];
-			let rs = this.M[O_RADIUS + si] * this.M[O_SIN + si];
-			let x0 = rs - rc + this.M[O_TX + si];
-			let y0 = -rc - rs + this.M[O_TY + si];
-			let x2 = rc - rs + this.M[O_TX + si];
-			let y2 = rc + rs + this.M[O_TY + si];
+		if(M[O_FORM + si] == this.CIRCLE_FORM){
+			let rc = M[O_RADIUS + si] * M[O_COS + si];
+			let rs = M[O_RADIUS + si] * M[O_SIN + si];
+			let x0 = rs - rc + M[O_TX + si];
+			let y0 = -rc - rs + M[O_TY + si];
+			let x2 = rc - rs + M[O_TX + si];
+			let y2 = rc + rs + M[O_TY + si];
 			this.positions[p++] = x0;
 			this.positions[p++] = y0;
-			this.positions[p++] = rc + rs + this.M[O_TX + si];
-			this.positions[p++] = rs - rc + this.M[O_TY + si];
+			this.positions[p++] = rc + rs + M[O_TX + si];
+			this.positions[p++] = rs - rc + M[O_TY + si];
 			this.positions[p++] = x2;
 			this.positions[p++] = y2;
 			this.positions[p++] = x2;
 			this.positions[p++] = y2;
-			this.positions[p++] = -rc - rs + this.M[O_TX + si];
-			this.positions[p++] = rc - rs + this.M[O_TY + si];
+			this.positions[p++] = -rc - rs + M[O_TX + si];
+			this.positions[p++] = rc - rs + M[O_TY + si];
 			this.positions[p++] = x0;
 			this.positions[p++] = y0;
 
-			let ti = this.PO_SIZES[this.M[O_FORM + si]] + si + H_R;
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 1];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 1];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 1];
+			let ti = this.PO_SIZES[M[O_FORM + si]] + si + H_R;
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 1];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 1];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 1];
 
-			if(this.M[this.PO_SIZES[this.M[O_FORM + si]] + si + H_IS_JOINABLE]){
+			if(M[this.PO_SIZES[M[O_FORM + si]] + si + H_IS_JOINABLE]){
 				for(let i = 0; i < 4; ++i){
-					//let x = WHEEL_JOINABLES[i][0] * this.M[O_COS + si] - WHEEL_JOINABLES[i][1] * this.M[O_SIN + si] + this.M[O_TX + si];
-					//let y = WHEEL_JOINABLES[i][1] * this.M[O_COS + si] + WHEEL_JOINABLES[i][0] * this.M[O_SIN + si] + this.M[O_TY + si];
+					//let x = WHEEL_JOINABLES[i][0] * M[O_COS + si] - WHEEL_JOINABLES[i][1] * M[O_SIN + si] + M[O_TX + si];
+					//let y = WHEEL_JOINABLES[i][1] * M[O_COS + si] + WHEEL_JOINABLES[i][0] * M[O_SIN + si] + M[O_TY + si];
 					let r = pw.JOINABLE_RADIUS;
-					rc = (this.M[O_RADIUS + si] - r) * this.M[O_COS + si];
-					rs = (this.M[O_RADIUS + si] - r) * this.M[O_SIN + si];
-					let x = this.WHEEL_J[i][0] * rc - this.WHEEL_J[i][1] * rs + this.M[O_TX + si];
-					let y = this.WHEEL_J[i][1] * rc + this.WHEEL_J[i][0] * rs + this.M[O_TY + si];
+					rc = (M[O_RADIUS + si] - r) * M[O_COS + si];
+					rs = (M[O_RADIUS + si] - r) * M[O_SIN + si];
+					let x = this.WHEEL_J[i][0] * rc - this.WHEEL_J[i][1] * rs + M[O_TX + si];
+					let y = this.WHEEL_J[i][1] * rc + this.WHEEL_J[i][0] * rs + M[O_TY + si];
 					this.positions[p++] = x - r;
 					this.positions[p++] = y - r;
 					this.positions[p++] = x + r;
@@ -331,13 +334,13 @@ pw.render = function() {
 				}
 			}
 			
-		} else if(this.M[O_FORM + si] == this.PLANE_FORM){
-			let xe = -this.M[O_UY + si] * this.M[O_HALF_WIDTH + si];
-			let ye = this.M[O_UX + si] * this.M[O_HALF_WIDTH + si];
-			let x0 = this.M[O_W0X + si];
-			let y0 = this.M[O_W0Y + si];
-			let x1 = this.M[O_W1X + si];
-			let y1 = this.M[O_W1Y + si];
+		} else if(M[O_FORM + si] == this.PLANE_FORM){
+			let xe = -M[O_UY + si] * M[O_HALF_WIDTH + si];
+			let ye = M[O_UX + si] * M[O_HALF_WIDTH + si];
+			let x0 = M[O_W0X + si];
+			let y0 = M[O_W0Y + si];
+			let x1 = M[O_W1X + si];
+			let y1 = M[O_W1Y + si];
 			
 			this.positions[p++] = x0 + xe;
 			this.positions[p++] = y0 + ye;
@@ -352,22 +355,22 @@ pw.render = function() {
 			this.positions[p++] = x0 - xe;
 			this.positions[p++] = y0 - ye;
 
-			let ti = this.PO_SIZES[this.M[O_FORM + si]] + si + H_R;
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 1];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 1];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 1];
+			let ti = this.PO_SIZES[M[O_FORM + si]] + si + H_R;
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 1];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 1];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 1];
 
-			if(this.M[O_TYPE + si] == pw.FIXED_TYPE){
-				let r = this.M[O_HALF_WIDTH + si];
+			if(M[O_TYPE + si] == pw.FIXED_TYPE){
+				let r = M[O_HALF_WIDTH + si];
 				this.positions[p++] = x0 - r;
 				this.positions[p++] = y0 - r;
 				this.positions[p++] = x0 + r;
@@ -419,7 +422,7 @@ pw.render = function() {
 				this.texCoords[c++] = 0.5;
 			}
 
-			if(this.M[this.PO_SIZES[this.M[O_FORM + si]] + si + H_IS_JOINABLE]) {
+			if(M[this.PO_SIZES[M[O_FORM + si]] + si + H_IS_JOINABLE]) {
 				let r = 0.01;
 				this.positions[p++] = x0 - r;
 				this.positions[p++] = y0 - r;
@@ -471,57 +474,57 @@ pw.render = function() {
 				this.texCoords[c++] = 0.25;
 				this.texCoords[c++] = 0.75;
 			}
-		} else if(this.M[O_FORM + si] == this.AABB_FORM){
-			this.positions[p++] = this.M[O_MIN_X + si];
-			this.positions[p++] = this.M[O_MIN_Y + si];
-			this.positions[p++] = this.M[O_MAX_X + si];
-			this.positions[p++] = this.M[O_MIN_Y + si];
-			this.positions[p++] = this.M[O_MAX_X + si];
-			this.positions[p++] = this.M[O_MAX_Y + si];
-			this.positions[p++] = this.M[O_MAX_X + si];
-			this.positions[p++] = this.M[O_MAX_Y + si];
-			this.positions[p++] = this.M[O_MIN_X + si];
-			this.positions[p++] = this.M[O_MAX_Y + si];
-			this.positions[p++] = this.M[O_MIN_X + si];
-			this.positions[p++] = this.M[O_MIN_Y + si];
+		} else if(M[O_FORM + si] == this.AABB_FORM){
+			this.positions[p++] = M[O_MIN_X + si];
+			this.positions[p++] = M[O_MIN_Y + si];
+			this.positions[p++] = M[O_MAX_X + si];
+			this.positions[p++] = M[O_MIN_Y + si];
+			this.positions[p++] = M[O_MAX_X + si];
+			this.positions[p++] = M[O_MAX_Y + si];
+			this.positions[p++] = M[O_MAX_X + si];
+			this.positions[p++] = M[O_MAX_Y + si];
+			this.positions[p++] = M[O_MIN_X + si];
+			this.positions[p++] = M[O_MAX_Y + si];
+			this.positions[p++] = M[O_MIN_X + si];
+			this.positions[p++] = M[O_MIN_Y + si];
 
-			let ti = this.PO_SIZES[this.M[O_FORM + si]] + si + H_R;
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 1];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 1];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti + 2];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 3];
-			this.texCoords[c++] = this.M[ti];
-			this.texCoords[c++] = this.M[ti + 1];
+			let ti = this.PO_SIZES[M[O_FORM + si]] + si + H_R;
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 1];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 1];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti + 2];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 3];
+			this.texCoords[c++] = M[ti];
+			this.texCoords[c++] = M[ti + 1];
 
 
-		} else if(this.M[O_FORM + si] == this.POLYGON_FORM){
+		} else if(M[O_FORM + si] == this.POLYGON_FORM){
 			let vPtr = O_NUM_VERTICES + si + 1;
-			let v0x = this.M[V_WX + vPtr];
-			let v0y = this.M[V_WY + vPtr];
+			let v0x = M[V_WX + vPtr];
+			let v0y = M[V_WY + vPtr];
 			vPtr += this.V_SIZE;
-			let ti = this.M[O_USERFLOATS_PTR + si] + H_R;
-			for(let len = vPtr + (this.M[O_NUM_VERTICES + si] - 2) * this.V_SIZE; vPtr < len; vPtr += this.V_SIZE){
+			let ti = M[O_USERFLOATS_PTR + si] + H_R;
+			for(let len = vPtr + (M[O_NUM_VERTICES + si] - 2) * this.V_SIZE; vPtr < len; vPtr += this.V_SIZE){
 				this.positions[p++] = v0x;
 				this.positions[p++] = v0y;
-				this.positions[p++] = this.M[V_WX + vPtr];
-				this.positions[p++] = this.M[V_WY + vPtr];
-				this.positions[p++] = this.M[V_WX + vPtr + this.V_SIZE];
-				this.positions[p++] = this.M[V_WY + vPtr + this.V_SIZE];
+				this.positions[p++] = M[V_WX + vPtr];
+				this.positions[p++] = M[V_WY + vPtr];
+				this.positions[p++] = M[V_WX + vPtr + this.V_SIZE];
+				this.positions[p++] = M[V_WY + vPtr + this.V_SIZE];
 
-				this.texCoords[c++] = this.M[ti];
-				this.texCoords[c++] = this.M[ti + 1];
-				this.texCoords[c++] = this.M[ti];
-				this.texCoords[c++] = this.M[ti + 1];
-				this.texCoords[c++] = this.M[ti];
-				this.texCoords[c++] = this.M[ti + 1];
+				this.texCoords[c++] = M[ti];
+				this.texCoords[c++] = M[ti + 1];
+				this.texCoords[c++] = M[ti];
+				this.texCoords[c++] = M[ti + 1];
+				this.texCoords[c++] = M[ti];
+				this.texCoords[c++] = M[ti + 1];
 			}
-			//debugPoints.push([this.M[O_TX + si], this.M[O_TY + si]]);
+			//debugPoints.push([M[O_TX + si], M[O_TY + si]]);
 		}
 	}
 

@@ -11,15 +11,13 @@ const modeScene = {
 	},
 	init() {
 		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", e => {sceneManager.pop();});
+		sceneCloseBtn.addEventListener("click", e => {sceneManager.popModal();});
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("play-btn").addEventListener("click", () => {
-			sceneManager.push("/play/" + this.currentLevel.path, this.currentLevel);
-			//levelBrowserScene.loadLevel(this.currentIndex);
+			sceneManager.push(`/play/${stringToBase64(this.currentLevel.path)}`, this.currentLevel);
 		});
 		document.getElementById("edit-btn").addEventListener("click", () => {
-			sceneManager.push("/sandbox", this.currentLevel);
-			//levelBrowserScene.loadLevel(this.currentIndex);
+			sceneManager.push(`/sandbox/${stringToBase64(this.currentLevel.path)}`, this.currentLevel);
 		});
 	}
 }
@@ -32,7 +30,8 @@ const saveScene = {
 	nameInput: document.getElementById('name-input'),
 	tagInput: document.getElementById("tag-input"),
 	header: document.getElementById("save-header"),
-	start(){
+	level: null,
+	start(level){
 		if(!user){
 			sceneManager.pushModal(loginScene);
 			return;
@@ -45,11 +44,12 @@ const saveScene = {
 			);
 			return;
 		}
-		if(sandboxMode){
-			this.header.textContent = "Save Level";
-		} else {
+		if(level){
 			this.header.textContent = "Save Solution";
+		} else {
+			this.header.textContent = "Save Level";
 		}
+		this.level = level;
 		this.ui.style.display = "block";
 	},
 	suspend(){
@@ -68,16 +68,16 @@ const saveScene = {
 	},
 	init(){
 		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("save-form").addEventListener("submit", async (e) => {
 			e.preventDefault();
 			let nameIn = this.nameInput.value.trim();
 			const pre = /^og /;
 			let docPath = "community/";
-			if(!sandboxMode) {
-				console.log(levelBrowserScene.currentLevel.path);
-				docPath = levelBrowserScene.currentLevel.path + "/solutions/"; 
+			if(this.level) {
+				console.log(this.level);
+				docPath = this.level.path + "/solutions/";
 			} else if(user && user.displayName === "halait" && pre.test(nameIn)){
 				docPath = "original/";
 				nameIn = nameIn.replace(pre, "");
@@ -94,7 +94,7 @@ const saveScene = {
 				} else {
 					docTags = [];
 				}
-				docTags.push(nameIn);
+				docTags.push(...nameIn.split(" "));
 				docTags.push(user.displayName);
 				for(let i = 0; i != 20; ++i){
 					await db.doc(docPath).set({
@@ -105,6 +105,7 @@ const saveScene = {
 						rating: 0,
 						plays: 0,
 						tags: docTags,
+						solution: !sandboxMode,
 						json: this.getJson()
 					});
 				}
@@ -286,27 +287,22 @@ const profileScene = {
 profileScene.init();
 
 var successScene = {
-	activeBtn: false,
-	activeBtnElement: false,
-	btnsDiv: document.getElementById("successSceneCloseBtn"),
 	ui: document.getElementById("successSceneDiv"),
 	nextLevelBtn: document.getElementById("nextLevelBtn"),
 	incrementBtn: document.getElementById("increment-btn"),
 	decrementBtn: document.getElementById("decrement-btn"),
 	ratingDiv: document.getElementById("rating"),
 	saveSolutionBtn: document.getElementById("save-solution-btn"),
-	start(){
+	level: null,
+	start(level){
 		this.ui.style.display = "block";
-		this.ratingDiv.textContent = levelBrowserScene.currentLevel.rating;
-		let rating = 0;
-		if(levelBrowserScene.currentLevel.review){
-			rating = levelBrowserScene.currentLevel.review.rating;
-		}
-		this.selectBtn(rating);
-		if(/solutions$/.test(levelBrowserScene.refDef.collectionPath)){
-			this.saveSolutionBtn.style.display = "none";
-		} else {
+		this.level = level;
+		this.ratingDiv.textContent = level.rating;
+		this.selectBtn(level.review.rating);
+		if(level){
 			this.saveSolutionBtn.style.display = "block";
+		} else {
+			this.saveSolutionBtn.style.display = "none";
 		}
 	},
 	suspend(){
@@ -333,41 +329,29 @@ var successScene = {
 		} else if(e.currentTarget == successScene.decrementBtn) {
 			newRating = -1;
 		}
-		if(levelBrowserScene.currentLevel.review && levelBrowserScene.currentLevel.review.rating == newRating){
+		if(successScene.level.review && successScene.level.review.rating == newRating){
 			newRating = 0;
 		}
-		let ratingDelta = newRating;
-		if(levelBrowserScene.currentLevel.review){
-			ratingDelta -= levelBrowserScene.currentLevel.review.rating;
-		} else {
-			levelBrowserScene.currentLevel.review = {
-				rating: 0,
-				subjectPath: levelBrowserScene.currentLevel.path
-			};
-		}
+		let ratingDelta = newRating - successScene.level.review.rating;
 		if(ratingDelta > 2 || ratingDelta < -2) throw "ratingDelta > 2 || ratingDelta < -2";
-		levelBrowserScene.currentLevel.rating += ratingDelta;
-		levelBrowserScene.currentLevel.review.rating = newRating;
-		successScene.ratingDiv.textContent = levelBrowserScene.currentLevel.rating;
-		const levelId = levelBrowserScene.currentLevel.id;
+		successScene.level.rating += ratingDelta;
+		successScene.level.review.rating = newRating;
+		successScene.ratingDiv.textContent = successScene.level.rating;
+		successScene.selectBtn(newRating);
 		const batch = db.batch();
-		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(levelId), {
+		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(successScene.level.id), {
 			rating: newRating
 		}, {merge: true});
-		batch.update(db.doc(levelBrowserScene.currentLevel.path), {
+		batch.update(db.doc(successScene.level.path), {
 			rating: firebase.firestore.FieldValue.increment(ratingDelta)
 		});
-		batch.commit().catch((err) => {exceptionScene.throw(err.message)});
-		successScene.selectBtn(newRating);
+		batch.commit().catch((err) => {exceptionScene.throw(err.message);});
 	},
 	init(){
 		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
 		successScene.ui.prepend(sceneCloseBtn);
-		document.getElementById("exit-btn").addEventListener("pointerdown", () => {
-			sceneManager.pop();
-			sceneManager.pop();
-		});
+		document.getElementById("exit-btn").addEventListener("pointerdown", () => {sceneManager.push("/");});
 		this.incrementBtn.addEventListener("pointerdown", this.ratingHandler);
 		this.decrementBtn.addEventListener("pointerdown", this.ratingHandler);
 		document.getElementById("next-level-btn").addEventListener("click", () => {
@@ -393,9 +377,7 @@ var successScene = {
 			sceneManager.pop();
 			sceneManager.push(levelBrowserScene, {collectionPath: levelBrowserScene.currentLevel.path + "/solutions"});
 		});
-		this.saveSolutionBtn.addEventListener("click", () => {
-			sceneManager.push(saveScene);
-		});
+		this.saveSolutionBtn.addEventListener("click", () => {sceneManager.pushModal(saveScene, this.level);});
 	}
 }
 successScene.init();
