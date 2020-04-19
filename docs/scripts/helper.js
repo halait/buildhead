@@ -534,19 +534,7 @@ function isPlayable(){
 	}
 	return false;
 }
-/*
-function getJson(){
-	let json = '[{"JSON_LevelFile":true}';
-	for(const o of gameObjects){
-		if(sandboxMode || !o.levelObject) json += "," + o.toJson();
-	}
-	for(const j of joints){
-		if(sandboxMode || !j.levelObject) json += "," + j.toJson();
-	}
-	json += "]"
-	return json;
-}
-*/
+
 function getJson(){
 	let json = '[{"JSON_LevelFile":true}';
 	for(const o of gameObjects){

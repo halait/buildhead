@@ -1,5 +1,90 @@
 "use strict";
 
+const simulationManager = {
+	begin(caller){
+		this.caller = caller;
+		caller.toolbar.style.display = "none";
+		this.toolbar.style.display = "block";
+		this.oldBtn = canvasEventManager.currentBtn;
+		this.oldHandler = canvasEventManager.currentHandler;
+		canvasEventManager.setHandler(this.eventHandler);
+		isSimulating = true;
+		this.successPending = !sandboxMode;
+		requestAnimationFrame(this.simulate);
+	},
+	end(){
+		isSimulating = false;
+		this.toolbar.style.display = "none";
+		this.caller.toolbar.style.display = "flex";
+		canvasEventManager.setHandler(this.oldHandler, this.oldBtn);
+	},
+	
+	caller: null,
+	oldBtn: null,
+	oldHandler: null,
+	toolbar: document.getElementById("simulationSceneBtnsDiv"),
+
+
+	eventHandler: {
+		xDragStart: false,
+		yDragStart: false,
+		handleActivePress(){
+			this.xDragStart = canvasEventManager.mx;
+			this.yDragStart = canvasEventManager.my;
+		},
+		handleActiveDrag(){
+			if(this.xDragStart){
+				canvasEventManager.drag(canvasEventManager.mx - this.xDragStart, canvasEventManager.my - this.yDragStart);
+			}
+		},
+		handleActiveMouseup(){
+			this.xDragStart = false;
+		},
+	},
+	successPending: false,
+	before: 0,
+	simulate(now) {
+		if(isSimulating) {
+			requestAnimationFrame(simulationManager.simulate);
+			pw.update();
+			let dt = now - simulationManager.before;
+			if(dt < 25) return;
+			//if(dt > 34) console.log("frame drop");
+			simulationManager.before = now;
+			//pw.update();
+			pw.render();
+			if(simulationManager.successPending){
+				let success = true;
+				for(let i = 0, len = targets.length; i != len; ++i){
+					if(!pw.isWithinAABB(goalField.ref, targets[i].ref)) {
+						success = false;
+						break;
+					}
+				}
+				if(success) {
+					sceneManager.pushModal(successScene);
+					simulationManager.successPending = false;
+				}
+			}
+		} else {
+			pw.resetAllImpulses();
+			for(const o of gameObjects){
+				if(pw.getType(o.ref) == pw.FIXED_TYPE) continue;
+				pw.setPosition(o.ref, o.originX, o.originY);
+				pw.setOrientation(o.ref, 0.0);
+				pw.setLinearVelocity(o.ref, 0.0, 0.0);
+				pw.setRotationalVelocity(o.ref, 0.0);
+			}
+			pw.render();
+		}
+	},
+	init(){
+		addBtn(stopSimulationBtn, this.toolbar, () => {this.end()});
+	}
+}
+simulationManager.init();
+
+
 pw.gl = canvas.getContext("webgl");
 if(!pw.gl) {
 	let noWebGlErr = "Sorry, this game cannot be played here because WebGl is not supported.";
@@ -104,14 +189,10 @@ function createTexture(imgPath){
 	}
 	img.src = imgPath;
 }
-createTexture("newestTex.png");
+createTexture("/images/newestTex.png");
 
 pw.positions = new Float32Array(6000);
 pw.texCoords = new Float32Array(6000);
-/*
-pw.aabbPositions = new Float32Array(24);
-pw.aabbColors = new Float32Array(36);
-*/
 
 pw.positionsBuffer = pw.gl.createBuffer();
 pw.texCoordsBuffer = pw.gl.createBuffer();
@@ -493,47 +574,3 @@ pw.render = function() {
 	this.gl.bufferData(this.gl.ARRAY_BUFFER, this.texCoords.subarray(0, c), this.gl.STREAM_DRAW);
 	this.gl.drawArrays(this.gl.TRIANGLES, 0, p * 0.5);
 };
-
-			/*
-			
-		} else if(this.M[O_FORM + si] == this.AABB_FORM){
-			if(sandboxMode){
-				this.pointPositions[pp++] = this.M[O_MIN_X + si];
-				this.pointPositions[pp++] = this.M[O_MIN_Y + si];
-				this.pointColors.set(this.JOINABLE_COLOR, pc += 3);
-				this.pointSizes[ps++] = JOINABLE_RADIUS;
-				this.pointPositions[pp++] = this.M[O_MAX_X + si];
-				this.pointPositions[pp++] = this.M[O_MAX_Y + si];
-				this.pointColors.set(this.JOINABLE_COLOR, pc += 3);
-				this.pointSizes[ps++] = JOINABLE_RADIUS;
-			}
-			this.aabbPositions[ap++] = this.M[O_MIN_X + si];
-			this.aabbPositions[ap++] = this.M[O_MIN_Y + si];
-			this.aabbPositions[ap++] = this.M[O_MIN_X + si];
-			this.aabbPositions[ap++] = this.M[O_MAX_Y + si];
-			this.aabbPositions[ap++] = this.M[O_MAX_X + si];
-			this.aabbPositions[ap++] = this.M[O_MAX_Y + si];
-			this.aabbPositions[ap++] = this.M[O_MAX_X + si];
-			this.aabbPositions[ap++] = this.M[O_MAX_Y + si];
-			this.aabbPositions[ap++] = this.M[O_MAX_X + si];
-			this.aabbPositions[ap++] = this.M[O_MIN_Y + si];
-			this.aabbPositions[ap++] = this.M[O_MIN_X + si];
-			this.aabbPositions[ap++] = this.M[O_MIN_Y + si];
-
-			for(let ind = 0, ci = this.PO_SIZES[this.M[O_FORM + si]] + si + H_R; ind < 6; ++ind){
-				this.aabbColors[ac++] = this.M[ci];
-				this.aabbColors[ac++] = this.M[ci + 1];
-				this.aabbColors[ac++] = this.M[ci + 2];
-			}
-
-			let color = this.PO_COLORS[this.M[this.PO_SIZES[this.M[O_FORM + si]] + si]];
-			this.aabbColors.set(color, ac += 3);
-			this.aabbColors.set(color, ac += 3);
-			this.aabbColors.set(color, ac += 3);
-			this.aabbColors.set(color, ac += 3);
-			this.aabbColors.set(color, ac += 3);
-			this.aabbColors.set(color, ac += 3);
-		} else{
-			console.error("ohh boy");
-		}
-	}*/

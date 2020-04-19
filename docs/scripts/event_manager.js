@@ -1,5 +1,4 @@
 "use strict";
-
 // get rid of this
 const canvas = document.getElementById("canvas");
 var sandboxMode = false;
@@ -57,8 +56,36 @@ const canvasEventManager = {
 		this.xTranslate = 0.0;
 		this.yTranslate = 0.0;
 		this.drag(0.0, 0.0);
+		this.setHandler(null, null);
 		console.log("canvas cleared");
 	},
+
+	currentHandler: null,
+	currentBtn: null,
+
+	setHandler(handler, btn){
+		if(this.currentBtn) {
+			this.currentBtn.classList.remove("activeBtn");
+		}
+		if(btn){
+			this.currentBtn = btn;
+			btn.classList.add("activeBtn");
+		} else {
+			this.currentBtn = null;
+		}
+		this.currentHandler = handler;
+	},
+
+	handlePointerEnd(e){
+		if(canvasEventManager.activePointers.length){
+			canvasEventManager.activePointers.splice(0);
+			this.style.cursor = "crosshair";
+			if(this.currentHandler) {
+				this.currentHandler.handleActiveMouseup();
+			}
+		}
+	},
+
 	init(){
 		window.onresize = () => {
 			const r = window.devicePixelRatio;
@@ -88,8 +115,8 @@ const canvasEventManager = {
 				this.activePointers.push({pointerId: e.pointerId, x: this.mx, y: this.my});
 				if(len == 1) return;
 			}
-			if(sceneManager.current.eventHandler) {
-				sceneManager.current.eventHandler.handleActivePress();
+			if(this.currentHandler) {
+				this.currentHandler.handleActivePress();
 			}
 		});
 		canvas.addEventListener('pointermove', (e) => {
@@ -118,8 +145,8 @@ const canvasEventManager = {
 				this.scale(Math.sqrt(dx * dx + dy * dy) / od * this.zoom - this.zoom);
 				return;
 			}
-			if(sceneManager.current.eventHandler) {
-				sceneManager.current.eventHandler.handleActiveDrag();
+			if(this.currentHandler) {
+				this.currentHandler.handleActiveDrag();
 			}
 		});
 		canvas.addEventListener('pointerup', this.handlePointerEnd);
@@ -127,34 +154,15 @@ const canvasEventManager = {
 		canvas.addEventListener('pointercancel', this.handlePointerEnd);
 		canvas.addEventListener('pointerleave', this.handlePointerEnd);
 
-
 		canvas.addEventListener('wheel', (e) => {
 			e.preventDefault();
 			this.scale(-e.deltaY * 0.001);
 		});
-
-
-	},
-	handlePointerEnd(e){
-		if(canvasEventManager.activePointers.length){
-			canvasEventManager.activePointers.splice(0);
-			this.style.cursor = "crosshair";
-			if(sceneManager.current.eventHandler) {
-				sceneManager.current.eventHandler.handleActiveMouseup();
-			}
-		}
-	},
+	}
 };
 canvasEventManager.init();
 var tempWheel = null;
 var tempRod = null;
-
-function setActiveBtn(btn, eventHandler){
-	if(sceneManager.current.activeBtn) sceneManager.current.activeBtn.classList.remove("activeBtn");
-	sceneManager.current.activeBtn = btn;
-	btn.classList.add("activeBtn");
-	sceneManager.current.eventHandler = eventHandler;
-}
 
 const startSimulationBtn = document.querySelector(".startSimulationBtn");
 const stopSimulationBtn = document.querySelector(".stopSimulationBtn");
@@ -180,7 +188,7 @@ const polygonBtn = document.querySelector(".polygonBtn");
 function addBtn(node, parentNode, eventHandler){
 	if(typeof eventHandler === "object" && eventHandler.handleEvent === undefined){
 		let handler = eventHandler;
-		eventHandler = () => {setActiveBtn(node, handler);};
+		eventHandler = () => {canvasEventManager.setHandler(handler, node);};
 	}
 	node.addEventListener("mousedown", eventHandler);
 	parentNode.appendChild(node);
@@ -626,10 +634,10 @@ const sceneManager = {
 		if(this.current){
 			this.current.suspend();
 		}
+		history.pushState(args, "", pathname);
 		const paths = parsePathname(pathname);
 		this.current = routes[paths.route];
 		this.current.start(paths.subpath);
-		history.pushState(args, "", pathname);
 	},
 	pushModal(modal, args){
 		if(this.currentModal){

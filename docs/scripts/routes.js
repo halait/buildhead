@@ -51,7 +51,6 @@ const routes = {
 	},
 	"/listing": {
 		ui: document.getElementById("levelBrowserUi"),
-		//isModal:true,
 		async start(query){
 			console.log(query);
 			//loadingScreen.style.display = "flex";
@@ -113,8 +112,7 @@ const routes = {
 				for(let i = 0; i != len; ++i){
 					this.rows[i].style.display = "table-row";
 					this.rows[i].onpointerdown = () => {
-						this.loadLevel(i);
-						//sceneManager.float(modeScene);
+						this.startLevel(i);
 					};
 					this.cells[i][0].textContent = this.levels[i].name;
 					this.cells[i][1].textContent = this.levels[i].author;
@@ -134,9 +132,12 @@ const routes = {
 			}
 		},
 
-		async loadLevel(index){
-			this.currentLevel = this.levels[index];
-			this.currentLevelIndex = index;
+		startLevel(index){
+			sceneManager.pushModal(modeScene, this.levels[index]);
+		},
+
+		async loadLevel(level){
+			this.currentLevel = level;
 			let levelData = null;
 			try {
 				levelData = JSON.parse(this.currentLevel.json);
@@ -144,7 +145,7 @@ const routes = {
 				exceptionScene.throw("Level corrupted, could not deserialize");
 				throw e;
 			}
-			if(!/solutions$/.test(this.refDef.collectionPath)){
+			if(true || !/solutions$/.test(this.refDef.collectionPath)){
 				canvasEventManager.reset();
 			}
 			sandboxMode = true;
@@ -161,7 +162,7 @@ const routes = {
 					exceptionScene.throw(err);
 					throw err;
 				});
-			sceneManager.push(modeScene);
+			//sceneManager.push(modeScene);
 		},
 
 		init(){
@@ -180,10 +181,7 @@ const routes = {
 		}
 	},
 	"/sandbox": {
-		eventHandler: false,
-		activeBtn: false,
 		toolbar: document.getElementById("sandboxToolbar"),
-		pathname: "/sandbox",
 
 		start(){
 			sandboxMode = true;
@@ -194,7 +192,7 @@ const routes = {
 		},
 
 		init() {
-			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(simulationScene)});
+			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {simulationManager.begin(this);});
 			addBtn(ccwWheelCreatorBtn.cloneNode(true), this.toolbar, ccwWheelCreatorEventHandler);
 			addBtn(nWheelCreatorBtn.cloneNode(true), this.toolbar, nWheelCreatorEventHandler);
 			addBtn(cwWheelCreatorBtn.cloneNode(true), this.toolbar, cwWheelCreatorEventHandler);
@@ -213,47 +211,23 @@ const routes = {
 		}
 	},
 	"/play": {
-		start(docPathBase64){
+		start(){
+			this.currentLevel = history.state;
+			if(!this.currentLevel){
+				this.currentLevel
+			}
+			routes["/listing"].loadLevel(this.currentLevel);
 			sandboxMode = false;
 			this.toolbar.style.display = "flex";
-			if(levelBrowserScene.currentLevel.id == "halait - 0 Tutorial"){
-				sceneManager.float(tutorialScene);
-			}
 		},
 		suspend(){
 			this.toolbar.style.display = "none";
 		},
-	
-		eventHandler: false,
-		activeBtn: false,
 		toolbar: document.getElementById("assemblySceneBtnsDiv"),
-		levelNum: 0,
-	
-		async startLevel(levelPath){
-			this.levelNum = parseInt(levelPath[7]);
-			if(path) levelPath = path + levelPath;
-			let response = null;
-			try {
-				response = await fetch(levelPath);
-			} catch(e) {
-				exceptionScene.throw("Unable to load level, check your internet connection.");
-				return;
-			}
-			if(!response.ok){
-				exceptionScene.throw("Level file could not be found.");
-				return;
-			}
-			try {
-				loadLevelScene.load(await response.json());
-			} catch(e) {
-				exceptionScene.throw("Unable to parse level file.");
-				return;
-			}
-			sceneManager.push(this);
-		},
+		currentLevel: null,
 	
 		init(){
-			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(simulationScene);});
+			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {simulationManager.begin(this);});
 			addBtn(ccwWheelCreatorBtn.cloneNode(true), this.toolbar, ccwWheelCreatorEventHandler);
 			addBtn(nWheelCreatorBtn.cloneNode(true), this.toolbar, nWheelCreatorEventHandler);
 			addBtn(cwWheelCreatorBtn.cloneNode(true), this.toolbar, cwWheelCreatorEventHandler);
