@@ -552,6 +552,5 @@ function stringToBase64(str){
 }
 
 function base64ToString(base64){
-	console.log(base64.replace(/-/g, "+").replace(/_/g, "/").replace(/~/g, "="));
 	return atob(base64.replace(/-/g, "+").replace(/_/g, "/").replace(/~/g, "="));
 }

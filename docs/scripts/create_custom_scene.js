@@ -107,7 +107,7 @@ var createCustomScene = {
 		};
 		this.planeUi.appendChild(formElement);
 		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.popModal();});
+		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
 		this.planeUi.prepend(sceneCloseBtn);
 
 		formElement = this.customPropertiesForm.cloneNode(true);
@@ -165,7 +165,7 @@ var createCustomScene = {
 		};
 		this.circleUi.appendChild(formElement);
 		sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.popModal();});
+		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
 		this.circleUi.prepend(sceneCloseBtn);
 	}
 }

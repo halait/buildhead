@@ -1,383 +1,282 @@
 "use strict";
-const modeScene = {
-	ui: document.getElementById("mode-ui"),
-	currentLevel: 0,
-	start(level) {
-		this.ui.style.display = "block";
-		this.currentLevel = level;
-	},
-	suspend() {
-		this.ui.style.display = "none";
-	},
-	init() {
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", e => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
-		document.getElementById("play-btn").addEventListener("click", () => {
-			sceneManager.push(`/play/${stringToBase64(this.currentLevel.path)}`, this.currentLevel);
-		});
-		document.getElementById("edit-btn").addEventListener("click", () => {
-			sceneManager.push(`/sandbox/${stringToBase64(this.currentLevel.path)}`, this.currentLevel);
-		});
-	}
-}
-modeScene.init();
-
-const saveScene = {
-	ui: document.getElementById("save-ui"),
-	isModal: true,
-	saveInfoP: document.getElementById("save-info-p"),
-	nameInput: document.getElementById('name-input'),
-	tagInput: document.getElementById("tag-input"),
-	header: document.getElementById("save-header"),
-	level: null,
-	start(level){
-		if(!user){
-			sceneManager.pushModal(loginScene);
-			return;
-		}
-		if(!isPlayable()){
-			sceneManager.popModal();
-			exceptionScene.throw(
-				`Unable to save level because it is not playable, to be playable the level must have one assesmbly 
-				area (blue box), one goal area (orange box) and one or more targets (orange objects, usually circle).`
-			);
-			return;
-		}
-		if(level){
-			this.header.textContent = "Save Solution";
-		} else {
-			this.header.textContent = "Save Level";
-		}
-		this.level = level;
-		this.ui.style.display = "block";
-	},
-	suspend(){
-		this.ui.style.display = "none";
-	},
-	getJson(){
-		let json = '[{"JSON_LevelFile":true}';
-		for(const o of gameObjects){
-			if(sandboxMode || !o.levelObject) json += "," + o.toJson();
-		}
-		for(const j of joints){
-			if(sandboxMode || !j.levelObject) json += "," + j.toJson();
-		}
-		json += "]";
-		return json;
-	},
-	init(){
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
-		document.getElementById("save-form").addEventListener("submit", async (e) => {
-			e.preventDefault();
-			let nameIn = this.nameInput.value.trim();
-			const pre = /^og /;
-			let docPath = "community/";
-			if(this.level) {
-				console.log(this.level);
-				docPath = this.level.path + "/solutions/";
-			} else if(user && user.displayName === "halait" && pre.test(nameIn)){
-				docPath = "original/";
-				nameIn = nameIn.replace(pre, "");
+const routes = {
+	"/": {
+		start(){
+			this.ui.style.display = "block";
+			/*
+			if(tutorialStep != -1){
+				tutorialScene.removeCurrentEventListener();
+				tutorialStep = -1;
 			}
-			docPath += `{"author:"${user.displayName}","name":"${nameIn}"}`;
-			try {
-				if((await db.doc(docPath).get()).exists){
-					this.saveInfoP.textContent = "You already used this name, choose a different name";
-					return;
-				}
-				let docTags = null;
-				if(this.tagInput.value){
-					docTags = this.tagInput.value.split(" ");
-				} else {
-					docTags = [];
-				}
-				docTags.push(...nameIn.split(" "));
-				docTags.push(user.displayName);
-				for(let i = 0; i != 20; ++i){
-					await db.doc(docPath).set({
-						name: nameIn,
-						author: user.displayName,
-						authorId: user.uid,
-						dateCreated: new Date(),
-						rating: 0,
-						plays: 0,
-						tags: docTags,
-						solution: !sandboxMode,
-						json: this.getJson()
-					});
-				}
-				sceneManager.popModal();
-			} catch(e) {
-				console.error(e);
-				exceptionScene.throw(e.message);
+			*/
+		},
+		suspend(){
+			this.ui.style.display = "none";
+		},
+		onUserChanged(){
+			console.log(user);
+			if(user) {
+				this.accountBtn.textContent = user.displayName;
+				this.accountBtn.onclick = () => {sceneManager.push(profileScene)};
+			} else {
+				this.accountBtn.textContent = "Login";
+				this.accountBtn.onclick = () => {sceneManager.push(loginScene)};
 			}
-			this.saveInfoP.textContent = "";
-			this.nameInput.value = "";
-		});
-	}
-}
-saveScene.init();
+		},
 
-const exceptionScene = {
-	activeBtn: false,
-	activeBtnElement: false,
-	ui: document.getElementById("exceptionDiv"),
-	messageP: document.getElementById("exceptionMessageP"),
-	throw(message){
-		this.messageP.textContent = message;
-		sceneManager.pushModal(this);
-	},
-	start(){
-		loadingScreen.style.display = "none";
-		this.ui.style.display = "block";
-	},
-	suspend(){
-		this.ui.style.display = "none";
-	},
+		//levelBtns: document.getElementsByClassName("levelBtn"),
+		ui: document.getElementById("menuUI"),
+		accountBtn: document.getElementById("accountBtn"),
+		listingOriginalRoute: `/listing/${stringToBase64("original")}`,
+		listingCommunityRoute: `/listing/${stringToBase64("community")}`,
 
-	init(){
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.popModal();});
-		exceptionScene.ui.prepend(sceneCloseBtn);
-	}
-}
-exceptionScene.init();
-
-const loginScene = {
-  ui: document.getElementById("loginUi"),
-  start(){
-    this.ui.style.display ="block";
-  },
-  suspend(){
-    this.ui.style.display = "none";
-  },
-	init(){
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", (e) => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
-		const passwordInput = document.getElementById("loginPassword");
-		const emailInput = document.getElementById("loginEmail");
-		const message = document.getElementById("loginMessage");
-		passwordInput.addEventListener("input", () => {
-			passwordInput.type = "password";
-			message.textContent = "";
-		});
-		emailInput.addEventListener("input", () => {message.textContent = "";});
-		document.getElementById("showPasswordBtn").addEventListener("pointerdown", () => {passwordInput.type = "text";});
-		document.getElementById("register").addEventListener("pointerdown", () => {sceneManager.push(registerScene);});
-		document.getElementById("loginForm").addEventListener("submit", (e) => {
-			e.preventDefault();
-			auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
-				.then(() => {
-					sceneManager.pop();
-				})
-				.catch((err) =>{
-					console.error(err);
-					const code = err.code;
-					if(code == "auth/user-not-found" || code == "auth/wrong-password"){
-						message.textContent = "Incorrect email or password";
-					} else {
-						exceptionScene.throw(err.message);
-					}
-				});
-		});
-	}
-}
-loginScene.init();
-
-const registerScene = {
-  ui: document.getElementById("registerUi"),
-  start(){
-    this.ui.style.display ="block";
-  },
-  suspend(){
-    this.ui.style.display = "none";
+		init(){
+			document.getElementById("originalLevelsBtn").addEventListener("pointerdown", () => {
+				sceneManager.push(this.listingOriginalRoute);
+			});
+			document.getElementById("userLevelsBtn").addEventListener("pointerdown", () => {
+				sceneManager.push(this.listingCommunityRoute);
+			});
+			document.getElementById("sandboxBtn").addEventListener("pointerdown", () => {
+				canvasEventManager.reset();
+				sceneManager.push("/sandbox");
+			});
+		}
 	},
-	passwordMessage: document.getElementById("registerPasswordMessage"),
-	password0: document.getElementById("registerPassword0"),
-	password1: document.getElementById("registerPassword1"),
-	hidePasswords(){
-		registerScene.password0.type = "password";
-		registerScene.password1.type = "password";
-		registerScene.passwordMessage.textContent = "";
-	},
-	init(){
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.unfloat();});
-		this.ui.prepend(sceneCloseBtn);
-		let form = document.getElementById("registerForm");
-		this.password0.addEventListener("input", this.hidePasswords);
-		this.password1.addEventListener("input", this.hidePasswords);
-		document.getElementById("showPasswordsBtn").addEventListener("pointerdown", () => {
-			this.password0.type = "text";
-			this.password1.type = "text";
-		});
-		const usernameInput = document.getElementById("registerName");
-		const usernameMessage = document.getElementById("registerNameMessage");
-		const emailInput = document.getElementById("registerEmail");
-		const emailMessage = document.getElementById("registerEmailMessage");
-		emailInput.addEventListener("input", () => {emailMessage.textContent = "";});
-		usernameInput.addEventListener("input", () => {usernameMessage.textContent = "";});
-
-		form.addEventListener("submit", async (e) => {
-			e.preventDefault();
+	"/listing": {
+		ui: document.getElementById("levelBrowserUi"),
+		async start(collectionPathBase64){
+			this.ui.style.display = "block";
 			loadingScreen.style.display = "flex";
-			const password = this.password0.value;
-			if(password != this.password1.value){
-				this.passwordMessage.textContent = "Both passwords must match, try agian";
-				loadingScreen.style.display = "none";
+			const collectionPath = base64ToString(collectionPathBase64);
+			if(collectionPath != this.collectionPath) {
+				this.collectionPath = collectionPath;
+				await this.normalizeLevels((await db.collection(collectionPath).limit(this.maxLevels).get()).docs);
+			}
+			this.populate();
+			loadingScreen.style.display ="none";
+		},
+		suspend(){
+			this.ui.style.display = "none";
+		},
+		rows: [],
+		cells: [],
+		maxLevels: 10,
+		levels: [],
+		lastDoc: null,
+		collectionPath: null,
+		async populate(){
+			const len = this.levels.length;
+			for(let i = 0; i != len; ++i){
+				this.rows[i].style.display = "table-row";
+				this.rows[i].onpointerdown = () => {
+					this.startLevel(i);
+				};
+				this.cells[i][0].textContent = this.levels[i].name;
+				this.cells[i][1].textContent = this.levels[i].author;
+				this.cells[i][2].textContent = this.levels[i].dateCreated.toDate().toDateString();
+				this.cells[i][3].textContent = this.levels[i].rating;
+				this.cells[i][4].textContent = this.levels[i].plays;
+				if(this.levels[i].review){
+					this.rows[i].classList.add("completed-level");
+				} else {
+					this.rows[i].classList.remove("completed-level");
+				}
+			}
+
+			for(let i = len; i != this.maxLevels; ++i){
+				this.rows[i].style.display = "none";
+			}
+		},
+
+		async normalizeLevels(docs){
+			console.log("normalizing levels");
+			const len = docs.length;
+			if(!len){
 				return;
 			}
-			const desiredUsername = usernameInput.value.trim();
-			console.log(desiredUsername);
-			const exists = await (await fetch("https://us-central1-js-physics-game.cloudfunctions.net/userExists?username=" + desiredUsername)).text();
-			console.log(exists);
-			if(exists){
-				usernameMessage.textContent = "Username taken, choose a different username";
-				loadingScreen.style.display = "none";
-				return;
+			this.lastDoc = docs[len - 1];
+			const ids = [];
+			for(let i = 0; i != len; ++i){
+				const level = docs[i].data();
+				const id = docs[i].id;
+				ids[i] = id;
+				level.id = id;
+				level.path = docs[i].ref.path;
+				this.levels[i] = level;
 			}
+			if(user){
+				const reviewSnap = (await db.collection("users").doc(user.uid).collection("reviews").where(firebase.firestore.FieldPath.documentId(), "in", ids).get()).docs;
+				const snapLen = reviewSnap.length;
+				for(let i = 0; i != len; ++i){
+					const id = this.levels[i].id;
+					for(let j = 0; j != snapLen; ++j){
+						if(id == reviewSnap[j].id){
+							this.levels[i].review = reviewSnap[j].data();
+							break;
+						}
+					}
+				}
+			}
+		},
+
+		indexOf(levelPath){
+			for(let i = 0, len = this.levels.length; i != len; ++i){
+				if(this.levels[i].path == levelPath){
+					return i;
+				}
+			}
+			return -1;
+		},
+
+		// maybe loadNextLevel
+		getNextLevel(level){
+			const i = this.indexOf(level.path);
+			if(i != -1 && i != this.levels.length){
+				return this.levels[i + 1];
+			}
+			await this.getNextChunk();
+			if(this.levels.length){
+				return this.levels[0];
+			}
+			return null;
+		},
+
+		async getNextChunk(){
+			if(!this.collectionPath || !this.lastDoc) throw "Never";
+			await this.normalizeLevels((db.collection(this.collectionPath).startAfter(this.lastDoc).limit(this.maxLevels).get()).docs);
+		}
+
+		startLevel(index){
+			sceneManager.pushModal(modeScene, this.levels[index]);
+		},
+
+		getCollectionPath(levelPath){
+			return levelPath.split("/").slice(0, -1).join("/");
+		},
+
+		async loadLevel(levelPath){
+			let i = this.indexOf(levelPath);
+			if(i == -1) {
+				this.collectionPath = this.getCollectionPath(levelPath);
+				await this.normalizeLevels((await db.collection(this.collectionPath).startAt(await db.doc(levelPath).get()).limit(this.maxLevels).get()).docs);
+				i = 0;
+			}
+			const level = this.levels[i];
+			let levelData = null;
 			try {
-				await auth.createUserWithEmailAndPassword(emailInput.value, password);
-				await auth.currentUser.updateProfile({displayName: desiredUsername});
-				await db.collection("users").doc(user.uid).set({username: user.displayName});
-				sceneManager.unfloat();
-			} catch(err) {
-				console.error(err);
-				const code = err.code;
-				if(code == "auth/email-already-in-use"){
-					emailMessage.textContent = "Email address taken, choose a different address";
-				} else if(code == "auth/invalid-email"){
-					emailMessage.textContent = "Email address incorrectly formatted";
-				} else {
-					exceptionScene.throw(err.message);
-				}
-				if(user){
-					db.collection("users").doc(user.uid).delete().catch();
-					user.delete().catch();
-				}
+				levelData = JSON.parse(level.json);
+			} catch(e) {
+				exceptionScene.throw("Level corrupted, could not deserialize");
+				throw e;
 			}
-			loadingScreen.style.display = "none";
-		});
-	}
-}
-registerScene.init();
+			canvasEventManager.reset();
+			sandboxMode = true;
+			loadLevelScene.load(levelData);
+			sandboxMode = false;
+			const batch = db.batch();
+			batch.update(db.doc(level.path), {plays: firebase.firestore.FieldValue.increment(1)});
+			if(!level.review){
+				level.review = {rating: 0};
+				batch.set(db.doc("users/" + user.uid + "/reviews/" + level.id), level.review);
+			}
+			batch.commit()
+				.catch((err) => {
+					exceptionScene.throw(err);
+					throw err;
+				});
+			return level;
+		},
 
-const profileScene = {
-	start(){
-		this.ui.style.display = "block";
-	},
-	suspend(){
-		this.ui.style.display = "none";
-	},
-	ui: document.getElementById("profileUi"),
-	init(){
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.unfloat();});
-		this.ui.prepend(sceneCloseBtn);
-		document.getElementById("logoutBtn").addEventListener("pointerdown", () => {
-			firebase.auth().signOut();
-			sceneManager.unfloat();
-		});
-	}
-}
-profileScene.init();
-
-var successScene = {
-	ui: document.getElementById("successSceneDiv"),
-	nextLevelBtn: document.getElementById("nextLevelBtn"),
-	incrementBtn: document.getElementById("increment-btn"),
-	decrementBtn: document.getElementById("decrement-btn"),
-	ratingDiv: document.getElementById("rating"),
-	saveSolutionBtn: document.getElementById("save-solution-btn"),
-	level: null,
-	start(level){
-		this.ui.style.display = "block";
-		this.level = level;
-		this.ratingDiv.textContent = level.rating;
-		this.selectBtn(level.review.rating);
-		if(level){
-			this.saveSolutionBtn.style.display = "block";
-		} else {
-			this.saveSolutionBtn.style.display = "none";
-		}
-	},
-	suspend(){
-		this.ui.style.display = "none";
-	},
-	selectBtn(rating){
-		if(rating){
-			if(rating > 0) {
-				this.incrementBtn.classList.add("activeBtn");
-				this.decrementBtn.classList.remove("activeBtn");
-			} else {
-				this.incrementBtn.classList.remove("activeBtn");
-				this.decrementBtn.classList.add("activeBtn");
-			}
-		} else {
-			this.incrementBtn.classList.remove("activeBtn");
-			this.decrementBtn.classList.remove("activeBtn");
-		}
-	},
-	ratingHandler(e){
-		let newRating = 0;
-		if(e.currentTarget == successScene.incrementBtn){
-			newRating = 1;
-		} else if(e.currentTarget == successScene.decrementBtn) {
-			newRating = -1;
-		}
-		if(successScene.level.review && successScene.level.review.rating == newRating){
-			newRating = 0;
-		}
-		let ratingDelta = newRating - successScene.level.review.rating;
-		if(ratingDelta > 2 || ratingDelta < -2) throw "ratingDelta > 2 || ratingDelta < -2";
-		successScene.level.rating += ratingDelta;
-		successScene.level.review.rating = newRating;
-		successScene.ratingDiv.textContent = successScene.level.rating;
-		successScene.selectBtn(newRating);
-		const batch = db.batch();
-		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(successScene.level.id), {
-			rating: newRating
-		}, {merge: true});
-		batch.update(db.doc(successScene.level.path), {
-			rating: firebase.firestore.FieldValue.increment(ratingDelta)
-		});
-		batch.commit().catch((err) => {exceptionScene.throw(err.message);});
-	},
-	init(){
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
-		successScene.ui.prepend(sceneCloseBtn);
-		document.getElementById("exit-btn").addEventListener("pointerdown", () => {sceneManager.push("/");});
-		this.incrementBtn.addEventListener("pointerdown", this.ratingHandler);
-		this.decrementBtn.addEventListener("pointerdown", this.ratingHandler);
-		document.getElementById("next-level-btn").addEventListener("click", () => {
-			sceneManager.pop();
-			sceneManager.pop();
-			const nextIndex = levelBrowserScene.currentLevelIndex + 1;
-			if(levelBrowserScene.levels[nextIndex]){
-				levelBrowserScene.loadLevel(nextIndex);
-				sceneManager.push(assemblyScene);
-			} else {
-				levelBrowserScene.refDef.getNextBatch = true;
-				levelBrowserScene.populate(levelBrowserScene.refDef);
-				if(levelBrowserScene.levels.length){
-					levelBrowserScene.loadLevel(0);
-					sceneManager.push(assemblyScene);
-				} else {
-					exceptionScene.throw("No more levels you win");
+		init(){
+			//const sceneCloseBtn = closeBtn.cloneNode(true);
+			//sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.pop();});
+			//this.ui.prepend(sceneCloseBtn);
+			const rowsLive = document.getElementById("levelBrowser").tBodies[0].rows;
+			const rowLen = rowsLive[0].cells.length;
+			for(let i = 0; i != this.maxLevels; ++i){
+				this.rows[i] = rowsLive[i];
+				this.cells[i] = [];
+				for(let j = 0; j < rowLen; ++j){
+					this.cells[i][j] = rowsLive[i].cells[j];
 				}
 			}
-		});
-		document.getElementById("browse-solutions-btn").addEventListener("click", () => {
-			sceneManager.pop();
-			sceneManager.pop();
-			sceneManager.push(levelBrowserScene, {collectionPath: levelBrowserScene.currentLevel.path + "/solutions"});
-		});
-		this.saveSolutionBtn.addEventListener("click", () => {sceneManager.pushModal(saveScene, this.level);});
+		}
+	},
+	"/sandbox": {
+		toolbar: document.getElementById("sandboxToolbar"),
+
+		async start(docPath){
+			this.toolbar.style.display = "flex";
+			let level = history.state;
+			if(!level && docPath) {
+				await routes["/listing"].normalizeLevels([await db.doc(base64ToString(docPath)).get()]);
+				level = routes["/listing"].levels[0];
+			}
+			if(level){
+				await routes["/listing"].loadLevel(level);
+			}
+			sandboxMode = true;
+		},
+		suspend(){
+			this.toolbar.style.display = "none";
+		},
+
+		init() {
+			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {simulationManager.begin(this);});
+			addBtn(ccwWheelCreatorBtn.cloneNode(true), this.toolbar, ccwWheelCreatorEventHandler);
+			addBtn(nWheelCreatorBtn.cloneNode(true), this.toolbar, nWheelCreatorEventHandler);
+			addBtn(cwWheelCreatorBtn.cloneNode(true), this.toolbar, cwWheelCreatorEventHandler);
+			addBtn(tWheelCreatorBtn.cloneNode(true), this.toolbar, tWheelCreatorEventHandler);
+			addBtn(nRodCreatorBtn.cloneNode(true), this.toolbar, nRodCreatorEventHandler);
+			addBtn(cRodCreatorBtn.cloneNode(true), this.toolbar, cRodCreatorEventHandler);
+			addBtn(gRodCreatorBtn.cloneNode(true), this.toolbar, gRodCreatorEventHandler);
+			addBtn(polygonBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(createPolygonScene);});
+			addBtn(moveBtn.cloneNode(true), this.toolbar, moveEventHandler);
+			addBtn(removeBtn.cloneNode(true), this.toolbar, removeEventHandler);
+			addBtn(assemblyFieldCreatorBtn.cloneNode(true), this.toolbar, assemblyFieldCreatorEventHandler);
+			addBtn(goalFieldCreatorBtn.cloneNode(true), this.toolbar, goalFieldCreatorEventHandler);
+			addBtn(saveLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.pushModal(saveScene);});
+			addBtn(loadLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(loadLevelScene);});
+			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
+		}
+	},
+	"/play": {
+		async start(docPath){
+			this.toolbar.style.display = "flex";
+			if(history.state){
+				docPath = history.state.path;
+			} else if(docPath){
+				docPath = base64ToString(docPath);
+			} else {
+				exceptionScene.throw("This url is incorrectly formatted");
+				return;
+			}
+			this.currentLevel = await routes["/listing"].loadLevel(docPath);
+			sandboxMode = false;
+		},
+		suspend(){
+			if(simulationManager.isSimulating){
+				simulationManager.end();
+			}
+			this.toolbar.style.display = "none";
+		},
+		toolbar: document.getElementById("assemblySceneBtnsDiv"),
+		currentLevel: null,
+	
+		init(){
+			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {simulationManager.begin(this);});
+			addBtn(ccwWheelCreatorBtn.cloneNode(true), this.toolbar, ccwWheelCreatorEventHandler);
+			addBtn(nWheelCreatorBtn.cloneNode(true), this.toolbar, nWheelCreatorEventHandler);
+			addBtn(cwWheelCreatorBtn.cloneNode(true), this.toolbar, cwWheelCreatorEventHandler);
+			addBtn(nRodCreatorBtn.cloneNode(true), this.toolbar, nRodCreatorEventHandler);
+			addBtn(cRodCreatorBtn.cloneNode(true), this.toolbar, cRodCreatorEventHandler);
+			addBtn(moveBtn.cloneNode(true), this.toolbar, moveEventHandler);
+			addBtn(removeBtn.cloneNode(true), this.toolbar, removeEventHandler);
+			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
+		}
 	}
 }
-successScene.init();
+for(const route in routes){
+	routes[route].init();
+}

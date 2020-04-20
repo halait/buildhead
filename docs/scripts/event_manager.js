@@ -281,7 +281,7 @@ const cwWheelCreatorEventHandler = {
 
 const tWheelCreatorEventHandler = {
 	handleEvent(e) {
-		setActiveBtn(e.currentTarget, this);
+		canvasEventManager.setHandler(this, e.currentTarget);
 		sceneManager.pushModal(createCustomScene, pw.CIRCLE_FORM);
 	},
 
@@ -367,8 +367,7 @@ const cRodCreatorEventHandler = {
 
 const gRodCreatorEventHandler = {
 	handleEvent(e){
-		setActiveBtn(e.currentTarget, this);
-		//sceneManager.float(createCustomScene);
+		canvasEventManager.setHandler(this, e.currentTarget);
 		sceneManager.pushModal(createCustomScene);
 	},
 
@@ -625,41 +624,44 @@ const polygonBtnEventHandler = {
 
 // scene management
 const sceneManager = {
-	modalHistory: [],
+	modalEntries: [],
 	current: null,
-	currentModal: null,
-	push(pathname, args){
+	modalEntry: null,
+	push(pathname, state){
 		this.popAllModal();
 		if(this.current){
 			this.current.suspend();
 		}
-		history.pushState(args, "", pathname);
+		history.pushState(state, "", pathname);
 		const paths = parsePathname(pathname);
 		this.current = routes[paths.route];
 		this.current.start(paths.subpath);
 	},
-	pushModal(modal, args){
-		if(this.currentModal){
-			this.currentModal.suspend();
+	pushModal(modal, state){
+		if(this.modalEntry){
+			this.modalEntry.modal.suspend();
 		}
-		this.currentModal = modal;
-		this.modalHistory.push(modal);
-		modal.start(args);
+		const entry = {modal, state}
+		this.modalEntry = entry;
+		this.modalEntries.push(entry);
+		modal.start(state);
 	},
 	popModal(){
-		this.modalHistory.pop().suspend();
-		const i = this.modalHistory.length - 1;
-		if(i > -1) {
-			this.currentModal = this.modalHistory[i];
-			this.currentModal.start();
+		const deleteLater = this.modalEntries.pop();
+		if(this.modalEntry != deleteLater) throw "Baaad";
+		this.modalEntry.modal.suspend();
+		const i = this.modalEntries.length - 1;
+		if(i != -1) {
+			this.modalEntry = this.modalEntries[i];
+			this.modalEntry.modal.start(this.modalEntry.state);
 		} else {
-			this.currentModal = null;
+			this.modalEntry = null;
 		}
 	},
 	popAllModal(){
-		for(let i = this.modalHistory.length - 1; i > -1; --i){
-			const modal = this.modalHistory.pop();
-			modal.suspend();
+		for(let i = this.modalEntries.length - 1; i > -1; --i){
+			const entry = this.modalEntries.pop();
+			entry.modal.suspend();
 		}
 		this.currentModal = null;
 	}
@@ -667,7 +669,6 @@ const sceneManager = {
 
 window.addEventListener("popstate", (e) => {
 	sceneManager.popAllModal();
-	console.log(window.location.pathname);
 	if(sceneManager.current){
 		sceneManager.current.suspend();
 	}
