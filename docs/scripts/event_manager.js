@@ -627,24 +627,24 @@ const sceneManager = {
 	modalEntries: [],
 	current: null,
 	modalEntry: null,
-	push(pathname, state){
+	push(url, state){
+		history.pushState(state, "", url);
 		this.popAllModal();
 		if(this.current){
 			this.current.suspend();
 		}
-		history.pushState(state, "", pathname);
-		const paths = parsePathname(pathname);
+		const paths = parsePathname(location.pathname);
 		this.current = routes[paths.route];
 		this.current.start(paths.subpath);
 	},
-	pushModal(modal, state){
+	pushModal(modal, ...state){
 		if(this.modalEntry){
 			this.modalEntry.modal.suspend();
 		}
 		const entry = {modal, state}
 		this.modalEntry = entry;
 		this.modalEntries.push(entry);
-		modal.start(state);
+		modal.start(...state);
 	},
 	popModal(){
 		const deleteLater = this.modalEntries.pop();
@@ -653,7 +653,7 @@ const sceneManager = {
 		const i = this.modalEntries.length - 1;
 		if(i != -1) {
 			this.modalEntry = this.modalEntries[i];
-			this.modalEntry.modal.start(this.modalEntry.state);
+			this.modalEntry.modal.start(...this.modalEntry.state);
 		} else {
 			this.modalEntry = null;
 		}
@@ -678,6 +678,6 @@ window.addEventListener("popstate", (e) => {
 });
 
 function parsePathname(pathname){
-	const route = /\/[^\/]*/.exec(pathname);
+	const route = /\/[^\/]*/.exec(pathname)[0];
 	return {route: route, subpath: pathname.replace(route, "").slice(1)};
 }

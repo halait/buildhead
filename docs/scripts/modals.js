@@ -2,9 +2,9 @@
 const modeScene = {
 	ui: document.getElementById("mode-ui"),
 	level: 0,
-	start(level) {
+	start(levelPath) {
 		this.ui.style.display = "block";
-		this.level = level;
+		this.levelPath = levelPath;
 	},
 	suspend() {
 		this.ui.style.display = "none";
@@ -14,10 +14,10 @@ const modeScene = {
 		sceneCloseBtn.addEventListener("click", e => {sceneManager.popModal();});
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("play-btn").addEventListener("click", () => {
-			sceneManager.push(`/play/${stringToBase64(this.level.path)}`, this.level);
+			sceneManager.push("/play/" + this.levelPath);
 		});
 		document.getElementById("edit-btn").addEventListener("click", () => {
-			sceneManager.push(`/sandbox/${stringToBase64(this.level.path)}`, this.level);
+			sceneManager.push("/sandbox/" + this.levelPath);
 		});
 	}
 }
@@ -39,7 +39,7 @@ const saveScene = {
 		}
 		if(!isPlayable()){
 			sceneManager.popModal();
-			exceptionScene.throw(
+			sceneManager.pushModal(messageScene, "Error", 
 				`Unable to save level because it is not playable, to be playable the level must have one assesmbly 
 				area (blue box), one goal area (orange box) and one or more targets (orange objects, usually circle).`
 			);
@@ -77,13 +77,13 @@ const saveScene = {
 			const pre = /^og /;
 			let docPath = "community/";
 			if(this.level) {
-				console.log(this.level);
-				docPath = this.level.path + "/solutions/";
+				docPath = this.level.path + "/solutions/" + this.level.data.id + stringToBase64(` sa="${user.displayName}",sn="${nameIn}"`);
 			} else if(user && user.displayName === "halait" && pre.test(nameIn)){
 				docPath = "original/";
 				nameIn = nameIn.replace(pre, "");
+			} else {
+				docPath += stringToBase64(`la="${user.displayName}",ln="${nameIn}"`);
 			}
-			docPath += `{"author:"${user.displayName}","name":"${nameIn}"}`;
 			try {
 				if((await db.doc(docPath).get()).exists){
 					this.saveInfoP.textContent = "You already used this name, choose a different name";
@@ -98,8 +98,10 @@ const saveScene = {
 				docTags.push(...nameIn.split(" "));
 				docTags.push(user.displayName);
 				for(let i = 0; i != 20; ++i){
-					await db.doc(docPath).set({
-						name: nameIn,
+					//                    temp i
+					await db.doc(docPath + i).set({
+						//            temp i
+						name: nameIn + i,
 						author: user.displayName,
 						authorId: user.uid,
 						dateCreated: new Date(),
@@ -113,7 +115,7 @@ const saveScene = {
 				sceneManager.popModal();
 			} catch(e) {
 				console.error(e);
-				exceptionScene.throw(e.message);
+				sceneManager.pushModal(messageScene, "Error", e.message);
 			}
 			this.saveInfoP.textContent = "";
 			this.nameInput.value = "";
@@ -122,17 +124,15 @@ const saveScene = {
 }
 saveScene.init();
 
-const exceptionScene = {
-	activeBtn: false,
-	activeBtnElement: false,
-	ui: document.getElementById("exceptionDiv"),
-	messageP: document.getElementById("exceptionMessageP"),
-	throw(message){
-		this.messageP.textContent = message;
-		sceneManager.pushModal(this);
-	},
-	start(){
-		loadingScreen.style.display = "none";
+const messageScene = {
+	ui: document.getElementById("message-div"),
+	header: document.getElementById("message-header"),
+	message: document.getElementById("message"),
+	btn: document.getElementById("message-btn"),
+	start(header, message, btn = "Okay"){
+		this.header.textContent = header;
+		this.message.textContent = message;
+		this.btn.textContent = btn;
 		this.ui.style.display = "block";
 	},
 	suspend(){
@@ -141,11 +141,12 @@ const exceptionScene = {
 
 	init(){
 		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.popModal();});
-		exceptionScene.ui.prepend(sceneCloseBtn);
+		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
+		this.btn.addEventListener("click", () => {sceneManager.popModal();});
+		this.ui.prepend(sceneCloseBtn);
 	}
 }
-exceptionScene.init();
+messageScene.init();
 
 const loginScene = {
   ui: document.getElementById("loginUi"),
@@ -181,7 +182,7 @@ const loginScene = {
 					if(code == "auth/user-not-found" || code == "auth/wrong-password"){
 						message.textContent = "Incorrect email or password";
 					} else {
-						exceptionScene.throw(err.message);
+						sceneManager.pushModal(messageScene, "Error", err.message);
 					}
 				});
 		});
@@ -254,7 +255,7 @@ const registerScene = {
 				} else if(code == "auth/invalid-email"){
 					emailMessage.textContent = "Email address incorrectly formatted";
 				} else {
-					exceptionScene.throw(err.message);
+					sceneManager.pushModal(messageScene, "Error", err.message);
 				}
 				if(user){
 					db.collection("users").doc(user.uid).delete().catch();
@@ -277,11 +278,11 @@ const profileScene = {
 	ui: document.getElementById("profileUi"),
 	init(){
 		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", e => {sceneManager.unfloat();});
+		sceneCloseBtn.addEventListener("click", e => {sceneManager.popModal();});
 		this.ui.prepend(sceneCloseBtn);
-		document.getElementById("logoutBtn").addEventListener("pointerdown", () => {
+		document.getElementById("logoutBtn").addEventListener("click", () => {
 			firebase.auth().signOut();
-			sceneManager.unfloat();
+			sceneManager.popModal();
 		});
 	}
 }
@@ -296,18 +297,11 @@ var successScene = {
 	// only used once?
 	saveSolutionBtn: document.getElementById("save-solution-btn"),
 	level: null,
-	nextLevel: null,
 	start(level){
 		if(!level) throw "Forgetaboutit";
 		this.level = level;
-		this.ratingDiv.textContent = level.rating;
+		this.ratingDiv.textContent = level.data.rating;
 		this.selectBtn(level.review.rating);
-		this.nextLevel = routes["/listing"].getNextLevel(level);
-		if(this.nextLevel){
-			this.nextLevelBtn.style.display = "block";
-		} else {
-			this.nextLevelBtn.style.display = "none";
-		}
 		this.ui.style.display = "block";
 	},
 	suspend(){
@@ -339,29 +333,36 @@ var successScene = {
 		}
 		let ratingDelta = newRating - successScene.level.review.rating;
 		if(ratingDelta > 2 || ratingDelta < -2) throw "ratingDelta > 2 || ratingDelta < -2";
-		successScene.level.rating += ratingDelta;
+		successScene.level.data.rating += ratingDelta;
 		successScene.level.review.rating = newRating;
-		successScene.ratingDiv.textContent = successScene.level.rating;
+		successScene.ratingDiv.textContent = successScene.level.data.rating;
 		successScene.selectBtn(newRating);
 		const batch = db.batch();
-		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(successScene.level.id), {
+		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(successScene.level.data.id), {
 			rating: newRating
 		}, {merge: true});
-		batch.update(db.doc(successScene.level.path), {
+		batch.update(db.doc(successScene.level.ref.path), {
 			rating: firebase.firestore.FieldValue.increment(ratingDelta)
 		});
-		batch.commit().catch((err) => {exceptionScene.throw(err.message);});
+		batch.commit().catch((err) => {sceneManager.pushModal(messageScene, "Error", err.message);});
 	},
 	init(){
 		const sceneCloseBtn = closeBtn.cloneNode(true);
 		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
 		successScene.ui.prepend(sceneCloseBtn);
-		document.getElementById("exit-btn").addEventListener("pointerdown", () => {sceneManager.push("/");});
-		this.incrementBtn.addEventListener("pointerdown", this.ratingHandler);
-		this.decrementBtn.addEventListener("pointerdown", this.ratingHandler);
-		this.nextLevelBtn.addEventListener("click", () => {sceneManager.push(`/play/${this.nextLevel.path}`, this.nextLevel);});	
+		document.getElementById("exit-btn").addEventListener("click", () => {sceneManager.push("/");});
+		this.incrementBtn.addEventListener("click", this.ratingHandler);
+		this.decrementBtn.addEventListener("click", this.ratingHandler);
+		this.nextLevelBtn.addEventListener("click", async () => {
+			const nextLevelPath = await levelManager.getNextLevelPath(this.level.ref.path);
+			if(nextLevelPath){
+				sceneManager.push("/play/" + nextLevelPath);
+			} else {
+				sceneManager.pushModal(messageScene, "Playlist complete", "No more levels could be found in the playlist");
+			}
+		});
 		document.getElementById("browse-solutions-btn").addEventListener("click", () => {
-			sceneManager.push(`/listing/${stringToBase64(this.level.path + "/solutions")}`);
+			sceneManager.push("/listing/" + this.level.path + "/solutions");
 		});
 		this.saveSolutionBtn.addEventListener("click", () => {sceneManager.pushModal(saveScene, this.level);});
 	}

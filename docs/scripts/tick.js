@@ -90,7 +90,7 @@ simulationManager.init();
 pw.gl = canvas.getContext("webgl");
 if(!pw.gl) {
 	let noWebGlErr = "Sorry, this game cannot be played here because WebGl is not supported.";
-	exceptionScene.throw(noWebGlErr);
+	sceneManager.pushModal(messageScene, "Error", noWebGlErr);
 	throw noWebGlErr;
 }
 
@@ -161,7 +161,9 @@ function createTexture(imgPath){
 		imgPath = path + imgPath;
 	}
 	img.onerror = () => {
-		exceptionScene.throw("Unable to play game because texture could not be loaded.");
+		loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+		loadingScreen.style.display = "none";
+		sceneManager.pushModal(messageScene, "Error", "Unable to play game because texture could not be loaded.");
 		window.onresize();
 		throw "Unable to load texture";
 	}
@@ -169,7 +171,7 @@ function createTexture(imgPath){
 		loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 		loadingScreen.style.display = "none";
 		window.onresize();
-		sceneManager.push(location.pathname);
+		sceneManager.push(location.href);
 
 		let texture = pw.gl.createTexture();
 		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);

@@ -550,7 +550,141 @@ function getJson(){
 function stringToBase64(str){
 	return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "~");
 }
-
+/*
 function base64ToString(base64){
 	return atob(base64.replace(/-/g, "+").replace(/_/g, "/").replace(/~/g, "="));
+}
+*/
+
+const levelManager = {
+	levelCache: [],
+	//currentRef: null,
+	//lastDoc: null,
+	setRef(ref){
+		this.levelCache.length = 0;
+		this.currentRef = ref;
+	},
+	async getNextChunk(){
+		let ref = this.currentRef;
+		if(!ref) {
+			throw "Naa"
+		}
+		//if(this.lastDoc){
+			//ref = ref.startAfter(this.lastDoc);
+		//}
+		//this.levelCache.push(...await this.normalizeLevels((await ref.get()).docs));
+		this.levelCache = await this.normalizeLevels((await ref.get()).docs);
+	},
+	async get(ref){
+		await this.normalizeLevels((await ref.get()).docs);
+	},
+	async normalizeLevels(docs){
+		const len = docs.length;
+		if(!len){
+			return [];
+		}
+		this.lastDoc = docs[len - 1];
+		const ids = [];
+		//const levels = [];
+		for(let i = 0; i != len; ++i){
+			//const id = docs[i].id;
+
+			this.levelCache[i] = docs[i];
+			const data = docs[i].data();
+			data.id = docs[i].id;
+			ids[i] = data.id;
+			this.levelCache[i].data = data;
+			//const level = docs[i].data();
+			//level.id = id;
+			//level.path = docs[i].ref.path;
+			//levels[i] = level;
+		}
+		if(user){
+			const reviewSnap = (await db.collection("users").doc(user.uid).collection("reviews").where(firebase.firestore.FieldPath.documentId(), "in", ids).get()).docs;
+			const snapLen = reviewSnap.length;
+			for(let i = 0; i != len; ++i){
+				const id = this.levelCache[i].data.id;
+				for(let j = 0; j != snapLen; ++j){
+					if(id == reviewSnap[j].id){
+						this.levelCache[i].review = reviewSnap[j].data();
+						break;
+					}
+				}
+			}
+		}
+		//return levels;
+	},
+	async loadLevel(levelPath){
+		let level = null;
+		const i = this.indexOf(levelPath);
+		if(i != -1){
+			level = this.levelCache[i];
+			console.log("loading level from cache");
+		} else {
+			const doc = await db.doc(levelPath).get();
+			console.log(doc.exists)
+			if(!doc.exists){
+				throw "Level not found"
+			}
+			await this.normalizeLevels([doc]);
+			level = this.levelCache[0];
+			console.log("loading level from server and caching");
+		} 
+		let levelData = null;
+		try {
+			levelData = JSON.parse(level.data.json);
+		} catch(e) {
+			sceneManager.pushModal(messageScene, "Error", "Level corrupted, could not deserialize");
+			throw e;
+		}
+		canvasEventManager.reset();
+		sandboxMode = true;
+		loadLevelScene.load(levelData);
+		sandboxMode = false;
+		const batch = db.batch();
+		batch.update(db.doc(level.ref.path), {plays: firebase.firestore.FieldValue.increment(1)});
+		if(!level.review){
+			level.review = {rating: 0};
+			batch.set(db.doc("users/" + user.uid + "/reviews/" + level.data.id), level.review);
+		}
+		batch.commit()
+			.then(() => {
+				++level.data.plays;
+			})
+			.catch((err) => {
+				sceneManager.pushModal(messageScene, "Error", err);
+				throw err;
+			});
+		return level;
+	},
+	async getNextLevelPath(levelPath){
+		const i = this.indexOf(levelPath) + 1;
+		const len = this.levelCache.length;
+		if(!i){
+			throw "Impossible";
+		}
+		//if(i == len && this.currentRef && this.lastDoc){
+			//await this.getNextChunk();
+		//}
+		if(i != len || this.levelCache.length > len){
+			return this.levelCache[i].ref.path;
+		}
+		return null;
+	},
+	indexOf(levelPath){
+		for(let i = 0, len = this.levelCache.length; i != len; ++i){
+			if(levelPath == this.levelCache[i].ref.path){
+				return i;
+			}
+		}
+		return -1;
+	},
+	getLevel(levelPath){
+		for(let i = 0, len = this.levelCache.length; i != len; ++i){
+			if(levelPath === this.levelCache[i].ref.path){
+				return this.levelCache[i];
+			}
+		}
+		return null;
+	}
 }

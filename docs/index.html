@@ -206,6 +206,31 @@
 			font-size: 40px;
 			color: #fff;
 		}
+		#levelBrowserUi{
+			text-align: center;
+		}
+		#browser-container {
+			display: inline-block;
+			margin: 32px 0;
+		}		
+		#next-page-btn, #prev-page-btn {
+			display: inline-block;
+		}
+		#sort-by-container, #search-container {
+			display: inline-block;
+			color: #fff;
+			background-color: inherit;
+		}
+		select, option {
+			background-color: #222;
+			color: #fff;
+		}
+		#next-page-btn, #sort-by-container {
+			float: right;
+		}		
+		#prev-page-btn, #search-container {
+			float: left;
+		}
 		#levelBrowser {
 			color: #fff;
 			border-collapse: collapse;
@@ -214,7 +239,6 @@
 			text-align: center;
 			overflow: hidden;
 			background-color: inherit;
-			margin: 32px auto;
 		}
 		tbody:hover {
 			cursor: pointer;
@@ -389,9 +413,10 @@
       <p id="loadMessageP"></p><br>
     </div>
 
-    <div id="exceptionDiv" class="modal">
-      <p class="modalHeader">Error</p>
-      <span id="exceptionMessageP"></span><br><br>
+    <div id="message-div" class="modal">
+      <p id="message-header" class="modalHeader"></p>
+			<span id="message"></span>
+			<div id="message-btn" class="btn"></div>
     </div>
 
     <div id="setCustomObroundPopup" class="modal">
@@ -460,89 +485,106 @@
 		</div>
 		
 		<div id="levelBrowserUi" class="overlay">
-			<table id="levelBrowser">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Author</th>
-						<th>Date Created (Local Time)</th>
-						<th>Likes</th>
-						<th>Plays</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-				</tbody>
-			</table>
+			<div id="browser-container">
+				<label id="search-container">
+					<input type="search"><span class="btn">Search</span>
+				</label>
+				<label id="sort-by-container">
+					SORT BY: 
+					<select id="sort-by-select">
+						<option>Upload Date</option>
+						<option>Likes</option>
+						<option>Plays</option>
+					</select>
+				</label><br>
+				<table id="levelBrowser">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Author</th>
+							<th>Upload Date</th>
+							<th>Likes</th>
+							<th>Plays</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+				<div id="browser-nav-container">
+					<span id="prev-page-btn" class="btn">Previous</span>
+					<span id="next-page-btn" class="btn">Next</span>
+				</div>
+			</div>
 		</div>
 
 		<div id="mode-ui" class="modal">
