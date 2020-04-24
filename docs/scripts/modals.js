@@ -25,7 +25,6 @@ modeScene.init();
 
 const saveScene = {
 	ui: document.getElementById("save-ui"),
-	isModal: true,
 	saveInfoP: document.getElementById("save-info-p"),
 	nameInput: document.getElementById('name-input'),
 	tagInput: document.getElementById("tag-input"),
@@ -77,7 +76,7 @@ const saveScene = {
 			const pre = /^og /;
 			let docPath = "community/";
 			if(this.level) {
-				docPath = this.level.path + "/solutions/" + this.level.data.id + stringToBase64(` sa="${user.displayName}",sn="${nameIn}"`);
+				docPath = this.level.path + "/solutions/" + this.level.id + stringToBase64(` sa="${user.displayName}",sn="${nameIn}"`);
 			} else if(user && user.displayName === "halait" && pre.test(nameIn)){
 				docPath = "original/";
 				nameIn = nameIn.replace(pre, "");
@@ -300,7 +299,7 @@ var successScene = {
 	start(level){
 		if(!level) throw "Forgetaboutit";
 		this.level = level;
-		this.ratingDiv.textContent = level.data.rating;
+		this.ratingDiv.textContent = level.rating;
 		this.selectBtn(level.review.rating);
 		this.ui.style.display = "block";
 	},
@@ -333,15 +332,15 @@ var successScene = {
 		}
 		let ratingDelta = newRating - successScene.level.review.rating;
 		if(ratingDelta > 2 || ratingDelta < -2) throw "ratingDelta > 2 || ratingDelta < -2";
-		successScene.level.data.rating += ratingDelta;
+		successScene.level.rating += ratingDelta;
 		successScene.level.review.rating = newRating;
-		successScene.ratingDiv.textContent = successScene.level.data.rating;
+		successScene.ratingDiv.textContent = successScene.level.rating;
 		successScene.selectBtn(newRating);
 		const batch = db.batch();
-		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(successScene.level.data.id), {
+		batch.set(db.collection("users").doc(user.uid).collection("reviews").doc(successScene.level.id), {
 			rating: newRating
 		}, {merge: true});
-		batch.update(db.doc(successScene.level.ref.path), {
+		batch.update(db.doc(successScene.level.path), {
 			rating: firebase.firestore.FieldValue.increment(ratingDelta)
 		});
 		batch.commit().catch((err) => {sceneManager.pushModal(messageScene, "Error", err.message);});
@@ -354,7 +353,7 @@ var successScene = {
 		this.incrementBtn.addEventListener("click", this.ratingHandler);
 		this.decrementBtn.addEventListener("click", this.ratingHandler);
 		this.nextLevelBtn.addEventListener("click", async () => {
-			const nextLevelPath = await levelManager.getNextLevelPath(this.level.ref.path);
+			const nextLevelPath = await levelManager.getNextLevelPath(this.level.path);
 			if(nextLevelPath){
 				sceneManager.push("/play/" + nextLevelPath);
 			} else {

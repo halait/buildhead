@@ -66,7 +66,7 @@
 			position: absolute;
 			width: 100%;
 			height: 100%;
-			background-color: #222;
+			background-color: #333;
 		}
 		.modal {
 			background-color: #333;
@@ -210,11 +210,22 @@
 			text-align: center;
 		}
 		#browser-container {
-			display: inline-block;
-			margin: 32px 0;
-		}		
-		#next-page-btn, #prev-page-btn {
-			display: inline-block;
+			display: flex;
+			flex-direction: column;
+			padding: 16px 0 0 0;
+			margin: 0 auto;
+			width: max-content;
+			max-height: 100%;
+		}
+		#content-container {
+			margin: 16px 0;
+			overflow-y: auto;
+		}
+		#load-more-btn {
+			width: 100%;
+			padding: 16px 0;
+			font-size: 24px;
+			margin: 0px;
 		}
 		#sort-by-container, #search-container {
 			display: inline-block;
@@ -234,27 +245,29 @@
 		#levelBrowser {
 			color: #fff;
 			border-collapse: collapse;
-			font-size: 24px;
 			border: none;
 			text-align: center;
-			overflow: hidden;
-			background-color: inherit;
+			white-space: nowrap;
 		}
 		tbody:hover {
 			cursor: pointer;
 		}
 		tr {
 			background-color: #048;
+			border: 2px #000 dotted;
 		}
 		tr:hover {
 			background-color: #06b;
 		}
 		td, th {
 			padding: 8px 16px;
-			white-space: nowrap;
+			font-size: 24px;
+			border: none;
 		}
 		th {
 			background-color: #000;
+			position: sticky;
+			top: 0;
 		}
 		.completed-level {
 			background-color: #840;
@@ -486,103 +499,34 @@
 		
 		<div id="levelBrowserUi" class="overlay">
 			<div id="browser-container">
-				<label id="search-container">
-					<input type="search"><span class="btn">Search</span>
-				</label>
-				<label id="sort-by-container">
-					SORT BY: 
-					<select id="sort-by-select">
-						<option>Upload Date</option>
-						<option>Likes</option>
-						<option>Plays</option>
-					</select>
-				</label><br>
-				<table id="levelBrowser">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Author</th>
-							<th>Upload Date</th>
-							<th>Likes</th>
-							<th>Plays</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-					</tbody>
-				</table>
-				<div id="browser-nav-container">
-					<span id="prev-page-btn" class="btn">Previous</span>
-					<span id="next-page-btn" class="btn">Next</span>
+				<div id="filter-container">
+					<label id="search-container">
+						<input type="search"><span class="btn">Search</span>
+					</label>
+					<label id="sort-by-container">
+						SORT BY: 
+						<select id="sort-by-select">
+							<option value="dateCreated">Upload Date</option>
+							<option value="rating">Likes</option>
+							<option value="plays">Plays</option>
+						</select>
+					</label>
+				</div>
+				<div id="content-container">
+					<table id="levelBrowser">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Author</th>
+								<th>Upload Date</th>
+								<th>Likes</th>
+								<th>Plays</th>
+							</tr>
+						</thead>
+						<tbody id="browser-content">
+						</tbody>
+					</table>
+					<div id="load-more-btn" class="btn">Load More</div>
 				</div>
 			</div>
 		</div>

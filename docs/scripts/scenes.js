@@ -14,7 +14,6 @@ const routes = {
 			this.ui.style.display = "none";
 		},
 		onUserChanged(){
-			console.log(user);
 			if(user) {
 				this.accountBtn.textContent = user.displayName;
 				this.accountBtn.onclick = () => {sceneManager.pushModal(profileScene)};
@@ -27,8 +26,8 @@ const routes = {
 		//levelBtns: document.getElementsByClassName("levelBtn"),
 		ui: document.getElementById("menuUI"),
 		accountBtn: document.getElementById("accountBtn"),
-		listingOriginalRoute: "/listing/original",
-		listingCommunityRoute: "/listing/community",
+		listingOriginalRoute: "/listing?collection=original",
+		listingCommunityRoute: "/listing?collection=community",
 
 		init(){
 			document.getElementById("originalLevelsBtn").addEventListener("pointerdown", () => {
@@ -38,7 +37,7 @@ const routes = {
 				sceneManager.push(this.listingCommunityRoute);
 			});
 			document.getElementById("sandboxBtn").addEventListener("pointerdown", () => {
-				canvasEventManager.reset();
+				//canvasEventManager.reset();
 				sceneManager.push("/sandbox");
 			});
 		}
@@ -48,121 +47,92 @@ const routes = {
 		async start(){
 			loadingScreen.style.display = "flex";
 			this.ui.style.display = "block";
-			const params = location.pathname + location.search;
-			if(params != this.params){
-				this.params = params;
-				let ref = db.collection(parsePathname(location.pathname).subpath).orderBy("dateCreated").limit(this.maxLevels);
-				let searchParams = new URLSearchParams(location.search);
-				const start = searchParams.get("start");
-				if(start){
-					this.prevPageBtn.style.display = "block";
-					ref = ref.startAt(levelManager.getLevel(start));
-				} else {
-					this.prevPageBtn.style.display = "none";
-				}
-				await levelManager.get(ref);
-				if(levelManager.levelCache.length != this.maxLevels){
-					this.nextPageBtn.style.display = "none";
-				} else {
-					this.nextPageBtn.style.display = "block";
-				}
+			if(location.search != this.search){
+				this.search = location.search;
+				levelManager.clearCache();
+				this.items = await levelManager.getLevels(this.createParams());
 			}
-			this.populate();
+			this.browserContent.innerHTML = "";
+			this.populate(this.items);
 			loadingScreen.style.display ="none";
 		},
 		suspend(){
 			this.ui.style.display = "none";
 		},
-		async refresh(){
-			
-		},
-
-		createRef(){
-			return db.collection(parsePathname(location.pathname).subpath).orderBy("dateCreated").limit(this.maxLevels);
-			//let searchParams = new URLSearchParams()
+		createParams(startAfterPath){
+			const searchParams = new URLSearchParams(location.search);
+			const collection = searchParams.get("collection");
+			if(!collection) {
+				sceneManager.pushModal("Error", "URL malformed");
+				throw "Collection path undefined";
+			}
+			let orderBy = searchParams.get("sort_by");
+			if(!orderBy){
+				orderBy = "dateCreated";
+			}
+			let result = {collection, orderBy};
+			let endAtPath = searchParams.get("end_at");
+			if(startAfterPath) {
+				result.startAfterPath = startAfterPath;
+			} else if(endAtPath){
+				result.endAtPath = endAtPath;
+			}
+			return result;
 		},
 		
-		rows: [],
-		cells: [],
 		maxLevels: 10,
-		params: "",
-		nextPageBtn: document.getElementById("next-page-btn"),
-		prevPageBtn: document.getElementById("prev-page-btn"),
+		search: "",
+		items: [],
+		loadMoreBtn: document.getElementById("load-more-btn"),
+		browserContent: document.getElementById("browser-content"),
+		sortBySelect: document.getElementById("sort-by-select"),
+		template: `<tr class="{{c}}" data-path="{{p}}"><td>{{n}}</td><td>{{a}}</td><td>{{d}}</td><td>{{r}}</td><td>{{pl}}</td></tr>`,
 
-		populate(){
-			const len = levelManager.levelCache.length;
-			history.replaceState
+		populate(items){
+			const len = items.length;
+			let html = "";
 			for(let i = 0; i != len; ++i){
-				this.rows[i].style.display = "table-row";
-				/*
-				this.rows[i].onpointerdown = () => {
-					sceneManager.pushModal(modeScene, levelManager.levelCache[i].ref.path);
-				};
-				this.cells[i][0].textContent = levelManager.levelCache[i].get("name");
-				this.cells[i][1].textContent = levelManager.levelCache[i].get("author");
-				this.cells[i][2].textContent = levelManager.levelCache[i].get("dateCreated").toDate().toDateString();
-				this.cells[i][3].textContent = levelManager.levelCache[i].get("rating");
-				this.cells[i][4].textContent = levelManager.levelCache[i].get("plays");
-				if(levelManager.levelCache[i].review){
-					this.rows[i].classList.add("completed-level");
-				} else {
-					this.rows[i].classList.remove("completed-level");
-				}
-				*/
-				this.rows[i].onpointerdown = () => {
-					sceneManager.pushModal(modeScene, levelManager.levelCache[i].ref.path);
-				};
-				this.cells[i][0].textContent = levelManager.levelCache[i].data.name;
-				this.cells[i][1].textContent = levelManager.levelCache[i].data.author;
-				this.cells[i][2].textContent = levelManager.levelCache[i].data.dateCreated.toDate().toDateString();
-				this.cells[i][3].textContent = levelManager.levelCache[i].data.rating;
-				this.cells[i][4].textContent = levelManager.levelCache[i].data.plays;
-				if(levelManager.levelCache[i].review){
-					this.rows[i].classList.add("completed-level");
-				} else {
-					this.rows[i].classList.remove("completed-level");
-				}
+				let className = items[i].review ? "completed-level" : "";
+				html += this.template
+					.replace("{{c}}", className)
+					.replace("{{p}}", items[i].path)
+					.replace("{{n}}", items[i].name)
+					.replace("{{a}}", items[i].author)
+					.replace("{{d}}", items[i].dateCreated.toDate().toDateString().slice(4))
+					.replace("{{r}}", items[i].rating)
+					.replace("{{pl}}", items[i].plays);
 			}
-			for(let i = len; i != this.maxLevels; ++i){
-				this.rows[i].style.display = "none";
-			}
-		},
-		getCollectionPath(levelPath){
-			return levelPath.split("/").slice(0, -1).join("/");
+			this.browserContent.innerHTML += html;
 		},
 		init(){
-			//const sceneCloseBtn = closeBtn.cloneNode(true);
-			//sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.pop();});
-			//this.ui.prepend(sceneCloseBtn);
-			this.prevPageBtn.addEventListener("click", async () => {
-				await levelManager.get(this.createRef().endBefore(levelManager.levelCache[0]));
-				this.populate();
-				const searchParams = new URLSearchParams(location.search);
-				searchParams.set("start", levelManager.levelCache[0].ref.path);
-				history.replaceState(null, "", location.pathname + "?" + searchParams.toString());
-				this.nextPageBtn.style.display = "block";
-			});
-			this.nextPageBtn.addEventListener("click", async () => {
-				await levelManager.get(this.createRef().startAfter(levelManager.levelCache[levelManager.levelCache.length - 1]));
-				this.populate();
-				const searchParams = new URLSearchParams(location.search);
-				searchParams.set("start", levelManager.levelCache[0].ref.path);
-				history.replaceState(null, "", location.pathname + "?" + searchParams.toString());
-				this.prevPageBtn.style.display = "block";
-				if(levelManager.levelCache.length != this.maxLevels){
-					this.nextPageBtn.style.display = "none";
+			this.browserContent.addEventListener("click", (e) => {
+				const node = e.target.parentNode;
+				if(node.tagName == "TR") {
+					sceneManager.pushModal(modeScene, node.dataset.path);
 				}
 			});
-
-			const rowsLive = document.getElementById("levelBrowser").tBodies[0].rows;
-			const rowLen = rowsLive[0].cells.length;
-			for(let i = 0; i != this.maxLevels; ++i){
-				this.rows[i] = rowsLive[i];
-				this.cells[i] = [];
-				for(let j = 0; j < rowLen; ++j){
-					this.cells[i][j] = rowsLive[i].cells[j];
+			this.sortBySelect.addEventListener("change", () => {
+				const searchParams = new URLSearchParams(location.search);
+				searchParams.set("sort_by", this.sortBySelect.value);
+				searchParams.delete("end_at");
+				history.replaceState(null, "", "/listing?" + searchParams.toString());
+				this.start();
+			});
+			this.loadMoreBtn.addEventListener("click", async () => {
+				const levels = await levelManager.getLevels(this.createParams(this.items[this.items.length - 1].path));
+				const len = levels.length;
+				if(len < this.maxLevels){
+					this.loadMoreBtn.style.display = "none";
+					if(!len){
+						return;
+					}
 				}
-			}
+				this.populate(levels);
+				this.items.push(...levels);
+				const searchParams = new URLSearchParams(location.search);
+				searchParams.set("end_at", levels[levels.length - 1].path);
+				history.replaceState(null, "", "/listing?" + searchParams.toString());
+			});
 		}
 	},
 	"/sandbox": {
@@ -171,7 +141,15 @@ const routes = {
 		async start(docPath){
 			this.toolbar.style.display = "flex";
 			if(docPath) {
-				await levelManager.loadLevel(docPath);
+				loadingScreen.style.display = "flex";
+				try {
+					const level = await levelManager.getLevel(docPath);
+					levelManager.loadLevel(level);
+				} catch(e) {
+					sceneManager.pushModal(messageScene, "Error", "Level could not be loaded. Try a different level also please consider sending feedback.");
+					console.error(e);
+				}
+				loadingScreen.style.display = "none";
 			}
 			sandboxMode = true;
 		},
@@ -200,13 +178,22 @@ const routes = {
 	},
 	"/play": {
 		async start(docPath){
+			loadingScreen.style.display = "flex";
 			this.toolbar.style.display = "flex";
 			if(!docPath){
-				sceneManager.pushModal(messageScene, "Error", "This url is incorrectly formatted");
+				sceneManager.pushModal(messageScene, "Error", "Url is incorrectly formatted");
 				return;
 			}
-			this.currentLevel = await levelManager.loadLevel(docPath);
+			try {
+				this.currentLevel = await levelManager.getLevel(docPath);
+				levelManager.loadLevel(this.currentLevel);
+			} catch(e) {
+				sceneManager.pushModal(messageScene, "Error", "Level could not be loaded. Try a different level also please consider sending feedback.");
+				throw e;
+			}
+			pw.render();
 			sandboxMode = false;
+			loadingScreen.style.display = "none";
 		},
 		suspend(){
 			if(simulationManager.isSimulating){

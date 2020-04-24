@@ -23,12 +23,11 @@ var loadLevelScene = {
 					`This level file is corrupted and cannot be loaded. Try another level file or please 
 					consider sending feedback to have the issue solved, it will be apreciated.`
 				);
-				return false;
+				throw "Invalid object definition"
 			}
 		}
 		canvas.style.cursor = "crosshair";
 		pw.render();
-		return true;
 	},
 
 	init(){

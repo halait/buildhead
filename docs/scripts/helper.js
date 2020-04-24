@@ -523,8 +523,7 @@ function create(def){
 	} else if(def.form == pw.REVOLUTE_FORM) {
 		return new Joint(def);
 	} else {
-		console.error(def);
-		return null;
+		throw {def: def, message: "Unrecognized form"};
 	}
 }
 
@@ -557,134 +556,124 @@ function base64ToString(base64){
 */
 
 const levelManager = {
-	levelCache: [],
-	//currentRef: null,
-	//lastDoc: null,
-	setRef(ref){
-		this.levelCache.length = 0;
-		this.currentRef = ref;
+	cache: [],
+	clearCache(){
+		this.cache = [];
 	},
-	async getNextChunk(){
-		let ref = this.currentRef;
-		if(!ref) {
-			throw "Naa"
+	async getLevels(params){
+		return this.normalize((await (await this.createRef(params)).get()).docs);
+	},
+	async createRef(params){
+		let ref = db.collection(params.collection).orderBy(params.orderBy, "desc");
+		if(params.startAfterPath) {
+			//                                no max
+			ref = ref.startAfter(await this.getDoc(params.startAfterPath)).limit(10);
+		} else if(params.endAtPath){
+			ref = ref.endAt(await this.getDoc(params.endAtPath));
+		} else {
+			//                    no max
+			ref = ref.limit(10);
 		}
-		//if(this.lastDoc){
-			//ref = ref.startAfter(this.lastDoc);
-		//}
-		//this.levelCache.push(...await this.normalizeLevels((await ref.get()).docs));
-		this.levelCache = await this.normalizeLevels((await ref.get()).docs);
+		console.log(ref);
+		return ref;
 	},
-	async get(ref){
-		await this.normalizeLevels((await ref.get()).docs);
-	},
-	async normalizeLevels(docs){
+	async normalize(docs){
+		const levels = [];
 		const len = docs.length;
-		if(!len){
-			return [];
+		if(!len) {
+			return levels;
 		}
-		this.lastDoc = docs[len - 1];
 		const ids = [];
-		//const levels = [];
 		for(let i = 0; i != len; ++i){
-			//const id = docs[i].id;
-
-			this.levelCache[i] = docs[i];
-			const data = docs[i].data();
-			data.id = docs[i].id;
-			ids[i] = data.id;
-			this.levelCache[i].data = data;
-			//const level = docs[i].data();
-			//level.id = id;
-			//level.path = docs[i].ref.path;
-			//levels[i] = level;
+			levels[i] = docs[i].data();
+			levels[i].id = docs[i].id;
+			levels[i].path = docs[i].ref.path;
+			ids[i] = levels[i].id;
+			docs[i].data = levels[i];
 		}
 		if(user){
-			const reviewSnap = (await db.collection("users").doc(user.uid).collection("reviews").where(firebase.firestore.FieldPath.documentId(), "in", ids).get()).docs;
-			const snapLen = reviewSnap.length;
-			for(let i = 0; i != len; ++i){
-				const id = this.levelCache[i].data.id;
-				for(let j = 0; j != snapLen; ++j){
-					if(id == reviewSnap[j].id){
-						this.levelCache[i].review = reviewSnap[j].data();
-						break;
-					}
+			let promises = [];
+			for(let i = 0, len = ids.length, window = Math.min(len - i, 10); i != len; i += window, window = Math.min(len - i, 10)){				
+				promises.push(this.attachReview(levels, ids, i, window));
+			}
+			await Promise.all(promises);
+		}
+		this.cache.push(...docs);
+		return levels;
+	},
+	async attachReview(levels, ids, startIndex, window){
+		const reviewSnap = (await db.collection("users").doc(user.uid).collection("reviews")
+			.where(firebase.firestore.FieldPath.documentId(), "in", ids.slice(startIndex, startIndex + window)).get()).docs;
+		for(let len = window + startIndex, kLen = reviewSnap.length; startIndex != len; ++startIndex){
+			const id = levels[startIndex].id;
+			for(let k = 0; k != kLen; ++k){
+				if(id == reviewSnap[k].id){
+					levels[startIndex].review = reviewSnap[k].data();
+					break;
 				}
 			}
 		}
-		//return levels;
 	},
-	async loadLevel(levelPath){
-		let level = null;
-		const i = this.indexOf(levelPath);
-		if(i != -1){
-			level = this.levelCache[i];
-			console.log("loading level from cache");
-		} else {
-			const doc = await db.doc(levelPath).get();
-			console.log(doc.exists)
-			if(!doc.exists){
-				throw "Level not found"
-			}
-			await this.normalizeLevels([doc]);
-			level = this.levelCache[0];
-			console.log("loading level from server and caching");
-		} 
+	loadLevel(level){
+		canvasEventManager.reset();
 		let levelData = null;
 		try {
-			levelData = JSON.parse(level.data.json);
+			levelData = JSON.parse(level.json);
+			sandboxMode = true;
+			for(let i = 1, len = levelData.length; i < len; ++i){
+				create(levelData[i]);
+			}
+			sandboxMode = false;
 		} catch(e) {
-			sceneManager.pushModal(messageScene, "Error", "Level corrupted, could not deserialize");
+			sceneManager.pushModal(messageScene, "Error", "Level corrupted, could not be loaded. Try a different level, also please consider sending feedback.");
 			throw e;
 		}
-		canvasEventManager.reset();
-		sandboxMode = true;
-		loadLevelScene.load(levelData);
-		sandboxMode = false;
 		const batch = db.batch();
-		batch.update(db.doc(level.ref.path), {plays: firebase.firestore.FieldValue.increment(1)});
+		batch.update(db.doc(level.path), {plays: firebase.firestore.FieldValue.increment(1)});
 		if(!level.review){
 			level.review = {rating: 0};
-			batch.set(db.doc("users/" + user.uid + "/reviews/" + level.data.id), level.review);
+			batch.set(db.doc("users/" + user.uid + "/reviews/" + level.id), level.review);
 		}
 		batch.commit()
 			.then(() => {
-				++level.data.plays;
+				++level.plays;
 			})
 			.catch((err) => {
 				sceneManager.pushModal(messageScene, "Error", err);
 				throw err;
 			});
-		return level;
 	},
-	async getNextLevelPath(levelPath){
-		const i = this.indexOf(levelPath) + 1;
-		const len = this.levelCache.length;
-		if(!i){
-			throw "Impossible";
-		}
-		//if(i == len && this.currentRef && this.lastDoc){
-			//await this.getNextChunk();
-		//}
-		if(i != len || this.levelCache.length > len){
-			return this.levelCache[i].ref.path;
-		}
-		return null;
-	},
-	indexOf(levelPath){
-		for(let i = 0, len = this.levelCache.length; i != len; ++i){
-			if(levelPath == this.levelCache[i].ref.path){
+	findIndex(path){
+		for(let i = 0, len = this.cache.length; i != len; ++i){
+			if(path == this.cache[i].data.path){
 				return i;
 			}
 		}
 		return -1;
 	},
-	getLevel(levelPath){
-		for(let i = 0, len = this.levelCache.length; i != len; ++i){
-			if(levelPath === this.levelCache[i].ref.path){
-				return this.levelCache[i];
-			}
+	async getLevel(path){
+		let doc = null;
+		try {
+			doc = await this.getDoc(path);
+		} catch(e) {
+			throw "Level could not be found";
 		}
-		return null;
+		if(doc.data.id){
+			return doc.data;
+		} else {
+			return (await this.normalize([doc]))[0];
+		}
+	},
+	async getDoc(path){
+		const i = this.findIndex(path);
+		if(i != -1){
+			return this.cache[i];
+		} else {
+			const doc = await db.doc(path).get();
+			if(!doc.exists){
+				throw "Document could not be found";
+			}
+			return doc;
+		}
 	}
 }
