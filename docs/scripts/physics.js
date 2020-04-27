@@ -195,7 +195,7 @@ class MemoryManager {
 const pw = {
 	G: -0.002,
 	//MIN_AA: 0.0,
-	VELOCITY_ITERATIONS: 64,
+	VELOCITY_ITERATIONS: 32,
 
 
 	//temp
@@ -251,9 +251,9 @@ const pw = {
 					M[C_DIST + i] = collisionData[6 + c];
 
 
-					//if(M[C_DIST + i] < 0) M[C_DIST + i] *= 0.8;
-					M[C_JN + i] *= 0.5;
-					M[C_JT + i] *= 0.5;
+					if(M[C_DIST + i] < 0) M[C_DIST + i] *= 0.75;
+					M[C_JN + i] *= 0.75;
+					M[C_JT + i] *= 0.75;
 
 					// vectors from center of masses to collision vertex (radius vectors)
 					M[C_RAX + i] = collisionData[2 + c] - M[O_TX + asi];
@@ -306,11 +306,11 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]);
-				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]);
-				M[C_JX + si] *= 0.5;
-				M[C_JY + si] *= 0.5;
-				M[C_SUM_T + si] *= 0.5;
+				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.75;
+				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.75;
+				M[C_JX + si] *= 0.75;
+				M[C_JY + si] *= 0.75;
+				M[C_SUM_T + si] *= 0.75;
 
 
 				if(this.warmStarting){
