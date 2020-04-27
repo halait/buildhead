@@ -204,7 +204,7 @@ const ccwWheelCreatorEventHandler = {
 			radius: DEFAULT_WHEEL_RADIUS,
 			density: DEFAULT_WHEEL_DENSITY,
 			group: COPLANAR_GROUP,
-			userFloats: [JOINABLE, 0.0, 0.25, 0.25, 0.5],
+			userFloats: [JOINABLE, texs.ccwWheel],
 			motorVelocity: DEFAULT_MOTOR_VELOCITY,
 			maxMotorTorque: DEFAULT_MAX_MOTOR_TORQUE,
 			motorJoinable: true
@@ -233,7 +233,7 @@ const nWheelCreatorEventHandler = {
 			radius: DEFAULT_WHEEL_RADIUS,
 			density: DEFAULT_WHEEL_DENSITY,
 			group: COPLANAR_GROUP,
-			userFloats: [JOINABLE, 0.0, 0.50, 0.25, 0.75],
+			userFloats: [JOINABLE, ...texs.nWheel],
 		});
 		pw.render();
 	},
@@ -259,7 +259,7 @@ const cwWheelCreatorEventHandler = {
 			radius: DEFAULT_WHEEL_RADIUS,
 			density: DEFAULT_WHEEL_DENSITY,
 			group: COPLANAR_GROUP,
-			userFloats: [JOINABLE, 0.0, 0.0, 0.25, 0.25],
+			userFloats: [JOINABLE, ...texs.cwWheel],
 			hasMotor: true,
 			motorVelocity: -DEFAULT_MOTOR_VELOCITY,
 			maxMotorTorque: DEFAULT_MAX_MOTOR_TORQUE,
@@ -286,18 +286,7 @@ const tWheelCreatorEventHandler = {
 	},
 
 	handleActivePress(){
-		let def = createCustomScene.circleDef;
-		if(def === null){
-			console.log("default circle");
-			def = {
-			form: pw.CIRCLE_FORM,
-			type: pw.MOVABLE_TYPE,
-			radius: DEFAULT_WHEEL_RADIUS,
-			density: DEFAULT_WHEEL_DENSITY,
-			group: COPLANAR_GROUP,
-			userFloats: [JOINABLE, 0.0, 0.5, 0.25, 0.75],
-			};
-		}
+		let def = createCustomScene.getCircleDef();
 		def.x = canvasEventManager.mx,
 		def.y = canvasEventManager.my,
 		tempWheel = create(def);
@@ -324,7 +313,7 @@ const nRodCreatorEventHandler = {
 			width: DEFAULT_ROD_WIDTH,
 			density: DEFAULT_ROD_DENSITY,
 			group: NON_COPLANAR_GROUP,
-			userFloats: [JOINABLE, ...AQUA_TC],
+			userFloats: [JOINABLE, ...texs.aqua],
 		});
 		pw.render();
 	},
@@ -349,7 +338,7 @@ const cRodCreatorEventHandler = {
 			width: DEFAULT_ROD_WIDTH,
 			density: DEFAULT_ROD_DENSITY,
 			group: COPLANAR_GROUP,
-			userFloats: [JOINABLE, ...GRAY_TC],
+			userFloats: [JOINABLE, ...texs.gray],
 		});
 		pw.render();
 	},
@@ -372,7 +361,11 @@ const gRodCreatorEventHandler = {
 	},
 
 	handleActivePress(){
-		let def = createCustomScene.obroundDef;
+		if(tempRod){
+			console.error("Temp rod already initialized");
+		}
+		let def = createCustomScene.getObroundDef();
+		/*
 		if(def === null || createCustomScene.circleMode){
 			def = {
 				form: pw.PLANE_FORM,
@@ -382,7 +375,7 @@ const gRodCreatorEventHandler = {
 				group: COPLANAR_GROUP,
 				userFloats: [JOINABLE, ...GRAY_TC],
 			};
-		}
+		}*/
 		def.vertices = [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx, canvasEventManager.my]];
 		tempRod = create(def);
 		pw.render();
@@ -558,7 +551,7 @@ const assemblyFieldCreatorEventHandler = {
 			form: pw.AABB_FORM,
 			type: pw.FIXED_TYPE,
 			vertices: [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx + 0.05, canvasEventManager.my + 0.05]],
-			userFloats: [NON_JOINABLE, ...BLUE_TC],
+			userFloats: [NON_JOINABLE, ...texs.blue],
 			id: ASSEMBLY_FIELD_ID
 		});
 		pw.render();
@@ -579,7 +572,7 @@ const goalFieldCreatorEventHandler = {
 			form: pw.AABB_FORM,
 			type: pw.FIXED_TYPE,
 			vertices: [[canvasEventManager.mx, canvasEventManager.my], [canvasEventManager.mx + 0.05, canvasEventManager.my + 0.05]],
-			userFloats: [NON_JOINABLE, ...ORANGE_TC],
+			userFloats: [NON_JOINABLE, ...texs.orange],
 			id: GOAL_FIELD_ID
 		});
 		pw.render();
@@ -633,9 +626,8 @@ const sceneManager = {
 		if(this.current){
 			this.current.suspend();
 		}
-		const paths = parsePathname(location.pathname);
-		this.current = routes[paths.route];
-		this.current.start(paths.subpath);
+		this.current = routes[getRoute()];
+		this.current.start();
 	},
 	pushModal(modal, ...state){
 		if(this.modalEntry){
@@ -672,12 +664,10 @@ window.addEventListener("popstate", (e) => {
 	if(sceneManager.current){
 		sceneManager.current.suspend();
 	}
-	const paths = parsePathname(window.location.pathname);
-	sceneManager.current = routes[paths.route];
-	sceneManager.current.start(paths.subpath);	
+	sceneManager.current = routes[getRoute()];
+	sceneManager.current.start();	
 });
 
-function parsePathname(pathname){
-	const route = /\/[^\/]*/.exec(pathname)[0];
-	return {route: route, subpath: pathname.replace(route, "").slice(1)};
+function getRoute(){
+	return /\/[^\/]*/.exec(location.pathname)[0];
 }

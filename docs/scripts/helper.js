@@ -565,6 +565,9 @@ const levelManager = {
 	},
 	async createRef(params){
 		let ref = db.collection(params.collection).orderBy(params.orderBy, "desc");
+		if(params.where) {
+			ref = ref.where(params.where.field, params.where.operator, params.where.value);
+		}
 		if(params.startAfterPath) {
 			//                                no max
 			ref = ref.startAfter(await this.getDoc(params.startAfterPath)).limit(10);
@@ -630,7 +633,7 @@ const levelManager = {
 		}
 		const batch = db.batch();
 		batch.update(db.doc(level.path), {plays: firebase.firestore.FieldValue.increment(1)});
-		if(!level.review){
+		if(user && !level.review){
 			level.review = {rating: 0};
 			batch.set(db.doc("users/" + user.uid + "/reviews/" + level.id), level.review);
 		}
@@ -642,6 +645,7 @@ const levelManager = {
 				sceneManager.pushModal(messageScene, "Error", err);
 				throw err;
 			});
+		pw.render();
 	},
 	findIndex(path){
 		for(let i = 0, len = this.cache.length; i != len; ++i){

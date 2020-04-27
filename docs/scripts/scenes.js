@@ -26,8 +26,8 @@ const routes = {
 		//levelBtns: document.getElementsByClassName("levelBtn"),
 		ui: document.getElementById("menuUI"),
 		accountBtn: document.getElementById("accountBtn"),
-		listingOriginalRoute: "/listing?collection=original",
-		listingCommunityRoute: "/listing?collection=community",
+		listingOriginalRoute: "/listing/original",
+		listingCommunityRoute: "/listing/community",
 
 		init(){
 			document.getElementById("originalLevelsBtn").addEventListener("pointerdown", () => {
@@ -47,10 +47,20 @@ const routes = {
 		async start(){
 			loadingScreen.style.display = "flex";
 			this.ui.style.display = "block";
-			if(location.search != this.search){
-				this.search = location.search;
+			if(location.href != this.href){
+				this.href = location.href;
 				levelManager.clearCache();
-				this.items = await levelManager.getLevels(this.createParams());
+				try {
+					this.items = await levelManager.getLevels(this.createParams());
+				} catch(e){
+					sceneManager.pushModal(messageScene, "Error", "Something went wrong. Try a different location, also please consider sending feedback");
+					throw e;
+				}
+			}
+			if(this.items.length < this.maxLevels){
+				this.loadMoreBtn.style.display = "none";
+			} else {
+				this.loadMoreBtn.style.display = "block";
 			}
 			this.browserContent.innerHTML = "";
 			this.populate(this.items);
@@ -60,17 +70,18 @@ const routes = {
 			this.ui.style.display = "none";
 		},
 		createParams(startAfterPath){
-			const searchParams = new URLSearchParams(location.search);
-			const collection = searchParams.get("collection");
+			const collection = location.pathname.replace(this.route, "");
 			if(!collection) {
-				sceneManager.pushModal("Error", "URL malformed");
 				throw "Collection path undefined";
 			}
+			const searchParams = new URLSearchParams(location.search);
 			let orderBy = searchParams.get("sort_by");
 			if(!orderBy){
-				orderBy = "dateCreated";
+				orderBy = this.defaultOrderBy;
 			}
-			let result = {collection, orderBy};
+			let search = searchParams.getAll("q");
+			let where = search.length ? {field: "tags", operator: "array-contains-any", value: search} : null;
+			let result = {collection, orderBy, where};
 			let endAtPath = searchParams.get("end_at");
 			if(startAfterPath) {
 				result.startAfterPath = startAfterPath;
@@ -81,13 +92,15 @@ const routes = {
 		},
 		
 		maxLevels: 10,
-		search: "",
+		href: "",
+		route: "/listing",
+		defaultOrderBy: "dateCreated",
 		items: [],
 		loadMoreBtn: document.getElementById("load-more-btn"),
 		browserContent: document.getElementById("browser-content"),
 		sortBySelect: document.getElementById("sort-by-select"),
+		searchInput: document.getElementById("search-input"),
 		template: `<tr class="{{c}}" data-path="{{p}}"><td>{{n}}</td><td>{{a}}</td><td>{{d}}</td><td>{{r}}</td><td>{{pl}}</td></tr>`,
-
 		populate(items){
 			const len = items.length;
 			let html = "";
@@ -104,6 +117,23 @@ const routes = {
 			}
 			this.browserContent.innerHTML += html;
 		},
+		createQueryString(searchParams){
+			searchParams = searchParams.toString();
+			if(searchParams){
+				searchParams = "?" + searchParams;
+			}
+			return searchParams;
+		},
+		searchHandler(){
+			const string = routes["/listing"].searchInput.value;
+			let searchParams = new URLSearchParams(location.search);
+			if(!string){
+				searchParams.delete("q");
+			} else {
+				searchParams.set("q", string);
+			}
+			sceneManager.push(location.pathname + routes["/listing"].createQueryString(searchParams));
+		},
 		init(){
 			this.browserContent.addEventListener("click", (e) => {
 				const node = e.target.parentNode;
@@ -112,12 +142,18 @@ const routes = {
 				}
 			});
 			this.sortBySelect.addEventListener("change", () => {
-				const searchParams = new URLSearchParams(location.search);
-				searchParams.set("sort_by", this.sortBySelect.value);
+				let searchParams = new URLSearchParams(location.search);
+				const value = this.sortBySelect.value;
+				if(value){
+					searchParams.set("sort_by", this.sortBySelect.value);
+				} else {
+					searchParams.delete("sort_by");
+				}
 				searchParams.delete("end_at");
-				history.replaceState(null, "", "/listing?" + searchParams.toString());
-				this.start();
+				sceneManager.push(location.pathname + this.createQueryString(searchParams));
 			});
+			this.searchInput.addEventListener("change", this.searchHandler);
+			document.getElementById("click", this.searchHandler);
 			this.loadMoreBtn.addEventListener("click", async () => {
 				const levels = await levelManager.getLevels(this.createParams(this.items[this.items.length - 1].path));
 				const len = levels.length;
@@ -129,18 +165,20 @@ const routes = {
 				}
 				this.populate(levels);
 				this.items.push(...levels);
-				const searchParams = new URLSearchParams(location.search);
+				let searchParams = new URLSearchParams(location.search);
 				searchParams.set("end_at", levels[levels.length - 1].path);
-				history.replaceState(null, "", "/listing?" + searchParams.toString());
+				history.replaceState(null, "", location.pathname + this.createQueryString(searchParams));
 			});
 		}
 	},
 	"/sandbox": {
 		toolbar: document.getElementById("sandboxToolbar"),
 
-		async start(docPath){
+		async start(){
+			let docPath = location.pathname;
 			this.toolbar.style.display = "flex";
-			if(docPath) {
+			if(docPath != "/sandbox") {
+				docPath = docPath.replace("/sandbox", "");
 				loadingScreen.style.display = "flex";
 				try {
 					const level = await levelManager.getLevel(docPath);
@@ -150,10 +188,15 @@ const routes = {
 					console.error(e);
 				}
 				loadingScreen.style.display = "none";
+			} else {
+				canvasEventManager.reset();
 			}
 			sandboxMode = true;
 		},
 		suspend(){
+			if(simulationManager.isSimulating){
+				simulationManager.end();
+			}
 			this.toolbar.style.display = "none";
 		},
 
@@ -166,7 +209,7 @@ const routes = {
 			addBtn(nRodCreatorBtn.cloneNode(true), this.toolbar, nRodCreatorEventHandler);
 			addBtn(cRodCreatorBtn.cloneNode(true), this.toolbar, cRodCreatorEventHandler);
 			addBtn(gRodCreatorBtn.cloneNode(true), this.toolbar, gRodCreatorEventHandler);
-			addBtn(polygonBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(createPolygonScene);});
+			//addBtn(polygonBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(createPolygonScene);});
 			addBtn(moveBtn.cloneNode(true), this.toolbar, moveEventHandler);
 			addBtn(removeBtn.cloneNode(true), this.toolbar, removeEventHandler);
 			addBtn(assemblyFieldCreatorBtn.cloneNode(true), this.toolbar, assemblyFieldCreatorEventHandler);
@@ -177,9 +220,10 @@ const routes = {
 		}
 	},
 	"/play": {
-		async start(docPath){
+		async start(){
 			loadingScreen.style.display = "flex";
 			this.toolbar.style.display = "flex";
+			let docPath = location.pathname.replace("/play/", "");
 			if(!docPath){
 				sceneManager.pushModal(messageScene, "Error", "Url is incorrectly formatted");
 				return;
@@ -191,7 +235,6 @@ const routes = {
 				sceneManager.pushModal(messageScene, "Error", "Level could not be loaded. Try a different level also please consider sending feedback.");
 				throw e;
 			}
-			pw.render();
 			sandboxMode = false;
 			loadingScreen.style.display = "none";
 		},

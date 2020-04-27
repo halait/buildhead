@@ -10,7 +10,7 @@ const simulationManager = {
 		canvasEventManager.setHandler(this.eventHandler);
 		this.isSimulating = true;
 		this.successPending = !sandboxMode;
-		requestAnimationFrame(this.simulate);
+		requestAnimationFrame(() => {this.simulate()});
 	},
 	end(){
 		this.isSimulating = false;
@@ -45,16 +45,19 @@ const simulationManager = {
 	},
 	successPending: false,
 	before: 0,
+	updateDt: 1 / 60 * 1000,
 	simulate(now) {
 		if(simulationManager.isSimulating) {
 			requestAnimationFrame(simulationManager.simulate);
-			pw.update();
-			const dt = now - simulationManager.before;
-			if(dt < 25) return;
-			//if(dt > 34) console.log("frame drop");
+			let dt = now - simulationManager.before;
+			if(!simulationManager.before) dt = simulationManager.updateDt;
 			simulationManager.before = now;
-			//pw.update();
+			let maxUpdate = 3;
+			do {
+				pw.update();
+			} while(--maxUpdate && Math.abs(dt -= simulationManager.updateDt) > 1 && dt > -1);
 			pw.render();
+			simulationManager.before = now;
 			if(simulationManager.successPending){
 				let success = true;
 				for(let i = 0, len = targets.length; i != len; ++i){
@@ -69,6 +72,7 @@ const simulationManager = {
 				}
 			}
 		} else {
+			simulationManager.before = 0;
 			pw.resetAllImpulses();
 			for(const o of gameObjects){
 				if(pw.getType(o.ref) == pw.FIXED_TYPE) continue;
@@ -87,7 +91,13 @@ const simulationManager = {
 simulationManager.init();
 
 
-pw.gl = canvas.getContext("webgl");
+pw.gl = canvas.getContext("webgl", {
+	alpha: false,
+	antialias: false,
+	depth: false,
+	powerPreference: "high-performance",
+	preMultipliedAlpha: true
+});
 if(!pw.gl) {
 	let noWebGlErr = "Sorry, this game cannot be played here because WebGl is not supported.";
 	sceneManager.pushModal(messageScene, "Error", noWebGlErr);
@@ -176,18 +186,23 @@ function createTexture(imgPath){
 		let texture = pw.gl.createTexture();
 		pw.gl.bindTexture(pw.gl.TEXTURE_2D, texture);
 		pw.gl.texImage2D(pw.gl.TEXTURE_2D, 0, pw.gl.RGBA, pw.gl.RGBA, pw.gl.UNSIGNED_BYTE, img);
-		pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
-		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.LINEAR_MIPMAP_NEAREST);
-		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.LINEAR);
-		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_S, pw.gl.CLAMP_TO_EDGE);
-		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_T, pw.gl.CLAMP_TO_EDGE);
+
+
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.NEAREST);
+		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.NEAREST);
+
+
+		//pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
+		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.LINEAR_MIPMAP_NEAREST);
+		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.LINEAR);
+		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_S, pw.gl.CLAMP_TO_EDGE);
+		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_T, pw.gl.CLAMP_TO_EDGE);
 		pw.gl.activeTexture(pw.gl.TEXTURE0);
 		pw.gl.uniform1i(pw.U_SAMPLER, 0);
 		if(pw.gl.getError()) {
 			console.error(pw.gl.getError());
 		}
 		//new
-		//pw.gl.disable(pw.gl.DEPTH_TEST);
 		//pw.gl.enable(pw.gl.BLEND);
 		//pw.gl.blendFunc(pw.gl.SRC_ALPHA, pw.gl.ONE_MINUS_SRC_ALPHA);
 	}
@@ -210,7 +225,7 @@ pw.gl.vertexAttribPointer(pw.A_TEX_COORDS_LOCATION, 2, pw.gl.FLOAT, false, 0, 0)
 pw.gl.enableVertexAttribArray(pw.A_POSITION_LOCATION);
 pw.gl.enableVertexAttribArray(pw.A_TEX_COORDS_LOCATION);
 
-pw.gl.clearColor(0, 0, 0, 0);
+pw.gl.clearColor(0, 0, 0, 1);
 pw.gl.useProgram(program);
 pw.gl.clear(pw.gl.COLOR_BUFFER_BIT);
 
@@ -232,13 +247,20 @@ pw.WHEEL_J = [
 	[Math.cos(Math.PI * 2.0 / 1.5), Math.sin(Math.PI * 2.0 / 1.5)]
 ];
 
-const GREEN_TC  = [0.875, 0.018, 0.875, 0.018];
-const GRAY_TC  = [0.875, 0.054, 0.875, 0.054];
-const AQUA_TC  = [0.875, 0.089, 0.875, 0.089];
-const WHITE_TC  = [0.875, 0.125, 0.875, 0.125];
-const ORANGE_TC  = [0.875, 0.161, 0.875, 0.161];
-const DARK_ORANGE_TC  = [0.875, 0.196, 0.875, 0.196];
-const BLUE_TC = [0.875, 0.232, 0.875, 0.232];
+const texs = {
+	green: [0.875, 0.018, 0.875, 0.018],
+	gray: [0.875, 0.054, 0.875, 0.054],
+	aqua: [0.875, 0.089, 0.875, 0.089],
+	white: [0.875, 0.125, 0.875, 0.125],
+	orange: [0.875, 0.161, 0.875, 0.161],
+	darkOrange: [0.875, 0.196, 0.875, 0.196],
+	blue: [0.875, 0.232, 0.875, 0.232],
+	cwWheel: [0, 0, 0.25, 0.25],
+	nWheel: [0.0, 0.50, 0.25, 0.75],
+	ccwWheel: [0.0, 0.25, 0.25, 0.5],
+	tWheel: [0.0, 0.75, 0.25, 1.0],
+	fixedWheel: [0.5, 0.5, 1.0, 1.0]
+};
 //const DR_TC  = [];
 
 const tempPolygon = [];

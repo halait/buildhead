@@ -250,8 +250,10 @@ const pw = {
 					// distance between collision vertices
 					M[C_DIST + i] = collisionData[6 + c];
 
-					if(M[C_DIST + i] < 0) M[C_DIST + i] *= 0.1;
 
+					//if(M[C_DIST + i] < 0) M[C_DIST + i] *= 0.8;
+					M[C_JN + i] *= 0.5;
+					M[C_JT + i] *= 0.5;
 
 					// vectors from center of masses to collision vertex (radius vectors)
 					M[C_RAX + i] = collisionData[2 + c] - M[O_TX + asi];
@@ -304,8 +306,12 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.1;
-				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.1;
+				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]);
+				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]);
+				M[C_JX + si] *= 0.5;
+				M[C_JY + si] *= 0.5;
+				M[C_SUM_T + si] *= 0.5;
+
 
 				if(this.warmStarting){
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -354,6 +360,8 @@ const pw = {
 						let maxJt = -M[C_JN + i] * M[C_US + si];
 						// clamp to max friction
 						if(Math.abs(M[C_JT + i]) > maxJt){
+							// new 
+							maxJt *= M[C_UK + si];
 							if(jt > 0) M[C_JT + i] = maxJt;
 							else M[C_JT + i] = -maxJt;
 							jt = M[C_JT + i] - oldJt;
@@ -429,7 +437,7 @@ const pw = {
 
 
 
-					// relative velocity at joint vertices plus distance                                                                        new beta
+					// relative velocity at joint vertices plus distance
 					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si] + M[C_DX + si];
 					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si] + M[C_DY + si];
 					// if no relative velocity then done
@@ -1493,8 +1501,8 @@ const pw = {
 
 		this.M[O_FORM + ptr] = def.form;
 		this.M[O_TYPE + ptr] = def.type;
-		this.M[O_GROUP + ptr] = def.group;
-		if(def.staticFriction === undefined) this.M[O_US + ptr] = 0.9;
+		this.M[O_GROUP + ptr] = def.group;                          // tune?
+		if(def.staticFriction === undefined) this.M[O_US + ptr] = 0.8;
 		else this.M[O_US + ptr] = def.staticFriction;
 		if(def.kineticFriction === undefined) this.M[O_UK + ptr] = 0.7;
 		else this.M[O_UK + ptr] = def.kineticFriction;
