@@ -292,12 +292,12 @@
 			align-items: center;
 			justify-content: center;
 		}
-		#play-btn, #next-level-btn {
+		#play-btn {
 			background-color: #048;
 			font-size: 24px;
 			padding: 8px;
 		}
-		#play-btn:hover, #next-level-btn:hover {
+		#play-btn:hover {
 			background-color: #06b;
 		}
 		#save-ui {
@@ -498,10 +498,11 @@
 					<polygon points="50 90, 15 55, 42 55, 42 10, 58 10, 58 55, 85 55"></polygon>
 				</svg>
 			</div>
-			<div id="next-level-btn" class="btn">Next</div>
+			<!--<div id="next-level-btn" class="btn">Next</div>-->
+			<div id="go-back-btn" class="btn">Go Back</div>
 			<div id="save-solution-btn" class="btn">Save Solution</div>
 			<div id="browse-solutions-btn" class="btn">Browse Solutions</div>
-			<div id="exit-btn" class="btn">Exit</div>
+			<div id="main-menu-btn" class="btn">Main Menu</div>
 		</div>
 		
 		<div id="loginUi" class="modal">
@@ -657,11 +658,11 @@
 				<label><input class="nonTarget" name="targetRadio" type="radio" checked>No</label>
 			</span>
 			<h3>Density: </h3>
-			<input class="density" type="number" step="0.001" min="0" placeholder="If empty defaults to 30.0">
+			<input class="density" type="number" step="0.0001" min="0" placeholder="If empty defaults to 30.0">
 			<h3>Friction: </h3>
-			<label>Static friction: <input class="staticFriction" type="number" step="0.001" min="0"
+			<label>Static friction: <input class="staticFriction" type="number" step="0.0001" min="0"
 					placeholder="If empty defaults to 0.8"></label><br>
-			<label>Kinetic friction: <input class="kineticFriction" type="number" step="0.001" min="0"
+			<label>Kinetic friction: <input class="kineticFriction" type="number" step="0.0001" min="0"
 					placeholder="If empty defaults to 0.5"></label>
 			<h3>Velocity Resistance: </h3>
 			<label>Linear velocity resistance: <input class="linearResistance" type="number" step="0.001" min="0"
@@ -675,15 +676,15 @@
 		</form>
 		<span id="rodProperties">
 			<h3>Width: </h3>
-			<input id="width" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.05"><br><br>
+			<input id="width" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.05"><br><br>
 		</span>
 		<span id="circleProperties">
 			<h3>Radius: </h3>
-			<input id="radius" type="number" step="0.001" min="0" placeholder="If empty defaults to 0.1">
+			<input id="radius" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.1">
 			<h3>Motor Speed: </h3>
-			<input id="motorSpeed" type="number" step="0.001" placeholder="If empty then circle non-motorized">
+			<input id="motorSpeed" type="number" step="0.00001" placeholder="If empty then circle non-motorized">
 			<h3>Max Motor Torque: </h3>
-			<input id="maxMotorTorque" type="number" step="0.001" min="0"
+			<input id="maxMotorTorque" type="number" step="0.00001" min="0"
 				placeholder="If empty then circle non-motorized"><br><br>
 		</span>
 	</div>

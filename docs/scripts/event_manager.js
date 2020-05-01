@@ -204,7 +204,7 @@ const ccwWheelCreatorEventHandler = {
 			radius: DEFAULT_WHEEL_RADIUS,
 			density: DEFAULT_WHEEL_DENSITY,
 			group: COPLANAR_GROUP,
-			userFloats: [JOINABLE, texs.ccwWheel],
+			userFloats: [JOINABLE, ...texs.ccwWheel],
 			motorVelocity: DEFAULT_MOTOR_VELOCITY,
 			maxMotorTorque: DEFAULT_MAX_MOTOR_TORQUE,
 			motorJoinable: true

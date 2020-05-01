@@ -47,8 +47,11 @@ const routes = {
 		async start(){
 			loadingScreen.style.display = "flex";
 			this.ui.style.display = "block";
-			if(location.href != this.href){
-				this.href = location.href;
+			let collection = location.pathname.replace(this.route, "");
+			let search = location.search;
+			if(collection != this.collection || search != this.search){
+				this.collection = collection;
+				this.search = search;
 				levelManager.clearCache();
 				try {
 					this.items = await levelManager.getLevels(this.createParams());
@@ -59,8 +62,10 @@ const routes = {
 			}
 			if(this.items.length < this.maxLevels){
 				this.loadMoreBtn.style.display = "none";
+				this.moreLoadable = false;
 			} else {
 				this.loadMoreBtn.style.display = "block";
+				this.moreLoadable = true;
 			}
 			this.browserContent.innerHTML = "";
 			this.populate(this.items);
@@ -70,11 +75,11 @@ const routes = {
 			this.ui.style.display = "none";
 		},
 		createParams(startAfterPath){
-			const collection = location.pathname.replace(this.route, "");
+			const collection = this.collection;
 			if(!collection) {
 				throw "Collection path undefined";
 			}
-			const searchParams = new URLSearchParams(location.search);
+			const searchParams = new URLSearchParams(this.search);
 			let orderBy = searchParams.get("sort_by");
 			if(!orderBy){
 				orderBy = this.defaultOrderBy;
@@ -88,14 +93,21 @@ const routes = {
 			} else if(endAtPath){
 				result.endAtPath = endAtPath;
 			}
+			console.log(result);
 			return result;
 		},
-		
+
 		maxLevels: 10,
-		href: "",
+		collection: "",
+		search: "",
 		route: "/listing",
 		defaultOrderBy: "dateCreated",
 		items: [],
+
+
+		moreLoadable: false,
+
+
 		loadMoreBtn: document.getElementById("load-more-btn"),
 		browserContent: document.getElementById("browser-content"),
 		sortBySelect: document.getElementById("sort-by-select"),
@@ -134,6 +146,22 @@ const routes = {
 			}
 			sceneManager.push(location.pathname + routes["/listing"].createQueryString(searchParams));
 		},
+		async loadMoreHandler(){
+			const levels = await levelManager.getLevels(routes["/listing"].createParams(routes["/listing"].items[routes["/listing"].items.length - 1].path));
+			const len = levels.length;
+			if(len < routes["/listing"].maxLevels){
+				routes["/listing"].loadMoreBtn.style.display = "none";
+				routes["/listing"].moreLoadable = false;
+				if(!len){
+					return;
+				}
+			}
+			routes["/listing"].populate(levels);
+			routes["/listing"].items.push(...levels);
+			let searchParams = new URLSearchParams(location.search);
+			searchParams.set("end_at", levels[levels.length - 1].path);
+			history.replaceState(null, "", location.pathname + routes["/listing"].createQueryString(searchParams));
+		},
 		init(){
 			this.browserContent.addEventListener("click", (e) => {
 				const node = e.target.parentNode;
@@ -153,22 +181,7 @@ const routes = {
 				sceneManager.push(location.pathname + this.createQueryString(searchParams));
 			});
 			this.searchInput.addEventListener("change", this.searchHandler);
-			document.getElementById("click", this.searchHandler);
-			this.loadMoreBtn.addEventListener("click", async () => {
-				const levels = await levelManager.getLevels(this.createParams(this.items[this.items.length - 1].path));
-				const len = levels.length;
-				if(len < this.maxLevels){
-					this.loadMoreBtn.style.display = "none";
-					if(!len){
-						return;
-					}
-				}
-				this.populate(levels);
-				this.items.push(...levels);
-				let searchParams = new URLSearchParams(location.search);
-				searchParams.set("end_at", levels[levels.length - 1].path);
-				history.replaceState(null, "", location.pathname + this.createQueryString(searchParams));
-			});
+			this.loadMoreBtn.addEventListener("click", this.loadMoreHandler);
 		}
 	},
 	"/sandbox": {

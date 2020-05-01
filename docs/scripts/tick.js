@@ -52,7 +52,7 @@ const simulationManager = {
 			let dt = now - simulationManager.before;
 			if(!simulationManager.before) dt = simulationManager.updateDt;
 			simulationManager.before = now;
-			let maxUpdate = 3;
+			let maxUpdate = 4;
 			do {
 				pw.update();
 			} while(--maxUpdate && Math.abs(dt -= simulationManager.updateDt) > 1 && dt > -1);

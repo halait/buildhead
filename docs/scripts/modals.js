@@ -100,11 +100,11 @@ const saveScene = {
 				}
 				docTags.push(...nameIn.split(" "));
 				docTags.push(user.displayName);
-				//for(let i = 0; i != 20; ++i){
+				for(let i = 0; i != 20; ++i){
 					//                    temp i
-					await db.doc(docPath /*+ i*/).set({
+					await db.doc(docPath + i).set({
 						//            temp i
-						name: nameIn/* + i*/,
+						name: nameIn + i,
 						author: user.displayName,
 						authorId: user.uid,
 						dateCreated: new Date(),
@@ -114,7 +114,7 @@ const saveScene = {
 						solution: !sandboxMode,
 						json: this.getJson()
 					});
-				//}
+				}
 				sceneManager.popModal();
 			} catch(e) {
 				console.error(e);
@@ -364,7 +364,6 @@ profileScene.init();
 
 const successScene = {
 	ui: document.getElementById("successSceneDiv"),
-	nextLevelBtn: document.getElementById("next-level-btn"),
 	incrementBtn: document.getElementById("increment-btn"),
 	decrementBtn: document.getElementById("decrement-btn"),
 	ratingDiv: document.getElementById("rating"),
@@ -430,17 +429,10 @@ const successScene = {
 		const sceneCloseBtn = closeBtn.cloneNode(true);
 		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
 		successScene.ui.prepend(sceneCloseBtn);
-		document.getElementById("exit-btn").addEventListener("click", () => {sceneManager.push("/");});
+		document.getElementById("main-menu-btn").addEventListener("click", () => {sceneManager.push("/");});
 		this.incrementBtn.addEventListener("click", this.ratingHandler);
 		this.decrementBtn.addEventListener("click", this.ratingHandler);
-		this.nextLevelBtn.addEventListener("click", async () => {
-			const nextLevelPath = await levelManager.getNextLevelPath(this.level.path);
-			if(nextLevelPath){
-				sceneManager.push("/play/" + nextLevelPath);
-			} else {
-				sceneManager.pushModal(messageScene, "Playlist complete", "No more levels could be found in the playlist");
-			}
-		});
+		document.getElementById("go-back-btn").addEventListener("click", () => {history.go(-1)});
 		document.getElementById("browse-solutions-btn").addEventListener("click", () => {
 			sceneManager.push("/listing/" + this.level.path + "/solutions");
 		});

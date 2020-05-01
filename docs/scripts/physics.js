@@ -195,7 +195,7 @@ class MemoryManager {
 const pw = {
 	G: -0.002,
 	//MIN_AA: 0.0,
-	VELOCITY_ITERATIONS: 32,
+	VELOCITY_ITERATIONS: 16,
 
 
 	//temp
@@ -1502,9 +1502,9 @@ const pw = {
 		this.M[O_FORM + ptr] = def.form;
 		this.M[O_TYPE + ptr] = def.type;
 		this.M[O_GROUP + ptr] = def.group;                          // tune?
-		if(def.staticFriction === undefined) this.M[O_US + ptr] = 0.8;
+		if(def.staticFriction === undefined) this.M[O_US + ptr] = 0.85;
 		else this.M[O_US + ptr] = def.staticFriction;
-		if(def.kineticFriction === undefined) this.M[O_UK + ptr] = 0.7;
+		if(def.kineticFriction === undefined) this.M[O_UK + ptr] = 0.75;
 		else this.M[O_UK + ptr] = def.kineticFriction;
 		if(def.linearVelocityResistance === undefined) this.M[O_VM + ptr] = 0.99;
 		else this.M[O_VM + ptr] = 1.0 - def.linearVelocityResistance;
