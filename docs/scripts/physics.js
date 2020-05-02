@@ -360,8 +360,8 @@ const pw = {
 						let maxJt = -M[C_JN + i] * M[C_US + si];
 						// clamp to max friction
 						if(Math.abs(M[C_JT + i]) > maxJt){
-							// new 
-							maxJt *= M[C_UK + si];
+							// new
+							maxJt = -M[C_JN + i] * M[C_UK + si];
 							if(jt > 0) M[C_JT + i] = maxJt;
 							else M[C_JT + i] = -maxJt;
 							jt = M[C_JT + i] - oldJt;
@@ -487,7 +487,7 @@ const pw = {
 			M[O_SIN + ptr] = Math.sin(M[O_O + ptr]);
 			this.updateWorldPositions(ptr);
 		}
-
+		
 		// solve position constraints
 		iter = 0
 		for(this.unsolved = true; this.unsolved && iter < this.POSITION_ITERATIONS; ++iter){
@@ -1506,9 +1506,9 @@ const pw = {
 		else this.M[O_US + ptr] = def.staticFriction;
 		if(def.kineticFriction === undefined) this.M[O_UK + ptr] = 0.75;
 		else this.M[O_UK + ptr] = def.kineticFriction;
-		if(def.linearVelocityResistance === undefined) this.M[O_VM + ptr] = 0.99;
+		if(def.linearVelocityResistance === undefined) this.M[O_VM + ptr] = 0.999;
 		else this.M[O_VM + ptr] = 1.0 - def.linearVelocityResistance;
-		if(def.rotationalVelocityResistance === undefined) this.M[O_WM + ptr] = 0.99;
+		if(def.rotationalVelocityResistance === undefined) this.M[O_WM + ptr] = 0.999;
 		else this.M[O_WM + ptr] = 1.0 - def.rotationalVelocityResistance;
 		this.M[O_VX + ptr] = 0.0;
 		this.M[O_VY + ptr] = 0.0;

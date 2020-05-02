@@ -417,6 +417,12 @@ class Joint {
 		joints.push(this);
 	}
 
+	setPosition(x, y){
+		this.def.x = x;
+		this.def.y = y;
+		pw.setJointPosition(this.ref, x, y);
+	}
+
 	destroy(){
 		console.log("destroying joint");
 		let i = this.gameObjectA.joints.indexOf(this);
@@ -471,9 +477,9 @@ class Joint {
 	toJson(){
 		this.def.gai = gameObjects.indexOf(this.gameObjectA);
 		this.def.gbi = gameObjects.indexOf(this.gameObjectB);
-		let p = pw.getJointAnchorPositionA(this.ref);
-		this.def.x = p[0];
-		this.def.y = p[1];
+		//let p = pw.getJointAnchorPositionA(this.ref);
+		//this.def.x = p[0];
+		//this.def.y = p[1];
 		return JSON.stringify(this.def);
 	}
 }
@@ -669,6 +675,7 @@ const levelManager = {
 		}
 	},
 	async getDoc(path){
+		console.log
 		const i = this.findIndex(path);
 		if(i != -1){
 			return this.cache[i];

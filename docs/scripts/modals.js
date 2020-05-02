@@ -30,7 +30,7 @@ const saveScene = {
 	tagInput: document.getElementById("tag-input"),
 	header: document.getElementById("save-header"),
 	level: null,
-	// do we really need level or just check if sandbox, solution if not sandbox mode
+	// need level or just check if sandbox? solution if not sandbox mode
 	start(level){
 		if(!user){
 			sceneManager.popModal();

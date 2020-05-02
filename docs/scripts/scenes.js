@@ -187,8 +187,7 @@ const routes = {
 		toolbar: document.getElementById("sandboxToolbar"),
 
 		async start(){
-			//let docPath = location.pathname;
-			let docPath = "originalLevels/halait - 0 Tutorial";
+			let docPath = location.pathname;
 			this.toolbar.style.display = "flex";
 			if(docPath != "/sandbox") {
 				docPath = docPath.replace("/sandbox", "");
@@ -249,8 +248,10 @@ const routes = {
 				throw e;
 			}
 			sandboxMode = false;
+			this.levelInfo.style.display = "block";
+			this.levelInfo.textContent = this.currentLevel.author + " - " + this.currentLevel.name;
 			loadingScreen.style.display = "none";
-			if(this.currentLevel.name == "0 Tutorial19" && this.currentLevel.author == "halait"){
+			if(this.currentLevel.name == "0 Tutorial" && this.currentLevel.author == "halait"){
 				sceneManager.pushModal(tutorialScene);
 			}
 		},
@@ -259,8 +260,10 @@ const routes = {
 				simulationManager.end();
 			}
 			this.toolbar.style.display = "none";
+			this.levelInfo.style.display = "none";
 		},
 		toolbar: document.getElementById("assemblySceneBtnsDiv"),
+		levelInfo: document.getElementById("level-info"),
 		currentLevel: null,
 	
 		init(){

@@ -515,7 +515,7 @@ const moveEventHandler = {
 							let vertex = j.def.vb;
 							if(j.gameObjectA == o.gameObject) vertex = j.def.va;
 							let wv = pw.getWorldVertices(o.gameObject.ref)[vertex];
-							pw.setJointPosition(j.ref, wv[0], wv[1]);
+							j.setPostion(wv[0], wv[1]);
 						}
 					}
 					o.gameObject.setFinalProperties(false);
