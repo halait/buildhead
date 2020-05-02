@@ -65,6 +65,7 @@ const canvasEventManager = {
 	setHandler(handler, btn){
 		if(this.currentBtn) {
 			this.currentBtn.classList.remove("activeBtn");
+			this.handlePointerEnd();
 		}
 		if(btn){
 			this.currentBtn = btn;
@@ -75,7 +76,7 @@ const canvasEventManager = {
 		this.currentHandler = handler;
 	},
 
-	handlePointerEnd(e){
+	handlePointerEnd(){
 		if(canvasEventManager.activePointers.length){
 			canvasEventManager.activePointers.splice(0);
 			canvas.style.cursor = "crosshair";

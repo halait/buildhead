@@ -102,9 +102,9 @@ const saveScene = {
 				docTags.push(user.displayName);
 				for(let i = 0; i != 20; ++i){
 					//                    temp i
-					await db.doc(docPath + i).set({
+					await db.doc(docPath/* + i*/).set({
 						//            temp i
-						name: nameIn + i,
+						name: nameIn/* + i*/,
 						author: user.displayName,
 						authorId: user.uid,
 						dateCreated: new Date(),
@@ -369,6 +369,8 @@ const successScene = {
 	ratingDiv: document.getElementById("rating"),
 	// only used once?
 	saveSolutionBtn: document.getElementById("save-solution-btn"),
+	browseSolutionBtn: document.getElementById("browse-solutions-btn"),
+	solutionBtns: document.getElementById("solution-btns"),
 	level: null,
 	start(level){
 		if(!level) throw "Forgetaboutit";
@@ -377,6 +379,11 @@ const successScene = {
 		if(user){
 			this.selectBtn(level.review.rating);
 		}
+		if(this.level.solution){
+			this.solutionBtns.style.display = "none";
+		} else {
+			this.solutionBtns.style.display = "inline";
+		} 
 		this.ui.style.display = "block";
 	},
 	suspend(){
@@ -433,7 +440,7 @@ const successScene = {
 		this.incrementBtn.addEventListener("click", this.ratingHandler);
 		this.decrementBtn.addEventListener("click", this.ratingHandler);
 		document.getElementById("go-back-btn").addEventListener("click", () => {history.go(-1)});
-		document.getElementById("browse-solutions-btn").addEventListener("click", () => {
+		this.browseSolutionBtn.addEventListener("click", () => {
 			sceneManager.push("/listing/" + this.level.path + "/solutions");
 		});
 		this.saveSolutionBtn.addEventListener("click", () => {
@@ -446,6 +453,115 @@ const successScene = {
 	}
 }
 successScene.init();
+
+const tutorialScene = {
+	ui: document.getElementById("tutorialUi"),
+	img: document.getElementById("tutorialImg"),
+	loadingMsg: document.getElementById("tutImgLoadingMsg"),
+	eventIndex: -1,
+	start(){
+		this.img.style.display = "none";
+		this.loadingMsg.style.display = "block";
+		this.removeCurrentEventListener();
+		++this.eventIndex;
+		this.events[this.eventIndex].target.addEventListener(this.events[this.eventIndex].type, this.events[this.eventIndex].callback);
+		this.img.src = "/images/" + this.eventIndex + "tut.png";
+		this.ui.style.display = "block";
+	},
+	suspend(){
+		tutorialScene.removeCurrentEventListener();
+		this.eventIndex = -1;
+		this.ui.style.display = "none";
+	},
+	removeCurrentEventListener(){
+		if(this.eventIndex != -1) {
+			this.events[this.eventIndex].target.removeEventListener(this.events[this.eventIndex].type, this.events[this.eventIndex].callback);
+			console.log("current evtlist remooved");
+		}
+	},
+	events: [
+		{
+			target: routes["/play"].toolbar.querySelector(".startSimulationBtn"),
+			type: "mousedown",
+			callback() {
+				tutorialScene.start();
+			}
+		},
+		{
+			target: simulationManager.toolbar.querySelector(".stopSimulationBtn"),
+			type: "mousedown",
+			callback() {
+				tutorialScene.start();
+			}
+		},
+		{
+			target: routes["/play"].toolbar.querySelector(".cwWheelCreatorBtn"),
+			type: "mousedown",
+			callback() {
+				tutorialScene.start();
+			}
+		},
+		{
+			target: canvas,
+			type: "mouseup",
+			callback() {
+				let last = gameObjects.length - 1;
+				if(gameObjects[last].def.form == pw.CIRCLE_FORM && gameObjects[last].def.motorVelocity < 0){
+					tutorialScene.start();
+				}
+			}
+		},
+		{
+			target: routes["/play"].toolbar.querySelector(".nRodCreatorBtn"),
+			type: "mousedown",
+			callback() {
+				tutorialScene.start();
+			}
+		},
+		{
+			target: canvas,
+			type: "mouseup",
+			callback() {
+				let last = gameObjects[gameObjects.length - 1];
+				if(last.def.form == pw.PLANE_FORM && last.joints.length == 2){
+					let j0 = last.joints[0];
+					let j1 = last.joints[1];
+					if(j0.gameObjectA != j1.gameObjectA && (j0.gameObjectA.def.target || j1.gameObjectA.def.target) && j0.def.va == 0 && j1.def.va == 0){
+						tutorialScene.start();
+					}
+				}
+			}
+		},
+		{
+			target: routes["/play"].toolbar.querySelector(".startSimulationBtn"),
+			type: "mousedown",
+			callback() {
+				sceneManager.popModal();
+			}
+		},
+	],
+	shrinkBtn: document.getElementById("tutorialShrinkBtn"),
+	showBtn: document.getElementById("tutorialShowBtn"),
+	hideImg(){
+		this.img.style.display = "none";
+		this.shrinkBtn.style.display = "none";
+		this.showBtn.style.display = "inline-block";
+	},
+	showImg(){
+		this.img.style.display = "block";
+		this.shrinkBtn.style.display = "inline-block";
+		this.showBtn.style.display = "none";
+	},
+	init(){
+		this.shrinkBtn.addEventListener("click", () => {this.hideImg();});
+		this.showBtn.addEventListener("click", () => {this.showImg();});
+		this.img.onload = () => {
+			this.showImg();
+			this.loadingMsg.style.display = "none";
+		};
+	}
+};
+tutorialScene.init();
 
 const createCustomScene = {
 	planeUi: document.getElementById("setCustomObroundPopup"),

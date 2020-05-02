@@ -23,7 +23,6 @@ const routes = {
 			}
 		},
 
-		//levelBtns: document.getElementsByClassName("levelBtn"),
 		ui: document.getElementById("menuUI"),
 		accountBtn: document.getElementById("accountBtn"),
 		listingOriginalRoute: "/listing/original",
@@ -188,7 +187,8 @@ const routes = {
 		toolbar: document.getElementById("sandboxToolbar"),
 
 		async start(){
-			let docPath = location.pathname;
+			//let docPath = location.pathname;
+			let docPath = "originalLevels/halait - 0 Tutorial";
 			this.toolbar.style.display = "flex";
 			if(docPath != "/sandbox") {
 				docPath = docPath.replace("/sandbox", "");
@@ -250,6 +250,9 @@ const routes = {
 			}
 			sandboxMode = false;
 			loadingScreen.style.display = "none";
+			if(this.currentLevel.name == "0 Tutorial19" && this.currentLevel.author == "halait"){
+				sceneManager.pushModal(tutorialScene);
+			}
 		},
 		suspend(){
 			if(simulationManager.isSimulating){

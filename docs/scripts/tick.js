@@ -17,7 +17,7 @@ const simulationManager = {
 		this.toolbar.style.display = "none";
 		this.caller.toolbar.style.display = "flex";
 		canvasEventManager.setHandler(this.oldHandler, this.oldBtn);
-		sceneManager.popAllModal();
+		//sceneManager.popAllModal();
 	},
 	
 	caller: null,
