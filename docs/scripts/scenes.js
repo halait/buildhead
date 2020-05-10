@@ -39,6 +39,15 @@ const routes = {
 				//canvasEventManager.reset();
 				sceneManager.push("/sandbox");
 			});
+			/*
+			document.getElementById("your-levels-btn").addEventListener("pointerdown", () => {
+				if(!user){
+					sceneManager.pushModal(loginScene);
+					return;
+				}
+				sceneManager.push("/listing/community?author=" + user.displayName);
+			});
+			*/
 		}
 	},
 	"/listing": {
@@ -48,7 +57,9 @@ const routes = {
 			this.ui.style.display = "block";
 			let collection = location.pathname.replace(this.route, "");
 			let search = location.search;
-			if(collection != this.collection || search != this.search){
+			if(this.forceRefreshFlag || collection != this.collection || search != this.search){
+				console.log("refreshing");
+				this.forceRefreshFlag = false;
 				this.collection = collection;
 				this.search = search;
 				levelManager.clearCache();
@@ -92,7 +103,6 @@ const routes = {
 			} else if(endAtPath){
 				result.endAtPath = endAtPath;
 			}
-			console.log(result);
 			return result;
 		},
 
@@ -102,6 +112,7 @@ const routes = {
 		route: "/listing",
 		defaultOrderBy: "dateCreated",
 		items: [],
+		forceRefreshFlag: false,
 
 
 		moreLoadable: false,
@@ -162,10 +173,10 @@ const routes = {
 			history.replaceState(null, "", location.pathname + routes["/listing"].createQueryString(searchParams));
 		},
 		init(){
-			this.browserContent.addEventListener("click", (e) => {
+			this.browserContent.addEventListener("click", async (e) => {
 				const node = e.target.parentNode;
 				if(node.tagName == "TR") {
-					sceneManager.pushModal(modeScene, node.dataset.path);
+					sceneManager.pushModal(modeScene, await levelManager.getLevel(node.dataset.path));
 				}
 			});
 			this.sortBySelect.addEventListener("change", () => {
@@ -227,7 +238,7 @@ const routes = {
 			addBtn(assemblyFieldCreatorBtn.cloneNode(true), this.toolbar, assemblyFieldCreatorEventHandler);
 			addBtn(goalFieldCreatorBtn.cloneNode(true), this.toolbar, goalFieldCreatorEventHandler);
 			addBtn(saveLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.pushModal(saveScene);});
-			addBtn(loadLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(loadLevelScene);});
+			//addBtn(loadLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(loadLevelScene);});
 			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
 		}
 	},

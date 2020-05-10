@@ -1,10 +1,19 @@
 "use strict";
 const modeScene = {
 	ui: document.getElementById("mode-ui"),
-	level: 0,
-	start(levelPath) {
+	deleteBtn: document.getElementById("delete-btn"),
+	level: null,
+	start(level) {
+		if(!level){
+			throw "Unable to start without level";
+		}
 		this.ui.style.display = "block";
-		this.levelPath = levelPath;
+		this.level = level;
+		if(user && user.uid == level.authorId){
+			this.deleteBtn.style.display = "block";
+		} else {
+			this.deleteBtn.style.display = "none";
+		}
 	},
 	suspend() {
 		this.ui.style.display = "none";
@@ -14,10 +23,50 @@ const modeScene = {
 		sceneCloseBtn.addEventListener("click", e => {sceneManager.popModal();});
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("play-btn").addEventListener("click", () => {
-			sceneManager.push("/play/" + this.levelPath);
+			sceneManager.push("/play/" + this.level.path);
 		});
 		document.getElementById("edit-btn").addEventListener("click", () => {
-			sceneManager.push("/sandbox/" + this.levelPath);
+			sceneManager.push("/sandbox/" + this.level.path);
+		});
+		this.deleteBtn.addEventListener("pointerdown", async () => {
+			sceneManager.popModal();
+			loadingScreen.style.display = "flex";
+			const solutionPath = this.level.path + "/solutions";
+			const solutions = (await db.collection(solutionPath).get()).docs;
+			const len = solutions.length;
+			if(len > 498) {
+				sceneManager.pushModal(messageScene, "Error", "Unable to delete. Contact developer by leaving feedback for more information.");
+				throw "Too many solutions for batched write";
+			}
+			const batch = db.batch();
+			for(let i = 0; i != len; ++i){
+				batch.delete(db.doc(solutionPath + "/" + solutions[i].id));
+			}
+			batch.delete(db.doc(this.level.path));
+			try {
+				await batch.commit()
+			} catch(e) {
+				sceneManager.pushModal(messageScene, "Error", "Unable to delete. Contact developer by leaving feedback for more information.");
+				throw e;
+			}
+			console.log("delete successful");
+			if(sceneManager.current != routes["/listing"]) {
+				console.error("Incorrect context for deleting level");
+			} else {
+				routes["/listing"].forceRefreshFlag = true;
+				sceneManager.push(location.pathname + location.search);
+				/*
+				const index = routes["/listing"].items.indexOf(this.level);
+				if(index != -1){
+					routes["/listing"].items.splice(index, 1);
+					routes["/listing"].browserContent.innerHTML = "";
+					routes["/listing"].populate(routes["/listing"].items);
+				} else {
+					console.error( "Level not in listing");
+				}
+				*/
+			}
+			loadingScreen.style.display = "none";
 		});
 	}
 }
@@ -73,6 +122,7 @@ const saveScene = {
 		this.ui.prepend(sceneCloseBtn);
 		document.getElementById("save-form").addEventListener("submit", async (e) => {
 			e.preventDefault();
+			loadingScreen.style.display = "flex";
 			let nameIn = this.nameInput.value.trim();
 			const pre = /^og /;
 			let docPath = null;
@@ -100,7 +150,7 @@ const saveScene = {
 				}
 				docTags.push(...nameIn.split(" "));
 				docTags.push(user.displayName);
-				for(let i = 0; i != 20; ++i){
+				//for(let i = 0; i != 20; ++i){
 					//                    temp i
 					await db.doc(docPath/* + i*/).set({
 						//            temp i
@@ -114,7 +164,7 @@ const saveScene = {
 						solution: !sandboxMode,
 						json: this.getJson()
 					});
-				}
+				//}
 				sceneManager.popModal();
 			} catch(e) {
 				console.error(e);
@@ -122,11 +172,13 @@ const saveScene = {
 			}
 			this.saveInfoP.textContent = "";
 			this.nameInput.value = "";
+			routes["/listing"].forceRefreshFlag = true;
+			loadingScreen.style.display = "none";
 		});
 	}
 }
 saveScene.init();
-
+/*
 const loadLevelScene = {
 	messageP: document.getElementById("loadMessageP"),
 	fileInput: document.getElementById("level-input"),
@@ -197,6 +249,7 @@ const loadLevelScene = {
 	}
 }
 loadLevelScene.init();
+*/
 
 const messageScene = {
 	ui: document.getElementById("message-div"),

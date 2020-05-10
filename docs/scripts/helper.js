@@ -583,7 +583,6 @@ const levelManager = {
 			//                    no max
 			ref = ref.limit(10);
 		}
-		console.log(ref);
 		return ref;
 	},
 	async normalize(docs){
@@ -637,6 +636,7 @@ const levelManager = {
 			sceneManager.pushModal(messageScene, "Error", "Level corrupted, could not be loaded. Try a different level, also please consider sending feedback.");
 			throw e;
 		}
+		pw.render();
 		const batch = db.batch();
 		batch.update(db.doc(level.path), {plays: firebase.firestore.FieldValue.increment(1)});
 		if(user && !level.review){
@@ -651,7 +651,6 @@ const levelManager = {
 				sceneManager.pushModal(messageScene, "Error", err);
 				throw err;
 			});
-		pw.render();
 	},
 	findIndex(path){
 		for(let i = 0, len = this.cache.length; i != len; ++i){

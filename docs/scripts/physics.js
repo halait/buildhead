@@ -195,11 +195,8 @@ class MemoryManager {
 const pw = {
 	G: -0.002,
 	//MIN_AA: 0.0,
-	VELOCITY_ITERATIONS: 16,
-
-
-	//temp
-	POSITION_ITERATIONS: 0,
+	VELOCITY_ITERATIONS: 8,
+	POSITION_ITERATIONS: 2,
 
 
 	POLYGON_SKIN: 0.005,
@@ -207,6 +204,10 @@ const pw = {
 	//isVelocityIter = true,
 	unsolved: true,
 	warmStarting: true,
+
+
+	collisionData: new Float64Array(14),
+
 
 	update(){
 		// scope M to function for faster access
@@ -230,7 +231,7 @@ const pw = {
 			let bsi = M[C_PO_PTR_B + si];
 
 			if(M[C_TYPE + si] === this.COLLISION_TYPE){
-				let collisionData = this.getCollisionData(si, asi, bsi);
+				this.getCollisionData(si, asi, bsi);
 				// temp
 				let cdLen = 7;
 				//if(collisionData.length == 14) cdLen = 14;
@@ -238,28 +239,28 @@ const pw = {
 				// never updated to accomadate C_JT
 				for(let i = si, c = 0; c < cdLen; i += 16, c += 7){
 																																// tune
-					if(!collisionData || collisionData[0 + c] === null || collisionData[6 + c] > 1.0){
+					if(this.collisionData[0 + c] === null/* || this.collisionData[6 + c] > 1.0*/){
 						M[C_ACTIVE + i] = 0;
 						M[C_JN + i] = 0.0;
 						M[C_JT + i] = 0.0;
 						continue;
 					}
 					// normal vector
-					M[C_NX + i] = collisionData[0 + c];
-					M[C_NY + i] = collisionData[1 + c];
+					M[C_NX + i] = this.collisionData[0 + c];
+					M[C_NY + i] = this.collisionData[1 + c];
 					// distance between collision vertices
-					M[C_DIST + i] = collisionData[6 + c];
+					M[C_DIST + i] = this.collisionData[6 + c];
 
-
-					if(M[C_DIST + i] < 0) M[C_DIST + i] *= 0.75;
-					M[C_JN + i] *= 0.75;
-					M[C_JT + i] *= 0.75;
+					if(M[C_DIST + i] < 0) {
+						M[C_DIST + i] = 0;
+					}
+					
 
 					// vectors from center of masses to collision vertex (radius vectors)
-					M[C_RAX + i] = collisionData[2 + c] - M[O_TX + asi];
-					M[C_RAY + i] = collisionData[3 + c] - M[O_TY + asi];
-					M[C_RBX + i] = collisionData[4 + c] - M[O_TX + bsi];
-					M[C_RBY + i] = collisionData[5 + c] - M[O_TY + bsi];
+					M[C_RAX + i] = this.collisionData[2 + c] - M[O_TX + asi];
+					M[C_RAY + i] = this.collisionData[3 + c] - M[O_TY + asi];
+					M[C_RBX + i] = this.collisionData[4 + c] - M[O_TX + bsi];
+					M[C_RBY + i] = this.collisionData[5 + c] - M[O_TY + bsi];
 
 					M[C_ACTIVE + i] = 1;
 
@@ -270,17 +271,19 @@ const pw = {
 					}
 					*/
 					// cross product of radius vector and normal vector
-					M[C_RNA + i] = M[C_RAX + i] * collisionData[1 + c] - M[C_RAY + i] * collisionData[0 + c];
-					M[C_RNB + i] = M[C_RBX + i] * collisionData[1 + c] - M[C_RBY + i] * collisionData[0 + c];
+					M[C_RNA + i] = M[C_RAX + i] * this.collisionData[1 + c] - M[C_RAY + i] * this.collisionData[0 + c];
+					M[C_RNB + i] = M[C_RBX + i] * this.collisionData[1 + c] - M[C_RBY + i] * this.collisionData[0 + c];
 					// total inverse "mass" in normal reference
 					M[C_M + i] = 1.0 / (M[O_M_INV + asi] + M[O_M_INV + bsi] + M[C_RNA + i] * M[C_RNA + i] * M[O_I_INV + asi] + M[C_RNB + i] * M[C_RNB + i] * M[O_I_INV + bsi]);
 					// dot product of radius vector and tangential vector
-					M[C_RTA + i] = M[C_RAX + i] * collisionData[0 + c] + M[C_RAY + i] * collisionData[1 + c];
-					M[C_RTB + i] = M[C_RBX + i] * collisionData[0 + c] + M[C_RBY + i] * collisionData[1 + c];
+					M[C_RTA + i] = M[C_RAX + i] * this.collisionData[0 + c] + M[C_RAY + i] * this.collisionData[1 + c];
+					M[C_RTB + i] = M[C_RBX + i] * this.collisionData[0 + c] + M[C_RBY + i] * this.collisionData[1 + c];
 					// total inverse "mass" in tangential reference
 					M[C_MT + i] = 1.0 / (M[O_M_INV + asi] + M[O_M_INV + bsi] + M[C_RTA + i] * M[C_RTA + i] * M[O_I_INV + asi] + M[C_RTB + i] * M[C_RTB + i] * M[O_I_INV + bsi]);
 
 					if(this.warmStarting){
+						//M[C_JN + i] *= 0.8;
+						//M[C_JT + i] *= 0.8;
 						let jx = M[C_JN + i] * M[C_NX + i] - M[C_JT + i] * M[C_NY + i];
 						let jy = M[C_JN + i] * M[C_NY + i] + M[C_JT + i] * M[C_NX + i];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
@@ -306,14 +309,13 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.75;
-				M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.75;
-				M[C_JX + si] *= 0.75;
-				M[C_JY + si] *= 0.75;
-				M[C_SUM_T + si] *= 0.75;
-
+				//M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.0;
+				//M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.0;
 
 				if(this.warmStarting){
+					//M[C_JX + si] *= 0.8;
+					//M[C_JY + si] *= 0.8;
+					//M[C_SUM_T + si] *= 0.8;
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
 						M[O_VX + asi] -= M[C_JX + si] * M[O_M_INV + asi];
 						M[O_VY + asi] -= M[C_JY + si] * M[O_M_INV + asi];
@@ -337,7 +339,7 @@ const pw = {
 		// solve velocity constraints
 		let iter = 0
 		for(this.unsolved = true; this.unsolved && iter < this.VELOCITY_ITERATIONS; ++iter){
-			this.unsolved = false
+			this.unsolved = false;
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 				let si = this.C_PTRS[ptr];
 				let asi = M[C_PO_PTR_A + si];
@@ -438,20 +440,18 @@ const pw = {
 
 
 					// relative velocity at joint vertices plus distance
-					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si] + M[C_DX + si];
-					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si] + M[C_DY + si];
-					// if no relative velocity then done
-					//if(Math.abs(vxRel) < 0.00000001 && Math.abs(vyRel) < 0.00000001) continue;
+																																																					// turned off distance in initialize contraints
+					let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + si] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + si]/* + M[C_DX + si]*/;
+					let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + si] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + si]/* + M[C_DY + si]*/;
 					let vn = vxRel * vxRel + vyRel * vyRel;
 					if(!vn) continue;
 					this.unsolved = true;
-					// relative velocity vector is the direction impulse is applied
 					vn = Math.sqrt(vn);
 					vxRel /= vn;
 					vyRel /= vn;
 					let rna = M[C_RAX + si] * vyRel - M[C_RAY + si] * vxRel;
 					let rnb = M[C_RBX + si] * vyRel - M[C_RBY + si] * vxRel;
-					// total "mass" in constraint reference
+					// total pseudo-mass in constraint reference
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
 					//let j = vn / mInv;
 					let j = vn / mInv;
@@ -462,6 +462,7 @@ const pw = {
 					// accumulate impulse
 					M[C_JX + si] += jx;
 					M[C_JY + si] += jy;
+
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
 						M[O_VX + asi] -= jx * M[O_M_INV + asi];
 						M[O_VY + asi] -= jy * M[O_M_INV + asi];
@@ -504,46 +505,34 @@ const pw = {
 				let asi = M[C_PO_PTR_A + si];
 				let bsi = M[C_PO_PTR_B + si];
 				if(M[C_TYPE + si] == this.COLLISION_TYPE){
-					let len = 7;
-					let collisionData = this.getCollisionData(si, asi, bsi);
-					if(!collisionData) continue;
-					for(let i = si, c = 0; c < len; i += 16, c += 7){
-						if(collisionData[6 + c] > 0.0) continue;
+					let cdLen = 7;
+					if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) cdLen = 14;
+					this.getCollisionData(si, asi, bsi);
+					for(let i = si, c = 0; c < cdLen; i += 16, c += 7){
+						if(this.collisionData[6 + c] > 0.0) {
+							continue;
+						}
 						this.unsolved = true;
-						// keep no rotation?
-						//let rna = (M[O_TY + asi] - collisionData[3 + c]) * collisionData[0 + c] + (collisionData[2 + c] - M[O_TX + asi]) * collisionData[1 + c];
-						//let rnb = (M[O_TY + bsi] - collisionData[5 + c]) * collisionData[0 + c] + (collisionData[4 + c] - M[O_TX + bsi]) * collisionData[1 + c];
-						//let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-						let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi];
-						// tune?
-						//let j = (collisionData[6 + c] * 0.5) / mInv;
-						let j = (collisionData[6 + c]) / mInv;
-						let jx = j * collisionData[0 + c];
-						let jy = j * collisionData[1 + c];
+						let rna = (this.collisionData[2 + c] - M[O_TX + asi]) * this.collisionData[1 + c] - (this.collisionData[3 + c] - M[O_TY + asi]) * this.collisionData[0 + c];
+						let rnb = (this.collisionData[4 + c] - M[O_TX + bsi]) * this.collisionData[1 + c] - (this.collisionData[5 + c] - M[O_TY + bsi]) * this.collisionData[0 + c];
+																					//tune
+						let j = this.collisionData[6 + c] * 0.333 / (M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi]);
+						let jx = j * this.collisionData[0 + c];
+						let jy = j * this.collisionData[1 + c];
 						if(M[O_TYPE + asi] == this.MOVABLE_TYPE) {
-							let aax = jx * M[O_M_INV + asi];
-							let aay = jy * M[O_M_INV + asi];
-							M[O_VX + asi] -= aax;
-							M[O_VY + asi] -= aay;
-							M[O_TX + asi] -= aax;
-							M[O_TY + asi] -= aay;
-							// forgot to update angular velocity?
-							//M[O_O + asi] -= j * rna * M[O_I_INV + asi];
-							//M[O_COS + asi] = Math.cos(M[O_O + asi]);
-							//M[O_SIN + asi] = Math.sin(M[O_O + asi]);
+							M[O_TX + asi] -= jx * M[O_M_INV + asi];
+							M[O_TY + asi] -= jy * M[O_M_INV + asi];
+							M[O_O + asi] -= j * rna * M[O_I_INV + asi];
+							M[O_COS + asi] = Math.cos(M[O_O + asi]);
+							M[O_SIN + asi] = Math.sin(M[O_O + asi]);
 							this.updateWorldPositions(asi);
 						}
 						if(M[O_TYPE + bsi] == this.MOVABLE_TYPE) {
-							let abx = jx * M[O_M_INV + bsi];
-							let aby = jy * M[O_M_INV + bsi];
-							M[O_VX + bsi] += abx;
-							M[O_VY + bsi] += aby;
-							M[O_TX + bsi] += abx;
-							M[O_TY + bsi] += aby;
-							// forgot to update angular velocity?
-							//M[O_O + bsi] += j * rnb * M[O_I_INV + bsi];
-							//M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
-							//M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
+							M[O_TX + bsi] += jx * M[O_M_INV + bsi];
+							M[O_TY + bsi] += jy * M[O_M_INV + bsi];
+							M[O_O + bsi] += j * rnb * M[O_I_INV + bsi];
+							M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
+							M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
 							this.updateWorldPositions(bsi);
 						}
 					}
@@ -555,44 +544,35 @@ const pw = {
 					M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 					let nx = M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi];
 					let ny = M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi];
-					//if(Math.abs(nx) < 0.00000001 && Math.abs(ny) < 0.00000001) continue;
+					let dist = nx * nx + ny * ny;
+					if(!dist) {
+						continue;
+					}
 					this.unsolved = true;
-					let dist = Math.sqrt(nx * nx + ny * ny);
+					dist = Math.sqrt(dist);
 					nx /= dist;
 					ny /= dist;
 					let rna = M[C_RAX + si] * ny - M[C_RAY + si] * nx;
 					let rnb = M[C_RBX + si] * ny - M[C_RBY + si] * nx;
 					// total "mass" in the constraint reference
 					let mInv = M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi];
-					// tune?
-					let j = dist / mInv;
+											// tune
+					let j = dist * 0.333 / mInv;
 					let jx = j * nx;
 					let jy = j * ny;
 
 					if(M[O_TYPE + asi] == this.MOVABLE_TYPE) {
-						let aax = jx * M[O_M_INV + asi];
-						let aay = jy * M[O_M_INV + asi];
-						let aaa = j * rna * M[O_I_INV + asi];
-						M[O_VX + asi] -= aax;
-						M[O_VY + asi] -= aay;
-						M[O_W + asi] -= aaa;
-						M[O_TX + asi] -= aax;
-						M[O_TY + asi] -= aay;
-						M[O_O + asi] -= aaa;
+						M[O_TX + asi] -= jx * M[O_M_INV + asi];
+						M[O_TY + asi] -= jy * M[O_M_INV + asi];
+						M[O_O + asi] -= j * rna * M[O_I_INV + asi];
 						M[O_COS + asi] = Math.cos(M[O_O + asi]);
 						M[O_SIN + asi] = Math.sin(M[O_O + asi]);
 						this.updateWorldPositions(asi);
 					}
 					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE) {
-						let abx = jx * M[O_M_INV + bsi];
-						let aby = jy * M[O_M_INV + bsi];
-						let aba = j * rnb * M[O_I_INV + bsi]
-						M[O_VX + bsi] += abx;
-						M[O_VY + bsi] += aby;
-						M[O_W + bsi] += aba;
-						M[O_TX + bsi] += abx;
-						M[O_TY + bsi] += aby;
-						M[O_O + bsi] += aba;
+						M[O_TX + bsi] += jx * M[O_M_INV + bsi];
+						M[O_TY + bsi] += jy * M[O_M_INV + bsi];
+						M[O_O + bsi] += j * rnb * M[O_I_INV + bsi];
 						M[O_COS + bsi] = Math.cos(M[O_O + bsi]);
 						M[O_SIN + bsi] = Math.sin(M[O_O + bsi]);
 						this.updateWorldPositions(bsi);
@@ -656,8 +636,17 @@ const pw = {
 		//debugPoints.push([ax, ay]);
 		//debugPoints.push([bx, by]);
 
-		let results = [nx / dist, ny / dist, ax, ay, bx, by, dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi]];
+
+		//let results = [nx / dist, ny / dist, ax, ay, bx, by, dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi]];
+		this.collisionData[0] = nx / dist;
+		this.collisionData[1] = ny / dist;
+		this.collisionData[2] = ax;
+		this.collisionData[3] = ay;
+		this.collisionData[4] = bx;
+		this.collisionData[5] = by;
+		this.collisionData[6] = dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi];
 		
+
 		ax = this.M[O_W1X + asi];
 		ay = this.M[O_W1Y + asi];
 		bx = this.M[O_W0X + bsi];
@@ -681,8 +670,18 @@ const pw = {
 		//debugPoints.push([ax, ay]);
 		//debugPoints.push([bx, by]);
 
-		results.push(nx / dist, ny / dist, ax, ay, bx, by, dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi]);
-		return results;
+
+		//results.push(nx / dist, ny / dist, ax, ay, bx, by, dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi]);
+		//return results;
+		this.collisionData[7] = nx / dist;
+		this.collisionData[8] = ny / dist;
+		this.collisionData[9] = ax;
+		this.collisionData[10] = ay;
+		this.collisionData[11] = bx;
+		this.collisionData[12] = by;
+		this.collisionData[13] = dist - this.M[O_HALF_WIDTH + asi] - this.M[O_HALF_WIDTH + bsi];
+
+
 	},
 
 	getCirclePlaneCollisionData(cSi, pSi){
@@ -702,7 +701,18 @@ const pw = {
 		ny /= dist;
 		cx += nx * -this.M[O_RADIUS + cSi];
 		cy += ny * -this.M[O_RADIUS + cSi];
-		return [nx, ny, cx, cy, lx, ly, dist - this.M[O_RADIUS + cSi] - this.M[O_HALF_WIDTH + pSi]];
+
+
+		//return [nx, ny, cx, cy, lx, ly, dist - this.M[O_RADIUS + cSi] - this.M[O_HALF_WIDTH + pSi]];
+		this.collisionData[0] = nx;
+		this.collisionData[1] = ny;
+		this.collisionData[2] = cx;
+		this.collisionData[3] = cy;
+		this.collisionData[4] = lx;
+		this.collisionData[5] = ly;
+		this.collisionData[6] = dist - this.M[O_RADIUS + cSi] - this.M[O_HALF_WIDTH + pSi];
+
+
 	},
 
 	getCirclesCollisionData(asi, bsi){
@@ -719,7 +729,18 @@ const pw = {
 		ay -= ny * this.M[O_RADIUS + asi];
 		bx += nx * this.M[O_RADIUS + bsi];
 		by += ny * this.M[O_RADIUS + bsi];
-		return [nx, ny, ax, ay, bx, by, dist - this.M[O_RADIUS + asi] - this.M[O_RADIUS + bsi]];
+
+
+		//return [nx, ny, ax, ay, bx, by, dist - this.M[O_RADIUS + asi] - this.M[O_RADIUS + bsi]];
+		this.collisionData[0] = nx;
+		this.collisionData[1] = ny;
+		this.collisionData[2] = ax;
+		this.	collisionData[3] = ay;
+		this.collisionData[4] = bx;
+		this.collisionData[5] = by;
+		this.collisionData[6] = dist - this.M[O_RADIUS + asi] - this.M[O_RADIUS + bsi];
+
+
 	},
 
 	getCirclePolygonCollisionData(cPtr, pPtr){
@@ -1537,8 +1558,8 @@ const pw = {
 				// is mass needed or only m_inv?
 				this.M[O_M + ptr] = mass;
 				this.M[O_M_INV + ptr] = 1.0 / mass;
-				// tune?
-				this.M[O_I + ptr] = 0.75 * mass * def.radius * def.radius;
+												// tune?
+				this.M[O_I + ptr] = 0.5 * mass * def.radius * def.radius;
 				this.M[O_I_INV + ptr] = 1.0 / this.M[O_I + ptr];
 			}
 
@@ -1903,7 +1924,7 @@ const pw = {
 				this.M[O_M + poPtr] = this.M[O_P + poPtr] * this.M[O_HALF_WIDTH + poPtr] * 2.0 * this.M[O_L + poPtr];
 				this.M[O_M_INV + poPtr] = 1.0 / this.M[O_M + poPtr];
 				// tune?
-				this.M[O_I + poPtr] = 0.2 * this.M[O_M + poPtr] * this.M[O_L + poPtr] * this.M[O_L + poPtr];
+				this.M[O_I + poPtr] = (1 / 12) * this.M[O_M + poPtr] * this.M[O_L + poPtr] * this.M[O_L + poPtr];
 				this.M[O_I_INV + poPtr] = 1.0 / this.M[O_I + poPtr];
 			} else {
 				this.M[O_M + poPtr] = 0.0;

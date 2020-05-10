@@ -123,7 +123,9 @@ const canvasEventManager = {
 			const len = this.activePointers.length;
 			if(!len) return;
 			this.now = e.timeStamp;
-			if(this.now - this.before <  16) return;
+			if(this.now - this.before <  16) {
+				return;
+			}
 			this.before = this.now;
 			this.mx = (e.clientX - this.centerX) * this.widthM - this.xTranslate;
 			this.my = (this.centerY - e.clientY) * this.heightM - this.yTranslate;
@@ -515,7 +517,7 @@ const moveEventHandler = {
 							let vertex = j.def.vb;
 							if(j.gameObjectA == o.gameObject) vertex = j.def.va;
 							let wv = pw.getWorldVertices(o.gameObject.ref)[vertex];
-							j.setPostion(wv[0], wv[1]);
+							j.setPosition(wv[0], wv[1]);
 						}
 					}
 					o.gameObject.setFinalProperties(false);
