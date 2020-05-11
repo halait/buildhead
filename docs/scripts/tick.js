@@ -447,7 +447,7 @@ pw.render = function() {
 			}
 
 			if(M[this.PO_SIZES[M[O_FORM + si]] + si + H_IS_JOINABLE]) {
-				let r = 0.01;
+				let r = pw.JOINABLE_RADIUS;
 				this.positions[p++] = x0 - r;
 				this.positions[p++] = y0 - r;
 				this.positions[p++] = x0 + r;

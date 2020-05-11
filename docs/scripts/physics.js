@@ -309,8 +309,8 @@ const pw = {
 				M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
 				M[C_RBY + si] = M[C_LBY + si] * M[O_COS + bsi] + M[C_LBX + si] * M[O_SIN + bsi];
 
-				//M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 0.0;
-				//M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 0.0;
+				//M[C_DX + si] = (M[C_RAX + si] + M[O_TX + asi] - M[C_RBX + si] - M[O_TX + bsi]) * 1.0;
+				//M[C_DY + si] = (M[C_RAY + si] + M[O_TY + asi] - M[C_RBY + si] - M[O_TY + bsi]) * 1.0;
 
 				if(this.warmStarting){
 					//M[C_JX + si] *= 0.8;
@@ -1392,7 +1392,9 @@ const pw = {
 		this.M[C_UK + ptr] = (this.M[O_UK + def.poPtrA] + this.M[O_UK + def.poPtrB]) * 0.5;
 
 		if(def.type == this.JOINT_TYPE){
-			if(def.x === undefined || def.y === undefined) throw "Missing x and/or y (position).";
+			if(def.x === undefined || def.y === undefined) {
+				throw "Missing x and/or y (position).";
+			}
 			this.M[C_ACTIVE + ptr] = 1;
 			if(def.motorVelocity === undefined){
 				this.M[C_IS_MOTOR + ptr] = 0;
@@ -1486,7 +1488,7 @@ const pw = {
 		console.log("all impulses reset");
 	},
 
-	MIN_PLANE_LEN: 0.05,
+	MIN_PLANE_LEN: 0.1,
 	MIN_AABB_LEN: 0.05,
 
 	M: new Float64Array(65000),
@@ -1522,22 +1524,18 @@ const pw = {
 
 		this.M[O_FORM + ptr] = def.form;
 		this.M[O_TYPE + ptr] = def.type;
-		this.M[O_GROUP + ptr] = def.group;                          // tune?
-		if(def.staticFriction === undefined) this.M[O_US + ptr] = 0.85;
-		else this.M[O_US + ptr] = def.staticFriction;
-		if(def.kineticFriction === undefined) this.M[O_UK + ptr] = 0.75;
-		else this.M[O_UK + ptr] = def.kineticFriction;
-		if(def.linearVelocityResistance === undefined) this.M[O_VM + ptr] = 0.999;
-		else this.M[O_VM + ptr] = 1.0 - def.linearVelocityResistance;
-		if(def.rotationalVelocityResistance === undefined) this.M[O_WM + ptr] = 0.999;
-		else this.M[O_WM + ptr] = 1.0 - def.rotationalVelocityResistance;
+		this.M[O_GROUP + ptr] = def.group
+		this.M[O_P + ptr] = def.density;       // tune?
+		this.M[O_US + ptr] = def.staticFriction || 0.85;
+		this.M[O_UK + ptr] = def.kineticFriction || 0.75;
+		this.M[O_VM + ptr] = 1.0 - def.linearVelocityResistance || 0.999;
+		this.M[O_WM + ptr] = 1.0 - def.rotationalVelocityResistance || 0.999;
 		this.M[O_VX + ptr] = 0.0;
 		this.M[O_VY + ptr] = 0.0;
 		this.M[O_W + ptr] = 0.0;
 		this.M[O_COS + ptr] = 1.0;
 		this.M[O_SIN + ptr] = 0.0;
 		this.M[O_O + ptr] = 0.0;
-		this.M[O_P + ptr] = def.density;
 		if(def.type == this.FIXED_TYPE){
 			this.M[O_P + ptr] = 0.0;
 			this.M[O_M + ptr] = 0.0;
@@ -1913,9 +1911,6 @@ const pw = {
 				return;
 			}
 
-
-
-
 			this.M[O_L0X + poPtr] = this.M[O_W0X + poPtr] - this.M[O_TX + poPtr];
 			this.M[O_L0Y + poPtr] = this.M[O_W0Y + poPtr] - this.M[O_TY + poPtr];
 			this.M[O_L1X + poPtr] = this.M[O_W1X + poPtr] - this.M[O_TX + poPtr];
@@ -1933,8 +1928,6 @@ const pw = {
 				this.M[O_I_INV + poPtr] = 0.0;
 			}
 			
-
-
 
 		} else if(this.AABB_FORM){
 			if(vertexIndex == 0){

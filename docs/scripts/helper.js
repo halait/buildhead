@@ -8,7 +8,7 @@ var goalField = false;
 // constants
 const MAX_SNAP_DIST = 0.025;
 
-const DEFAULT_ROD_WIDTH = 0.02;
+const DEFAULT_ROD_WIDTH = 0.04;
 const DEFAULT_ROD_DENSITY = 20.0;
 const MIN_ROD_LENGTH = 0.1;
 

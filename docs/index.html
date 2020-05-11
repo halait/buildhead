@@ -162,7 +162,6 @@
       position: absolute;
 			top: var(--toolbar-height);
 			cursor: crosshair;
-			/*background: radial-gradient(100% 60% at 50% 100%, #11a, 10%, #002);*/
       width: 100%;
       height: calc(100% - var(--toolbar-height));
 			touch-action: none;
@@ -315,6 +314,9 @@
 			position: absolute;
 			bottom: 16px;
 			right: 16px;
+		}
+		#registerBtn {
+			margin: 8px 0;
 		}
 
 		@keyframes blink {
@@ -524,14 +526,14 @@
 		<div id="loginUi" class="modal">
 			<p class="modalHeader">Login</p>
 			<form id="loginForm">
-				<label>Email Address<br><input id="loginEmail" type="email" required></label>
+				<label>Email Address<br><input id="loginEmail" type="email" required></label><br><br>
 				<label>Password<br><input id="loginPassword" type="password" required minlength="6" maxlength="128"></label>
 				<span id="showPasswordBtn" class="smallBtn btn">Show Password</span><br>
 				<p id="loginMessage" class="message errMessage"></p>
-				<input class="btn" type="submit" value="Login">
+				<input id="loginBtn" class="btn" type="submit" value="Login">
 			</form>
 			<p class="message">Don't have an account?</p>
-			<span id="register" class="btn">Create Account</span>
+			<div id="registerBtn" class="btn">Create Account</div>
 		</div>
 
     <div id="registerUi" class="modal">
