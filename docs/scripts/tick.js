@@ -85,7 +85,9 @@ const simulationManager = {
 		}
 	},
 	init(){
-		addBtn(stopSimulationBtn, this.toolbar, () => {this.end()});
+		this.toolbar.querySelector(".stopSimulationBtn").addEventListener("pointerdown", function(){
+			simulationManager.end();
+		});
 	}
 }
 simulationManager.init();
@@ -192,7 +194,7 @@ function createTexture(imgPath){
 		pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.NEAREST);
 
 
-		//pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
+		pw.gl.generateMipmap(pw.gl.TEXTURE_2D);
 		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MIN_FILTER, pw.gl.LINEAR_MIPMAP_NEAREST);
 		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_MAG_FILTER, pw.gl.LINEAR);
 		//pw.gl.texParameteri(pw.gl.TEXTURE_2D, pw.gl.TEXTURE_WRAP_S, pw.gl.CLAMP_TO_EDGE);

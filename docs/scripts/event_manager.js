@@ -166,27 +166,6 @@ canvasEventManager.init();
 var tempWheel = null;
 var tempRod = null;
 
-const startSimulationBtn = document.querySelector(".startSimulationBtn");
-const stopSimulationBtn = document.querySelector(".stopSimulationBtn");
-const ccwWheelCreatorBtn = document.querySelector(".ccwWheelCreatorBtn");
-const nWheelCreatorBtn = document.querySelector(".nWheelCreatorBtn");
-const cwWheelCreatorBtn = document.querySelector(".cwWheelCreatorBtn");
-const tWheelCreatorBtn = document.querySelector(".tWheelCreatorBtn");
-const nRodCreatorBtn = document.querySelector(".nRodCreatorBtn");
-const cRodCreatorBtn = document.querySelector(".cRodCreatorBtn");
-const gRodCreatorBtn = document.querySelector(".gRodCreatorBtn");
-const moveBtn = document.querySelector(".moveBtn");
-const removeBtn = document.querySelector(".removeBtn");
-const assemblyFieldCreatorBtn = document.querySelector(".assemblyFieldCreatorBtn");
-const goalFieldCreatorBtn = document.querySelector(".goalFieldCreatorBtn");
-const saveLevelBtn = document.querySelector(".saveLevelBtn");
-const loadLevelBtn = document.querySelector(".loadLevelBtn");
-const backBtn = document.querySelector(".backBtn");
-const closeBtn = document.querySelector(".closeBtn");
-
-const polygonBtn = document.querySelector(".polygonBtn");
-
-
 function addBtn(node, parentNode, eventHandler){
 	if(typeof eventHandler === "object" && eventHandler.handleEvent === undefined){
 		let handler = eventHandler;
@@ -283,11 +262,6 @@ const cwWheelCreatorEventHandler = {
 };
 
 const tWheelCreatorEventHandler = {
-	handleEvent(e) {
-		canvasEventManager.setHandler(this, e.currentTarget);
-		sceneManager.pushModal(createCustomScene, pw.CIRCLE_FORM);
-	},
-
 	handleActivePress(){
 		let def = createCustomScene.getCircleDef();
 		def.x = canvasEventManager.mx,
@@ -358,11 +332,6 @@ const cRodCreatorEventHandler = {
 };
 
 const gRodCreatorEventHandler = {
-	handleEvent(e){
-		canvasEventManager.setHandler(this, e.currentTarget);
-		sceneManager.pushModal(createCustomScene);
-	},
-
 	handleActivePress(){
 		if(tempRod){
 			console.error("Temp rod already initialized");

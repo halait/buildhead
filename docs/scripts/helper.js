@@ -563,28 +563,35 @@ function base64ToString(base64){
 
 const levelManager = {
 	cache: [],
+
 	clearCache(){
 		this.cache = [];
 	},
+
 	async getLevels(params){
 		return this.normalize((await (await this.createRef(params)).get()).docs);
 	},
+
 	async createRef(params){
-		let ref = db.collection(params.collection).orderBy(params.orderBy, "desc");
+		if(!params.collection){
+			throw "Unable to create firestore reference without collection and orderBy variable";
+		}
+		let ref = db.collection(params.collection).orderBy(...params.orderBy);
 		if(params.where) {
-			ref = ref.where(params.where.field, params.where.operator, params.where.value);
+			ref = ref.where(...params.where);
 		}
 		if(params.startAfterPath) {
-			//                                no max
+																																			// not here
 			ref = ref.startAfter(await this.getDoc(params.startAfterPath)).limit(10);
 		} else if(params.endAtPath){
 			ref = ref.endAt(await this.getDoc(params.endAtPath));
 		} else {
-			//                    no max
+								// not here
 			ref = ref.limit(10);
 		}
 		return ref;
 	},
+
 	async normalize(docs){
 		const levels = [];
 		const len = docs.length;
@@ -609,6 +616,7 @@ const levelManager = {
 		this.cache.push(...docs);
 		return levels;
 	},
+
 	async attachReview(levels, ids, startIndex, window){
 		const reviewSnap = (await db.collection("users").doc(user.uid).collection("reviews")
 			.where(firebase.firestore.FieldPath.documentId(), "in", ids.slice(startIndex, startIndex + window)).get()).docs;
@@ -622,6 +630,7 @@ const levelManager = {
 			}
 		}
 	},
+
 	loadLevel(level){
 		canvasEventManager.reset();
 		let levelData = null;
@@ -652,6 +661,7 @@ const levelManager = {
 				throw err;
 			});
 	},
+
 	findIndex(path){
 		for(let i = 0, len = this.cache.length; i != len; ++i){
 			if(path == this.cache[i].data.path){
@@ -660,6 +670,7 @@ const levelManager = {
 		}
 		return -1;
 	},
+
 	async getLevel(path){
 		let doc = null;
 		try {
@@ -673,6 +684,7 @@ const levelManager = {
 			return (await this.normalize([doc]))[0];
 		}
 	},
+	
 	async getDoc(path){
 		console.log
 		const i = this.findIndex(path);

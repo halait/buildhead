@@ -19,9 +19,7 @@ const modeScene = {
 		this.ui.style.display = "none";
 	},
 	init() {
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", e => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 		document.getElementById("play-btn").addEventListener("click", () => {
 			sceneManager.push("/play/" + this.level.path);
 		});
@@ -31,18 +29,20 @@ const modeScene = {
 		this.deleteBtn.addEventListener("pointerdown", async () => {
 			sceneManager.popModal();
 			loadingScreen.style.display = "flex";
-			const solutionPath = this.level.path + "/solutions";
-			const solutions = (await db.collection(solutionPath).get()).docs;
-			const len = solutions.length;
-			if(len > 498) {
-				sceneManager.pushModal(messageScene, "Error", "Unable to delete. Contact developer by leaving feedback for more information.");
-				throw "Too many solutions for batched write";
-			}
 			const batch = db.batch();
-			for(let i = 0; i != len; ++i){
-				batch.delete(db.doc(solutionPath + "/" + solutions[i].id));
-			}
 			batch.delete(db.doc(this.level.path));
+			if(!this.level.solution){
+				const solutionPath = this.level.path + "/solutions";
+				const solutions = (await db.collection(solutionPath).get()).docs;
+				const len = solutions.length;
+				if(len > 498) {
+					sceneManager.pushModal(messageScene, "Error", "Unable to delete. Contact developer by leaving feedback for more information.");
+					throw "Too many solutions for batched write";
+				}
+				for(let i = 0; i != len; ++i){
+					batch.delete(db.doc(solutionPath + "/" + solutions[i].id));
+				}
+			}
 			try {
 				await batch.commit()
 			} catch(e) {
@@ -117,9 +117,7 @@ const saveScene = {
 		return json;
 	},
 	init(){
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 		document.getElementById("save-form").addEventListener("submit", async (e) => {
 			e.preventDefault();
 			loadingScreen.style.display = "flex";
@@ -267,10 +265,8 @@ const messageScene = {
 	},
 
 	init(){
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 		this.btn.addEventListener("click", () => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
 	}
 }
 messageScene.init();
@@ -284,9 +280,7 @@ const loginScene = {
     this.ui.style.display = "none";
   },
 	init(){
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", (e) => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 		const passwordInput = document.getElementById("loginPassword");
 		const emailInput = document.getElementById("loginEmail");
 		const message = document.getElementById("loginMessage");
@@ -334,9 +328,7 @@ const registerScene = {
 		registerScene.passwordMessage.textContent = "";
 	},
 	init(){
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("pointerdown", () => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 		let form = document.getElementById("registerForm");
 		this.password0.addEventListener("input", this.hidePasswords);
 		this.password1.addEventListener("input", this.hidePasswords);
@@ -404,9 +396,7 @@ const profileScene = {
 	},
 	ui: document.getElementById("profileUi"),
 	init(){
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", e => {sceneManager.popModal();});
-		this.ui.prepend(sceneCloseBtn);
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 		document.getElementById("logoutBtn").addEventListener("click", () => {
 			firebase.auth().signOut();
 			sceneManager.popModal();
@@ -486,9 +476,7 @@ const successScene = {
 		batch.commit().catch((err) => {sceneManager.pushModal(messageScene, "Error", err.message);});
 	},
 	init(){
-		const sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
-		successScene.ui.prepend(sceneCloseBtn);
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 		document.getElementById("main-menu-btn").addEventListener("click", () => {sceneManager.push("/");});
 		this.incrementBtn.addEventListener("click", this.ratingHandler);
 		this.decrementBtn.addEventListener("click", this.ratingHandler);
@@ -737,11 +725,8 @@ const createCustomScene = {
 		return def;
 	},
 
-	customPropertiesForm: document.querySelector(".customProperties"),
-
 	init() {
-		let formElement = this.customPropertiesForm.cloneNode(true);
-		formElement.insertBefore(document.getElementById("rodProperties"), formElement.querySelector(".submitBtn"));
+		let formElement = this.planeUi.querySelector(".customProperties");
 		this.planeForm = this.createForm(formElement);
 		this.planeForm.width = formElement.querySelector("#width");
 		this.addFormEvents(formElement);
@@ -749,13 +734,10 @@ const createCustomScene = {
 			e.preventDefault();
 			sceneManager.popModal();
 		};
-		this.planeUi.appendChild(formElement);
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
-		this.planeUi.prepend(sceneCloseBtn);
+		this.planeUi.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 
-		formElement = this.customPropertiesForm.cloneNode(true);
-		formElement.insertBefore(document.getElementById("circleProperties"), formElement.querySelector(".submitBtn"));
+
+		formElement = this.circleUi.querySelector(".customProperties");
 		this.circleForm = this.createForm(formElement);
 		this.circleForm.radius = formElement.querySelector("#radius");
 		this.circleForm.motorSpeed = formElement.querySelector("#motorSpeed");
@@ -765,10 +747,7 @@ const createCustomScene = {
 			e.preventDefault();
 			sceneManager.popModal();
 		};
-		this.circleUi.appendChild(formElement);
-		sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("click", () => {sceneManager.popModal();});
-		this.circleUi.prepend(sceneCloseBtn);
+		this.circleUi.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 	}
 }
 createCustomScene.init();

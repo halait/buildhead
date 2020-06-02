@@ -25,6 +25,10 @@
 			--toolbar-height: 40px;
 			min-width: 240px;
     }
+		/* label {
+			display: block;
+			margin: 8px 0;
+		} */
 		input {
 			border-radius: 4px;
 			padding-left: 8px;
@@ -341,40 +345,134 @@
 		}
 	</style>
 </head>
+{{ define _startSimBtn 
+<svg class="startSimulationBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+	xmlns="http://www.w3.org/2000/svg">
+	<title>Start Simulation</title>
+	<polygon points="30 80, 30 20, 85 50" fill="#fff"></polygon>
+</svg>
+}}
+{{ define _ccwWheelBtn <img class="ccwWheelCreatorBtn toolbarBtn" title="Counter Clockwise Wheel" src="/images/ccwWheel.png"> }}
+{{ define _nWheelBtn <img class="nWheelCreatorBtn toolbarBtn" title="Neutral Wheel" src="/images/nWheel.png"> }}
+{{ define _cwWheelBtn <img class="cwWheelCreatorBtn toolbarBtn" title="Clockwise Wheel" src="/images/cwWheel.png"> }}
+{{ define _nRodBtn
+<svg class="nRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+	xmlns="http://www.w3.org/2000/svg">
+	<title>Non-Colliding Rod</title>
+	<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="#0ff" stroke-width="18"></line>
+	<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"></circle>
+	<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"></circle>
+	<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"></circle>
+	<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"></circle>
+</svg>
+}}
+{{ define _cRodBtn
+<svg class="cRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+	xmlns="http://www.w3.org/2000/svg">
+	<title>Colliding Rod</title>
+	<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="rgb(200, 200, 200)" stroke-width="18"></line>
+	<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"></circle>
+	<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"></circle>
+	<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"></circle>
+	<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"></circle>
+</svg>
+}}
+{{ define _moveBtn
+<svg class="moveBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+	xmlns="http://www.w3.org/2000/svg">
+	<title>Move Tool</title>
+	<polygon points="50 10, 35 25, 65 25" fill="#aaa"></polygon>
+	<polygon points="10 50, 25 35, 25 65" fill="#aaa"></polygon>
+	<polygon points="50 90, 35 75, 65 75" fill="#aaa"></polygon>
+	<polygon points="90 50, 75 35, 75 65" fill="#aaa"></polygon>
+	<line x1="50" y1="20" x2="50" y2="80" stroke="#aaa" stroke-width="7"></line>
+	<line x1="20" y1="50" x2="80" y2="50" stroke="#aaa" stroke-width="7"></line>
+</svg>
+}}
+{{ define _removeBtn
+<svg class="removeBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+	xmlns="http://www.w3.org/2000/svg">
+	<title>Remove Tool</title>
+	<line x1="20" y1="20" x2="80" y2="80" stroke="#f00" stroke-width="7"></line>
+	<line x1="80" y1="20" x2="20" y2="80" stroke="#f00" stroke-width="7"></line>
+</svg>
+}}
+{{ define _closeBtn
+<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+	xmlns="http://www.w3.org/2000/svg">
+	<title>Close Button</title>
+	<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
+	<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
+</svg>
+}}
+{{ define _customizeFormTopChunk
+<form class="customProperties">
+	<h3>Type: </h3>
+	<label><input class="fixedType" name="typeRadio" type="radio">Fixed</label>
+	<label><input class="movableType" name="typeRadio" type="radio" checked>Movable</label>
+	<span class="customGroup">
+		<h3>Group: </h3>
+		<p>If type is fixed, then group will automatically be set to fixed.</p>
+		<label><input class="coplanarGroup" name="groupRadio" type="radio" checked>Coplanar</label>
+		<label><input class="nonCoplanarGroup" name="groupRadio" type="radio">Non-Coplanar</label>
+	</span>
+	<span class="customTarget">
+		<h3>Target: </h3>
+		<p>Group must be coplanar in order for object to be target.</p>
+		<label><input class="target" name="targetRadio" type="radio">Yes</label>
+		<label><input class="nonTarget" name="targetRadio" type="radio" checked>No</label>
+	</span>
+	<h3>Joinable: </h3>
+	<label><input class="joinable" name="joinableRadio" type="radio">Yes</label>
+	<label><input class="nonJoinable" name="joinableRadio" type="radio" checked>No</label>
+}}
+{{ define _customizeFormBottomChunk
+	<h3>Density: </h3>
+	<input class="density" type="number" step="0.0001" min="0" placeholder="If empty defaults to 30.0">
+	<h3>Friction: </h3>
+	<label>Static friction: <input class="staticFriction" type="number" step="0.0001" min="0"
+			placeholder="If empty defaults to 0.8"></label><br>
+	<label>Kinetic friction: <input class="kineticFriction" type="number" step="0.0001" min="0"
+			placeholder="If empty defaults to 0.5"></label>
+	<h3>Velocity Resistance: </h3>
+	<label>Linear velocity resistance: <input class="linearResistance" type="number" step="0.001" min="0"
+			placeholder="If empty defaults to 0.01"></label><br>
+	<label>Rotational velocity resistance: <input class="rotationalResistance" type="number" step="0.001"
+			min="0" placeholder="If empty defaults to 0.01"></label><br>
+	<input class="submitBtn" type="submit" value="Apply">
+</form>
+}}
+{{ define _rodCustomizeFormChunk
+<span id="rodProperties">
+	<h3>Width: </h3>
+	<input id="width" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.05"><br>
+</span>
+}}
+{{ define _wheelCustomizeFormChunk
+<span id="circleProperties">
+	<h3>Radius: </h3>
+	<input id="radius" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.1">
+	<h3>Motor Speed: </h3>
+	<input id="motorSpeed" type="number" step="0.00001" placeholder="If empty then circle non-motorized">
+	<h3>Max Motor Torque: </h3>
+	<input id="maxMotorTorque" type="number" step="0.00001" min="0"
+		placeholder="If empty then circle non-motorized"><br>
+</span>
+}}
 <body>
   <div id="game">
     <div id="sandboxToolbar" class="toolbar">
-			<svg class="startSimulationBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Start Simulation</title>
-				<polygon points="30 80, 30 20, 85 50" fill="#fff"></polygon>
-			</svg>
-			<img class="ccwWheelCreatorBtn toolbarBtn" title="Counter Clockwise Wheel" src="/images/ccwWheel.png">
-			<img class="nWheelCreatorBtn toolbarBtn" title="Neutral Wheel" src="/images/nWheel.png">
-			<img class="cwWheelCreatorBtn toolbarBtn" title="Clockwise Wheel" src="/images/cwWheel.png">
+			_startSimBtn
+			_ccwWheelBtn
+			_nWheelBtn
+			_cwWheelBtn
 			<svg class="tWheelCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
 				xmlns="http://www.w3.org/2000/svg">
 				<title>Custom Wheel</title>
 				<circle cx="50" cy="50" fill="rgb(255, 255, 255)" r="40"></circle>
 			</svg>
-			<svg class="nRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Non-Colliding Rod</title>
-				<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="#0ff" stroke-width="18"></line>
-				<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"></circle>
-				<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"></circle>
-			</svg>
-			<svg class="cRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Colliding Rod</title>
-				<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="rgb(200, 200, 200)" stroke-width="18"></line>
-				<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"></circle>
-				<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"></circle>
-			</svg>
+			_nRodBtn
+			_cRodBtn
 			<svg class="gRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
 				xmlns="http://www.w3.org/2000/svg">
 				<title>Custom Rod</title>
@@ -385,22 +483,8 @@
 				<title>Custom Polygon</title>
 				<polygon points="50 20, 25 75, 75 75" fill="#fff"></polygon>
 			</svg>
-			<svg class="moveBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Move Tool</title>
-				<polygon points="50 10, 35 25, 65 25" fill="#aaa"></polygon>
-				<polygon points="10 50, 25 35, 25 65" fill="#aaa"></polygon>
-				<polygon points="50 90, 35 75, 65 75" fill="#aaa"></polygon>
-				<polygon points="90 50, 75 35, 75 65" fill="#aaa"></polygon>
-				<line x1="50" y1="20" x2="50" y2="80" stroke="#aaa" stroke-width="7"></line>
-				<line x1="20" y1="50" x2="80" y2="50" stroke="#aaa" stroke-width="7"></line>
-			</svg>
-			<svg class="removeBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Remove Tool</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#f00" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#f00" stroke-width="7"></line>
-			</svg>
+			_moveBtn
+			_removeBtn
 			<svg class="assemblyFieldCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
 				xmlns="http://www.w3.org/2000/svg">
 				<title>Edit Box</title>
@@ -421,48 +505,14 @@
 		</div>
 
     <div id="assemblySceneBtnsDiv" class="toolbar">
-			<svg class="startSimulationBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Start Simulation</title>
-				<polygon points="30 80, 30 20, 85 50" fill="#fff"></polygon>
-			</svg>
-			<img class="ccwWheelCreatorBtn toolbarBtn" title="Counter Clockwise Wheel" src="/images/ccwWheel.png">
-			<img class="nWheelCreatorBtn toolbarBtn" title="Neutral Wheel" src="/images/nWheel.png">
-			<img class="cwWheelCreatorBtn toolbarBtn" title="Clockwise Wheel" src="/images/cwWheel.png">
-			<svg class="nRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Non-Colliding Rod</title>
-				<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="#0ff" stroke-width="18"></line>
-				<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"></circle>
-				<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"></circle>
-			</svg>
-			<svg class="cRodCreatorBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Colliding Rod</title>
-				<line x1="20" y1="20" x2="80" y2="80" fill="none" stroke="rgb(200, 200, 200)" stroke-width="18"></line>
-				<circle cx="20" cy="20" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="20" cy="20" fill="rgb(255, 255, 255)" r="6"></circle>
-				<circle cx="80" cy="80" fill="rgb(0, 0, 0)" r="9"></circle>
-				<circle cx="80" cy="80" fill="rgb(255, 255, 255)" r="6"></circle>
-			</svg>
-			<svg class="moveBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Move Tool</title>
-				<polygon points="50 10, 35 25, 65 25" fill="#aaa"></polygon>
-				<polygon points="10 50, 25 35, 25 65" fill="#aaa"></polygon>
-				<polygon points="50 90, 35 75, 65 75" fill="#aaa"></polygon>
-				<polygon points="90 50, 75 35, 75 65" fill="#aaa"></polygon>
-				<line x1="50" y1="20" x2="50" y2="80" stroke="#aaa" stroke-width="7"></line>
-				<line x1="20" y1="50" x2="80" y2="50" stroke="#aaa" stroke-width="7"></line>
-			</svg>
-			<svg class="removeBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Remove Tool</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#f00" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#f00" stroke-width="7"></line>
-			</svg>
+			_startSimBtn
+			_ccwWheelBtn
+			_nWheelBtn
+			_cwWheelBtn
+			_nRodBtn
+			_cRodBtn
+			_moveBtn
+			_removeBtn
 		</div>
 		
 		<div id="simulationSceneBtnsDiv" class="toolbar">
@@ -505,6 +555,15 @@
 						<tspan x="50" dy="28">Levels</tspan>
 					</text>
 				</svg>
+				<!--
+				<svg id="your-levels-btn" class="level-type-btns" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" fill="#fff"
+        xmlns="http://www.w3.org/2000/svg">
+        	<text dominant-baseline="middle" text-anchor="middle" x="50" y="50" font-family="sans-serif" font-size="24">
+						<tspan x="50" dy="-14">Your</tspan>
+						<tspan x="50" dy="28">Levels</tspan>
+					</text>
+				</svg>
+				-->
 				<svg id="sandboxBtn" class="level-type-btns" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" fill="#fff"
         xmlns="http://www.w3.org/2000/svg">
         	<text dominant-baseline="middle" text-anchor="middle" x="50" y="50" font-family="sans-serif" font-size="24">Sandbox</text>
@@ -562,12 +621,7 @@
 		</div>
 
 		<div id="mode-ui" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p class="modalHeader">Mode</p>
 			<div id="play-btn" class="btn">Play</div>
 			<div id="edit-btn" class="btn">Edit</div>
@@ -585,12 +639,7 @@
     </div>
 
     <div id="save-ui" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p id="save-header" class="modalHeader"></p>
 			<form id="save-form">
 				<label>Name<br><input id="name-input" type="text" required></label>
@@ -600,134 +649,44 @@
 			<p id="save-info-p" class="message"></p>
 		</div>
 
+		<!--
+    <div id="loadLevelUI" class="modal">
+      <p class="modalHeader">Load Level</p>
+      <input id="level-input" type="file" accept="application/json" />
+      <p id="loadMessageP"></p><br>
+		</div>
+	-->
+
     <div id="message-div" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
       <p id="message-header" class="modalHeader"></p>
 			<span id="message"></span>
 			<div id="message-btn" class="btn"></div>
     </div>
 
     <div id="setCustomObroundPopup" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p class="modalHeader">Custom Obround Properties</p>
-			<form class="customProperties">
-				<h3>Type: </h3>
-				<label><input class="fixedType" name="typeRadio" type="radio">Fixed</label>
-				<label><input class="movableType" name="typeRadio" type="radio" checked>Movable</label>
-				<span class="customGroup">
-					<h3>Group: </h3>
-					<p>If type is fixed, then group will automatically be set to fixed.</p>
-					<label><input class="coplanarGroup" name="groupRadio" type="radio" checked>Coplanar</label>
-					<label><input class="nonCoplanarGroup" name="groupRadio" type="radio">Non-Coplanar</label>
-				</span>
-				<span class="customTarget">
-					<h3>Target: </h3>
-					<p>Group must be coplanar in order for object to be target.</p>
-					<label><input class="target" name="targetRadio" type="radio">Yes</label>
-					<label><input class="nonTarget" name="targetRadio" type="radio" checked>No</label>
-				</span>
-				<h3>Joinable: </h3>
-				<label><input class="joinable" name="joinableRadio" type="radio">Yes</label>
-				<label><input class="nonJoinable" name="joinableRadio" type="radio" checked>No</label>
-			<span id="rodProperties">
-				<h3>Width: </h3>
-				<input id="width" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.05"><br>
-			</span>
-			<h3>Density: </h3>
-				<input class="density" type="number" step="0.0001" min="0" placeholder="If empty defaults to 30.0">
-				<h3>Friction: </h3>
-				<label>Static friction: <input class="staticFriction" type="number" step="0.0001" min="0"
-						placeholder="If empty defaults to 0.8"></label><br>
-				<label>Kinetic friction: <input class="kineticFriction" type="number" step="0.0001" min="0"
-						placeholder="If empty defaults to 0.5"></label>
-				<h3>Velocity Resistance: </h3>
-				<label>Linear velocity resistance: <input class="linearResistance" type="number" step="0.001" min="0"
-						placeholder="If empty defaults to 0.01"></label><br>
-				<label>Rotational velocity resistance: <input class="rotationalResistance" type="number" step="0.001"
-						min="0" placeholder="If empty defaults to 0.01"></label><br>
-				<input class="submitBtn" type="submit" value="Apply">
-			</form>
+			_customizeFormTopChunk
+			_rodCustomizeFormChunk
+			_customizeFormBottomChunk
     </div>
 
     <div id="setCustomCirclePopup" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p class="modalHeader">Custom Circle Properties</p>
-			<form class="customProperties">
-				<h3>Type: </h3>
-				<label><input class="fixedType" name="typeRadio" type="radio">Fixed</label>
-				<label><input class="movableType" name="typeRadio" type="radio" checked>Movable</label>
-				<span class="customGroup">
-					<h3>Group: </h3>
-					<p>If type is fixed, then group will automatically be set to fixed.</p>
-					<label><input class="coplanarGroup" name="groupRadio" type="radio" checked>Coplanar</label>
-					<label><input class="nonCoplanarGroup" name="groupRadio" type="radio">Non-Coplanar</label>
-				</span>
-				<span class="customTarget">
-					<h3>Target: </h3>
-					<p>Group must be coplanar in order for object to be target.</p>
-					<label><input class="target" name="targetRadio" type="radio">Yes</label>
-					<label><input class="nonTarget" name="targetRadio" type="radio" checked>No</label>
-				</span>
-				<h3>Joinable: </h3>
-				<label><input class="joinable" name="joinableRadio" type="radio">Yes</label>
-				<label><input class="nonJoinable" name="joinableRadio" type="radio" checked>No</label>
-			<span id="circleProperties">
-				<h3>Radius: </h3>
-				<input id="radius" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.1">
-				<h3>Motor Speed: </h3>
-				<input id="motorSpeed" type="number" step="0.00001" placeholder="If empty then circle non-motorized">
-				<h3>Max Motor Torque: </h3>
-				<input id="maxMotorTorque" type="number" step="0.00001" min="0"
-					placeholder="If empty then circle non-motorized"><br>
-			</span>
-			<h3>Density: </h3>
-				<input class="density" type="number" step="0.0001" min="0" placeholder="If empty defaults to 30.0">
-				<h3>Friction: </h3>
-				<label>Static friction: <input class="staticFriction" type="number" step="0.0001" min="0"
-						placeholder="If empty defaults to 0.8"></label><br>
-				<label>Kinetic friction: <input class="kineticFriction" type="number" step="0.0001" min="0"
-						placeholder="If empty defaults to 0.5"></label>
-				<h3>Velocity Resistance: </h3>
-				<label>Linear velocity resistance: <input class="linearResistance" type="number" step="0.001" min="0"
-						placeholder="If empty defaults to 0.01"></label><br>
-				<label>Rotational velocity resistance: <input class="rotationalResistance" type="number" step="0.001"
-						min="0" placeholder="If empty defaults to 0.01"></label><br>
-				<input class="submitBtn" type="submit" value="Apply">
-			</form>
+			_customizeFormTopChunk
+			_wheelCustomizeFormChunk
+			_customizeFormBottomChunk
     </div>
     
     <div id="createPolygonPopup" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
       <p class="modalHeader">Custom Polygon Properties</p>
     </div>
     
     <div id="successSceneDiv" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p class="modalHeader">Success</p>
 			<div id="points-widget">
 				<svg id="increment-btn" class="toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="#0f0" stroke="#0f0">
@@ -750,12 +709,7 @@
 		</div>
 		
 		<div id="loginUi" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p class="modalHeader">Login</p>
 			<form id="loginForm">
 				<label>Email Address<br><input id="loginEmail" type="email" required></label><br><br>
@@ -769,12 +723,7 @@
 		</div>
 
     <div id="registerUi" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p class="modalHeader">Create Account</p>
 			<form id="registerForm">
 				<label>Email<br><input id="registerEmail" type="email" required></label>
@@ -791,16 +740,29 @@
 		</div>
 
 		<div id="profileUi" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
+			_closeBtn
 			<p class="modalHeader">Profile</p>
 			<span id="logoutBtn" class="btn">Logout</span>
 		</div>
 	</div>
+
+		<!--
+		<svg class="backBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+			xmlns="http://www.w3.org/2000/svg">
+			<title>Go Back</title>
+			<line x1="10" y1="50" x2="90" y2="50" stroke="#fff" stroke-width="5"></line>
+			<line x1="10" y1="50" x2="40" y2="20" stroke="#fff" stroke-width="5"></line>
+			<line x1="10" y1="50" x2="40" y2="80" stroke="#fff" stroke-width="5"></line>
+		</svg>
+		<svg class="loadLevelBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+			xmlns="http://www.w3.org/2000/svg">
+			<title>Load Level</title>
+			<rect x="20" y="30" width="60" height="40" fill="#dd0"></rect>
+			<polygon points="30 35, 90 35, 80 70, 20 70" fill="#880"></polygon>
+			<polygon points="44 32, 56 32, 56 22, 44 22" fill="#0f0"></polygon>
+			<polygon points="40 22, 50 12, 60 22" fill="#0f0"></polygon>
+		</svg>
+		-->
 
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-firestore.js"></script>

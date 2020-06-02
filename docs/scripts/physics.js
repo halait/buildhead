@@ -195,8 +195,9 @@ class MemoryManager {
 const pw = {
 	G: -0.002,
 	//MIN_AA: 0.0,
-	VELOCITY_ITERATIONS: 8,
-	POSITION_ITERATIONS: 2,
+	VELOCITY_ITERATIONS: 9,
+	POSITION_ITERATIONS: 3,
+
 
 
 	POLYGON_SKIN: 0.005,
@@ -385,8 +386,12 @@ const pw = {
 						vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
 						// normal impulse
-						let jn = (M[C_NX + i] * vxRel + M[C_NY + i] * vyRel + M[C_DIST + i]) * M[C_M + i];
+																																	//experiment
+						let jn = (M[C_NX + i] * vxRel + M[C_NY + i] * vyRel/* + M[C_DIST + i]*/) * M[C_M + i];
+
+						if(M[C_DIST + i] && jn < 0) continue;
 						let oldJn = M[C_JN + i];
+
 						M[C_JN + i] += jn;
 						// clamp to insure accumulated normal impulse stays negative (push only)
 						if(M[C_JN + i] > 0) M[C_JN + i] = 0;
@@ -492,13 +497,7 @@ const pw = {
 		// solve position constraints
 		iter = 0
 		for(this.unsolved = true; this.unsolved && iter < this.POSITION_ITERATIONS; ++iter){
-
-
-			//temp EXPERIEMENTAL
 			this.unsolved = false;
-
-
-
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 				let si = this.C_PTRS[ptr];
 				if(!M[C_ACTIVE + si]) continue;
@@ -509,7 +508,7 @@ const pw = {
 					if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) cdLen = 14;
 					this.getCollisionData(si, asi, bsi);
 					for(let i = si, c = 0; c < cdLen; i += 16, c += 7){
-						if(this.collisionData[6 + c] > 0.0) {
+						if(this.collisionData[6 + c] >= 0) {
 							continue;
 						}
 						this.unsolved = true;
@@ -1552,7 +1551,7 @@ const pw = {
 			this.M[O_TY + ptr] = def.y;
 			this.M[O_RADIUS + ptr] = def.radius;
 			if(def.type == this.MOVABLE_TYPE) {
-				let mass = def.density * Math.PI * def.radius * def.radius;
+				const mass = def.density * Math.PI * def.radius * def.radius;
 				// is mass needed or only m_inv?
 				this.M[O_M + ptr] = mass;
 				this.M[O_M_INV + ptr] = 1.0 / mass;
@@ -1804,10 +1803,15 @@ const pw = {
 			return true;
 
 		} else if(bForm == this.PLANE_FORM){
-			if(this.M[O_W0X + poPtr] < this.M[O_MIN_X + AABB_Ptr] || this.M[O_W0X + poPtr] > this.M[O_MAX_X + AABB_Ptr]) return false;
-			if(this.M[O_W0Y + poPtr] < this.M[O_MIN_Y + AABB_Ptr] || this.M[O_W0Y + poPtr] > this.M[O_MAX_Y + AABB_Ptr]) return false;
-			if(this.M[O_W1X + poPtr] < this.M[O_MIN_X + AABB_Ptr] || this.M[O_W1X + poPtr] > this.M[O_MAX_X + AABB_Ptr]) return false;
-			if(this.M[O_W1Y + poPtr] < this.M[O_MIN_Y + AABB_Ptr] || this.M[O_W1Y + poPtr] > this.M[O_MAX_Y + AABB_Ptr]) return false;
+			if(this.M[O_W0X + poPtr] + this.M[O_HALF_WIDTH + poPtr] > this.M[O_MAX_X + AABB_Ptr]) return false;
+			if(this.M[O_W0Y + poPtr] + this.M[O_HALF_WIDTH + poPtr] > this.M[O_MAX_Y + AABB_Ptr]) return false;
+			if(this.M[O_W0X + poPtr] - this.M[O_HALF_WIDTH + poPtr] < this.M[O_MIN_X + AABB_Ptr]) return false;
+			if(this.M[O_W0Y + poPtr] - this.M[O_HALF_WIDTH + poPtr] < this.M[O_MIN_Y + AABB_Ptr]) return false;
+
+			if(this.M[O_W1X + poPtr] + this.M[O_HALF_WIDTH + poPtr] > this.M[O_MAX_X + AABB_Ptr]) return false;
+			if(this.M[O_W1Y + poPtr] + this.M[O_HALF_WIDTH + poPtr] > this.M[O_MAX_Y + AABB_Ptr]) return false;
+			if(this.M[O_W1X + poPtr] - this.M[O_HALF_WIDTH + poPtr] < this.M[O_MIN_X + AABB_Ptr]) return false;
+			if(this.M[O_W1Y + poPtr] - this.M[O_HALF_WIDTH + poPtr] < this.M[O_MIN_Y + AABB_Ptr]) return false;
 			return true;
 
 		} else {
@@ -1916,10 +1920,11 @@ const pw = {
 			this.M[O_L1X + poPtr] = this.M[O_W1X + poPtr] - this.M[O_TX + poPtr];
 			this.M[O_L1Y + poPtr] = this.M[O_W1Y + poPtr] - this.M[O_TY + poPtr];
 			if(this.M[O_TYPE + poPtr] == this.MOVABLE_TYPE) {
-				this.M[O_M + poPtr] = this.M[O_P + poPtr] * this.M[O_HALF_WIDTH + poPtr] * 2.0 * this.M[O_L + poPtr];
+				const w = this.M[O_HALF_WIDTH + poPtr] * 2;
+				this.M[O_M + poPtr] = this.M[O_P + poPtr] * (w * this.M[O_L + poPtr] + Math.PI * this.M[O_HALF_WIDTH + poPtr] * this.M[O_HALF_WIDTH + poPtr]);
 				this.M[O_M_INV + poPtr] = 1.0 / this.M[O_M + poPtr];
-				// tune?
-				this.M[O_I + poPtr] = (1 / 12) * this.M[O_M + poPtr] * this.M[O_L + poPtr] * this.M[O_L + poPtr];
+				// incorporate inertia from half-circles on sides
+				this.M[O_I + poPtr] = (1 / 12) * this.M[O_M + poPtr] * (this.M[O_L + poPtr] * this.M[O_L + poPtr] + w * w);
 				this.M[O_I_INV + poPtr] = 1.0 / this.M[O_I + poPtr];
 			} else {
 				this.M[O_M + poPtr] = 0.0;

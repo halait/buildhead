@@ -55,7 +55,16 @@ const routes = {
 		async start(){
 			loadingScreen.style.display = "flex";
 			this.ui.style.display = "block";
-			let collection = location.pathname.replace(this.route, "");
+			const collection = location.pathname.replace(this.route, "");
+			if(collection == "/original"){
+				this.orderOption.style.display = "block";
+				this.searchContainer.style.display = "none";
+				this.defaultOrderBy = "index";
+			} else {
+				this.orderOption.style.display = "none";
+				this.searchContainer.style.display = "block";
+				this.defaultOrderBy = "dateCreated";
+			}
 			let search = location.search;
 			if(this.forceRefreshFlag || collection != this.collection || search != this.search){
 				console.log("refreshing");
@@ -90,12 +99,13 @@ const routes = {
 				throw "Collection path undefined";
 			}
 			const searchParams = new URLSearchParams(this.search);
-			let orderBy = searchParams.get("sort_by");
-			if(!orderBy){
-				orderBy = this.defaultOrderBy;
+			const orderBy = [searchParams.get("sort_by") || this.defaultOrderBy];
+			this.sortBySelect.value = orderBy[0];
+			if(!this.descSortOptions.includes(orderBy[0])) {
+				orderBy[1] = "desc";
 			}
-			let search = searchParams.getAll("q");
-			let where = search.length ? {field: "tags", operator: "array-contains-any", value: search} : null;
+			const search = searchParams.getAll("q");
+			const where = search.length ? ["tags", "array-contains-any", search] : null;
 			let result = {collection, orderBy, where};
 			let endAtPath = searchParams.get("end_at");
 			if(startAfterPath) {
@@ -110,18 +120,24 @@ const routes = {
 		collection: "",
 		search: "",
 		route: "/listing",
-		defaultOrderBy: "dateCreated",
+		defaultOrderBy: null,
 		items: [],
 		forceRefreshFlag: false,
 
+		orderOption: document.getElementById("order-option"),
 
-		moreLoadable: false,
+		descSortOptions : ["index"],
+
+
+
+	//	moreLoadable: false,
 
 
 		loadMoreBtn: document.getElementById("load-more-btn"),
 		browserContent: document.getElementById("browser-content"),
 		sortBySelect: document.getElementById("sort-by-select"),
 		searchInput: document.getElementById("search-input"),
+		searchContainer: document.getElementById("search-container"),
 		template: `<tr class="{{c}}" data-path="{{p}}"><td>{{n}}</td><td>{{a}}</td><td>{{d}}</td><td>{{r}}</td><td>{{pl}}</td></tr>`,
 		populate(items){
 			const len = items.length;
@@ -161,7 +177,7 @@ const routes = {
 			const len = levels.length;
 			if(len < routes["/listing"].maxLevels){
 				routes["/listing"].loadMoreBtn.style.display = "none";
-				routes["/listing"].moreLoadable = false;
+				//routes["/listing"].moreLoadable = false;
 				if(!len){
 					return;
 				}
@@ -224,20 +240,50 @@ const routes = {
 		},
 
 		init() {
-			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {simulationManager.begin(this);});
-			addBtn(ccwWheelCreatorBtn.cloneNode(true), this.toolbar, ccwWheelCreatorEventHandler);
-			addBtn(nWheelCreatorBtn.cloneNode(true), this.toolbar, nWheelCreatorEventHandler);
-			addBtn(cwWheelCreatorBtn.cloneNode(true), this.toolbar, cwWheelCreatorEventHandler);
-			addBtn(tWheelCreatorBtn.cloneNode(true), this.toolbar, tWheelCreatorEventHandler);
-			addBtn(nRodCreatorBtn.cloneNode(true), this.toolbar, nRodCreatorEventHandler);
-			addBtn(cRodCreatorBtn.cloneNode(true), this.toolbar, cRodCreatorEventHandler);
-			addBtn(gRodCreatorBtn.cloneNode(true), this.toolbar, gRodCreatorEventHandler);
-			//addBtn(polygonBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(createPolygonScene);});
-			addBtn(moveBtn.cloneNode(true), this.toolbar, moveEventHandler);
-			addBtn(removeBtn.cloneNode(true), this.toolbar, removeEventHandler);
-			addBtn(assemblyFieldCreatorBtn.cloneNode(true), this.toolbar, assemblyFieldCreatorEventHandler);
-			addBtn(goalFieldCreatorBtn.cloneNode(true), this.toolbar, goalFieldCreatorEventHandler);
-			addBtn(saveLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.pushModal(saveScene);});
+			this.toolbar.querySelector(".startSimulationBtn").addEventListener("pointerdown", function() {
+				simulationManager.begin(routes["/sandbox"]);
+			});
+			this.toolbar.querySelector(".ccwWheelCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(ccwWheelCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".nWheelCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(nWheelCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".cwWheelCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(cwWheelCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".tWheelCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(tWheelCreatorEventHandler, this);
+				sceneManager.pushModal(createCustomScene, pw.CIRCLE_FORM);
+			});
+			this.toolbar.querySelector(".nRodCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(nRodCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".cRodCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(cRodCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".gRodCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(gRodCreatorEventHandler, this);
+				sceneManager.pushModal(createCustomScene);
+			});
+			/*this.toolbar.querySelector(".polygonBtn").addEventListener("pointerdown", function(){
+				sceneManager.pushModal(createPolygonScene);
+			});*/
+			this.toolbar.querySelector(".moveBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(moveEventHandler, this);
+			});
+			this.toolbar.querySelector(".removeBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(removeEventHandler, this);
+			});
+			this.toolbar.querySelector(".assemblyFieldCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(assemblyFieldCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".goalFieldCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(goalFieldCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".saveLevelBtn").addEventListener("pointerdown", function(){
+				sceneManager.pushModal(saveScene);
+			});
 			//addBtn(loadLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(loadLevelScene);});
 			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
 		}
@@ -262,7 +308,7 @@ const routes = {
 			this.levelInfo.style.display = "block";
 			this.levelInfo.textContent = this.currentLevel.author + " - " + this.currentLevel.name;
 			loadingScreen.style.display = "none";
-			if(this.currentLevel.name == "0 Tutorial" && this.currentLevel.author == "halait"){
+			if(this.currentLevel.name == "Tutorial" && this.currentLevel.author == "halait"){
 				sceneManager.pushModal(tutorialScene);
 			}
 		},
@@ -278,14 +324,30 @@ const routes = {
 		currentLevel: null,
 	
 		init(){
-			addBtn(startSimulationBtn.cloneNode(true), this.toolbar, () => {simulationManager.begin(this);});
-			addBtn(ccwWheelCreatorBtn.cloneNode(true), this.toolbar, ccwWheelCreatorEventHandler);
-			addBtn(nWheelCreatorBtn.cloneNode(true), this.toolbar, nWheelCreatorEventHandler);
-			addBtn(cwWheelCreatorBtn.cloneNode(true), this.toolbar, cwWheelCreatorEventHandler);
-			addBtn(nRodCreatorBtn.cloneNode(true), this.toolbar, nRodCreatorEventHandler);
-			addBtn(cRodCreatorBtn.cloneNode(true), this.toolbar, cRodCreatorEventHandler);
-			addBtn(moveBtn.cloneNode(true), this.toolbar, moveEventHandler);
-			addBtn(removeBtn.cloneNode(true), this.toolbar, removeEventHandler);
+			this.toolbar.querySelector(".startSimulationBtn").addEventListener("pointerdown", function() {
+				simulationManager.begin(routes["/play"]);
+			});
+			this.toolbar.querySelector(".ccwWheelCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(ccwWheelCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".nWheelCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(nWheelCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".cwWheelCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(cwWheelCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".nRodCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(nRodCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".cRodCreatorBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(cRodCreatorEventHandler, this);
+			});
+			this.toolbar.querySelector(".moveBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(moveEventHandler, this);
+			});
+			this.toolbar.querySelector(".removeBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(removeEventHandler, this);
+			});
 			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
 		}
 	}
