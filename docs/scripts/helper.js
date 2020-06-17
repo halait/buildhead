@@ -561,6 +561,10 @@ function base64ToString(base64){
 }
 */
 
+function tokenize(str){
+	return str.split(/\s+/);
+}
+
 const levelManager = {
 	cache: [],
 
@@ -578,7 +582,7 @@ const levelManager = {
 		}
 		let ref = db.collection(params.collection).orderBy(...params.orderBy);
 		if(params.where) {
-			ref = ref.where(...params.where);
+				ref = ref.where(...params.where);
 		}
 		if(params.startAfterPath) {
 																																			// not here

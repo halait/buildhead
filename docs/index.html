@@ -25,6 +25,10 @@
 			--toolbar-height: 40px;
 			min-width: 240px;
     }
+		/* label {
+			display: block;
+			margin: 8px 0;
+		} */
 		input {
 			border-radius: 4px;
 			padding-left: 8px;
@@ -341,6 +345,19 @@
 		}
 	</style>
 </head>
+
+
+
+
+
+
+
+
+
+
+
+
+
 <body>
   <div id="game">
     <div id="sandboxToolbar" class="toolbar">
@@ -505,6 +522,15 @@
 						<tspan x="50" dy="28">Levels</tspan>
 					</text>
 				</svg>
+				<!--
+				<svg id="your-levels-btn" class="level-type-btns" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" fill="#fff"
+        xmlns="http://www.w3.org/2000/svg">
+        	<text dominant-baseline="middle" text-anchor="middle" x="50" y="50" font-family="sans-serif" font-size="24">
+						<tspan x="50" dy="-14">Your</tspan>
+						<tspan x="50" dy="28">Levels</tspan>
+					</text>
+				</svg>
+				-->
 				<svg id="sandboxBtn" class="level-type-btns" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" fill="#fff"
         xmlns="http://www.w3.org/2000/svg">
         	<text dominant-baseline="middle" text-anchor="middle" x="50" y="50" font-family="sans-serif" font-size="24">Sandbox</text>
@@ -599,6 +625,14 @@
 			</form>
 			<p id="save-info-p" class="message"></p>
 		</div>
+
+		<!--
+    <div id="loadLevelUI" class="modal">
+      <p class="modalHeader">Load Level</p>
+      <input id="level-input" type="file" accept="application/json" />
+      <p id="loadMessageP"></p><br>
+		</div>
+	-->
 
     <div id="message-div" class="modal">
 			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
@@ -781,10 +815,10 @@
 				<p id="registerEmailMessage" class="message errMessage"></p>
 				<label>Username<br><input id="registerName" type="text" pattern="[\w@#\*\-\+\[\]\{\}/\.,~]+" required></label>
 				<p id="registerNameMessage" class="message errMessage"></p>
-				<label>Password<br><input id="registerPassword0" type="password" required minlength="6" maxlength="128"></label>
+				<label>Password<br><input id="registerPassword0" type="password" required minlength="6" maxlength="128"></label><br>
 				<label>Confirm Password<br><input id="registerPassword1" type="password" required minlength="6" maxlength="128"></label>
 				<p id="registerPasswordMessage" class="message errMessage"></p>
-				<p class="message">The username and password cannot contain white space, parentheses and other special characters</p>
+				<p class="message">The username and password cannot contain white <br>space, parentheses and other special characters</p>
 				<span id="showPasswordsBtn" class="smallBtn btn">Show Password</span><br>
 				<input class="btn" type="submit" value="Submit">
 			</form>
@@ -801,6 +835,24 @@
 			<span id="logoutBtn" class="btn">Logout</span>
 		</div>
 	</div>
+
+		<!--
+		<svg class="backBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+			xmlns="http://www.w3.org/2000/svg">
+			<title>Go Back</title>
+			<line x1="10" y1="50" x2="90" y2="50" stroke="#fff" stroke-width="5"></line>
+			<line x1="10" y1="50" x2="40" y2="20" stroke="#fff" stroke-width="5"></line>
+			<line x1="10" y1="50" x2="40" y2="80" stroke="#fff" stroke-width="5"></line>
+		</svg>
+		<svg class="loadLevelBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+			xmlns="http://www.w3.org/2000/svg">
+			<title>Load Level</title>
+			<rect x="20" y="30" width="60" height="40" fill="#dd0"></rect>
+			<polygon points="30 35, 90 35, 80 70, 20 70" fill="#880"></polygon>
+			<polygon points="44 32, 56 32, 56 22, 44 22" fill="#0f0"></polygon>
+			<polygon points="40 22, 50 12, 60 22" fill="#0f0"></polygon>
+		</svg>
+		-->
 
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-firestore.js"></script>

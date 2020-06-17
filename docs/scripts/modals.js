@@ -140,14 +140,12 @@ const saveScene = {
 					this.saveInfoP.textContent = "You already used this name, choose a different name";
 					return;
 				}
-				let docTags = null;
-				if(this.tagInput.value){
-					docTags = this.tagInput.value.split(" ");
-				} else {
-					docTags = [];
-				}
-				docTags.push(...nameIn.split(" "));
-				docTags.push(user.displayName);
+				let tagStr = user.displayName;
+				tagStr += " " + nameIn;
+				tagStr += " " + this.tagInput.value;
+				tagStr = tagStr.trim();
+				tagStr = tagStr.toLowerCase();
+				tagStr = tokenize(tagStr);
 				//for(let i = 0; i != 20; ++i){
 					//                    temp i
 					await db.doc(docPath/* + i*/).set({
@@ -158,7 +156,7 @@ const saveScene = {
 						dateCreated: new Date(),
 						rating: 0,
 						plays: 0,
-						tags: docTags,
+						tags: tagStr,
 						solution: !sandboxMode,
 						json: this.getJson()
 					});

@@ -50,6 +50,7 @@ const routes = {
 			*/
 		}
 	},
+
 	"/listing": {
 		ui: document.getElementById("levelBrowserUi"),
 		async start(){
@@ -104,9 +105,11 @@ const routes = {
 			if(!this.descSortOptions.includes(orderBy[0])) {
 				orderBy[1] = "desc";
 			}
-			const search = searchParams.getAll("q");
-			const where = search.length ? ["tags", "array-contains-any", search] : null;
-			let result = {collection, orderBy, where};
+			let result = {collection, orderBy};
+			let search = searchParams.get("q");
+			if(search){
+				result.where = search ? ["tags", "array-contains-any", tokenize(search)] : null;
+			}
 			let endAtPath = searchParams.get("end_at");
 			if(startAfterPath) {
 				result.startAfterPath = startAfterPath;
@@ -123,16 +126,8 @@ const routes = {
 		defaultOrderBy: null,
 		items: [],
 		forceRefreshFlag: false,
-
 		orderOption: document.getElementById("order-option"),
-
 		descSortOptions : ["index"],
-
-
-
-	//	moreLoadable: false,
-
-
 		loadMoreBtn: document.getElementById("load-more-btn"),
 		browserContent: document.getElementById("browser-content"),
 		sortBySelect: document.getElementById("sort-by-select"),
@@ -163,7 +158,7 @@ const routes = {
 			return searchParams;
 		},
 		searchHandler(){
-			const string = routes["/listing"].searchInput.value;
+			const string = routes["/listing"].searchInput.value.toLowerCase().trim();
 			let searchParams = new URLSearchParams(location.search);
 			if(!string){
 				searchParams.delete("q");
@@ -210,6 +205,7 @@ const routes = {
 			this.loadMoreBtn.addEventListener("click", this.loadMoreHandler);
 		}
 	},
+
 	"/sandbox": {
 		toolbar: document.getElementById("sandboxToolbar"),
 
@@ -288,6 +284,7 @@ const routes = {
 			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
 		}
 	},
+
 	"/play": {
 		async start(){
 			loadingScreen.style.display = "flex";
