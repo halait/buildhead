@@ -173,14 +173,14 @@ function createTexture(imgPath){
 		imgPath = path + imgPath;
 	}
 	img.onerror = () => {
-		loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+		//loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 		loadingScreen.style.display = "none";
 		sceneManager.pushModal(messageScene, "Error", "Unable to play game because texture could not be loaded.");
 		window.onresize();
 		throw "Unable to load texture";
 	}
 	img.onload = () => {
-		loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+		//loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 		loadingScreen.style.display = "none";
 		window.onresize();
 		sceneManager.push(location.href);

@@ -1475,7 +1475,7 @@ const pw = {
 
 
 	create(def) {
-		if(this.poTotal > 198) throw "Unable to create physics object, maximum number of physics objects reached. Max is " + 200;
+		if(this.poTotal > 198) throw "Unable to create physics object, maximum number of physics objects reached. Max is 200";
 		if(def.form === undefined || def.type === undefined) {
 			throw "Missing form and/or type in PhysicsObject definition";
 		}
@@ -1497,7 +1497,7 @@ const pw = {
 
 		this.M[O_FORM + ptr] = def.form;
 		this.M[O_TYPE + ptr] = def.type;
-		this.M[O_GROUP + ptr] = def.group
+		this.M[O_GROUP + ptr] = def.group;
 		this.M[O_P + ptr] = def.density;       // tune?
 		this.M[O_US + ptr] = def.staticFriction || 0.85;
 		this.M[O_UK + ptr] = def.kineticFriction || 0.75;

@@ -146,21 +146,17 @@ const saveScene = {
 				tagStr = tagStr.trim();
 				tagStr = tagStr.toLowerCase();
 				tagStr = tokenize(tagStr);
-				//for(let i = 0; i != 20; ++i){
-					//                    temp i
-					await db.doc(docPath/* + i*/).set({
-						//            temp i
-						name: nameIn/* + i*/,
-						author: user.displayName,
-						authorId: user.uid,
-						dateCreated: new Date(),
-						rating: 0,
-						plays: 0,
-						tags: tagStr,
-						solution: !sandboxMode,
-						json: this.getJson()
-					});
-				//}
+				await db.doc(docPath).set({
+					name: nameIn,
+					author: user.displayName,
+					authorId: user.uid,
+					dateCreated: new Date(),
+					rating: 0,
+					plays: 0,
+					tags: tagStr,
+					solution: !sandboxMode,
+					json: this.getJson()
+				});
 				sceneManager.popModal();
 			} catch(e) {
 				console.error(e);

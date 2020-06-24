@@ -1,0 +1,345 @@
+* {
+	margin: 0;
+	padding: 0;
+	-webkit-user-drag: none;
+	user-select: none;
+	-khtml-user-select: none;
+	-o-user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	outline: none;
+	font-size: 18px;
+}
+#game {
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	position: relative;
+	--toolbar-height: 40px;
+	min-width: 240px;
+}
+/* label {
+	display: block;
+	margin: 8px 0;
+} */
+input {
+	border-radius: 4px;
+	padding-left: 8px;
+}
+input[type=radio] {
+	margin-left: 32px;
+}
+.toolbar {
+	top: 0px;
+	left: 0px;
+	height: var(--toolbar-height);
+	width: 100vw;
+	box-sizing: border-box;
+	background-color: #222;
+	display: none;
+	justify-content: space-between;
+}
+.toolbarBtn {
+	border-radius: 100%;
+	height:  var(--toolbar-height);
+	width: var(--toolbar-height);
+	background-size: 100% 300%;
+}
+.toolbarBtn:hover {
+	background-color: #444;
+}
+.activeBtn {
+	background-color: #888;
+}
+.activeBtn:hover {
+	background-color: #888;
+}
+.overlay {
+	display: none;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: #111;
+}
+.modal {
+	background-color: #222;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translateX(-50%) translateY(-50%);
+	margin: 0 auto;
+	display: none;
+	padding: 32px;
+	border-radius: 2px;
+	color: #fff;
+	box-sizing: border-box;
+	max-height: 100%;
+	max-width: 100%;
+	min-width: inherit;
+}
+.modalHeader {
+	font: small-caps 32px sans-serif;
+	margin-bottom: 20px;
+	white-space: nowrap;
+}
+.startSimulationBtn, .stopSimulationBtn, .backBtn {
+	border-radius: 0px;
+}
+.startSimulationBtn {
+	background-color: #0a0;
+}
+.startSimulationBtn:hover {
+	background-color: #0f0;
+}
+.stopSimulationBtn {
+	background-color: #a00;
+}
+.stopSimulationBtn:hover {
+	background-color: #f00;
+}
+.backBtn {
+	background-color: #a00;
+}
+.backBtn:hover {
+	background-color: #f00;
+}
+.closeBtn {
+	height: 32px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	border-radius: inherit;
+}
+.closeBtn:hover {
+	background-color: #b00;
+}
+.btn {
+	width: max-content;
+	background-color: #000;
+	color: #fff;
+	border-radius: 2px;
+	margin: 8px auto;
+	padding: 8px;
+	border: none;
+	cursor: pointer;
+}
+.smallBtn {
+	font-size: 14px;
+	border-radius: 1px;
+	margin: 4px auto;
+	padding: 4px;
+	border: none;
+}
+.btn:hover {
+	background-color: #333;
+}
+.errMessage {
+	color: #f44;
+}
+#tutorialUi {
+	top: 60px;
+	transform: translateX(-50%) translateY(0%);
+	text-align: center;
+}
+#tutorialImgDiv {
+	max-height: calc(100vh - 240px);
+	overflow: auto;
+}
+#tutorialShowBtn {
+	display: none;
+}
+#reuseableHtml {
+	display: none;
+}
+#canvas {
+	position: absolute;
+	top: var(--toolbar-height);
+	cursor: crosshair;
+	width: 100%;
+	height: calc(100% - var(--toolbar-height));
+	touch-action: none;
+}
+#logo {
+	margin: 32px auto;
+	display: block;
+	width: 64%;
+	max-width: 800px;
+	background-color: #000;
+	border-radius: 4px;
+}
+#logoText:hover {
+	fill: #f80;
+}
+/* remove */
+#level-input {
+	display: block;
+	margin-left: 20px;
+}
+/*
+#loadingScreen {
+	background-color: #000;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	font-size: 40px;
+	color: #fff;
+}
+*/
+#levelBrowserUi{
+	//text-align: center;
+}
+#browser-container {
+	display: flex;
+	flex-direction: column;
+	padding: 16px 0 0 0;
+	margin: 0 auto;
+	width: max-content;
+	max-height: 100%;
+}
+#content-container {
+	margin: 16px 0;
+	overflow-y: auto;
+}
+#load-more-btn {
+	width: 100%;
+	padding: 16px 0;
+	margin: 0px;
+	text-align: center;
+}
+#sort-by-container, #search-container, #search-input, #sort-by-select, option {
+	color: #fff;
+	background-color: #111;
+	height: 32px;
+}
+#sort-by-container {
+	float: right;
+}		
+#search-container {
+	float: left;
+}
+#search-btn {
+	height: 100%;
+	vertical-align: bottom;
+	cursor: pointer;
+}
+#search-input {
+	background-color: #000;
+}
+#levelBrowser {
+	color: #fff;
+	border-collapse: collapse;
+	border: none;
+	text-align: center;
+	white-space: nowrap;
+}
+tbody:hover {
+	cursor: pointer;
+}
+tr {
+	background-color: #048;
+}
+tr:hover {
+	background-color: #06b;
+}
+td, th {
+	padding: 16px;
+	font-size: 24px;
+}
+th {
+	background-color: #000;
+	position: sticky;
+	top: 0;
+}
+.completed-level {
+	background-color: #840;
+}
+.completed-level:hover {
+	background-color: #b60;
+}
+#level-type-container {
+	max-width: 1000px;
+	margin: 32px auto 0 auto;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	flex-wrap: wrap;
+}
+.level-type-btns {
+	background-color: #840;
+	border-radius: 4px;
+	margin: 32px;
+	width: 128px;
+	height: 128px;
+	cursor: pointer;
+}
+.level-type-btns:hover {
+	background-color: #b60;
+}
+#points-widget {
+	margin: 0 auto;
+	text-align: center;
+}
+#loadingDiv {
+	background-color:#fff;
+	display: block;
+	/*
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	*/
+}
+#play-btn {
+	background-color: #048;
+	font-size: 24px;
+	padding: 8px;
+}
+#play-btn:hover {
+	background-color: #06b;
+}
+#save-ui {
+	max-width: 480px;
+}
+/*
+#strob {
+	width: 50%;
+	max-width: 256px;
+	animation: 1s infinite alternate blink;
+}
+*/
+#level-info {
+	display: none;
+	color: #fff;
+	font-size: 32px;
+	position: absolute;
+	bottom: 16px;
+	right: 16px;
+}
+#registerBtn {
+	margin: 8px 0;
+}
+
+@keyframes blink {
+	from {
+		fill: rgba(255, 255, 255, 1.0);
+	}
+	to {
+		fill: rgba(0, 0, 0, 0.0);
+	}
+}
+
+@media (max-width: 480px){
+	.modal {
+		padding: 16px;
+	}
+	.level-type-btns {
+		margin: 16px;
+		width: 80px;
+		height: 80px;
+	}
+	td, th {
+		padding: 4px;
+		font-size: 16px;
+		white-space: normal;
+	}
+}
