@@ -709,7 +709,12 @@ const createCustomScene = {
 			def.userFloats.push(...texs.nWheel);
 		}
 		if(def.group == FIXED_GROUP){
-			def.userFloats.push(...texs.fixedWheel);
+			def.userFloats[1] = 0.5;
+			def.userFloats[3] = 0.75;
+			if(!def.motorVelocity){
+				def.userFloats[3] = 1.0;
+				def.userFloats[4] = 1.0;
+			}
 		} else if(def.group == NON_COPLANAR_GROUP) {
 			def.userFloats[1] = 0.25;
 			def.userFloats[3] = 0.5;

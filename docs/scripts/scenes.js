@@ -138,9 +138,8 @@ const routes = {
 			const len = items.length;
 			let html = "";
 			for(let i = 0; i != len; ++i){
-				let className = items[i].review ? "completed-level" : "";
 				html += this.template
-					.replace("{{c}}", className)
+					.replace("{{c}}", (items[i].review || localStorage.getItem(items[i].id)) ?  "completed-level" : "")
 					.replace("{{p}}", items[i].path)
 					.replace("{{n}}", items[i].name)
 					.replace("{{a}}", items[i].author)

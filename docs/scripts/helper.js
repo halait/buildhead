@@ -6,7 +6,7 @@
 var assemblyField = false;
 var goalField = false;
 // constants
-const MAX_SNAP_DIST = 0.025;
+const MAX_SNAP_DIST = 0.04;
 
 const DEFAULT_ROD_WIDTH = 0.04;
 const DEFAULT_ROD_DENSITY = 20.0;
@@ -655,6 +655,8 @@ const levelManager = {
 		if(user && !level.review){
 			level.review = {rating: 0};
 			batch.set(db.doc("users/" + user.uid + "/reviews/" + level.id), level.review);
+		} else {
+			localStorage.setItem(level.id, "opened");
 		}
 		batch.commit()
 			.then(() => {
