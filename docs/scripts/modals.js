@@ -529,6 +529,42 @@ const tutorialScene = {
 				tutorialScene.start();
 			}
 		},
+		
+
+
+		{
+			target: routes["/play"].toolbar.querySelector(".removeBtn"),
+			type: "mousedown",
+			callback() {
+				tutorialScene.start();
+			}
+		},
+
+		{
+			target: canvas,
+			type: "mouseup",
+			callback() {
+				if(gameObjects.length == 7){
+					tutorialScene.start();
+				}
+			}
+		},
+		{
+			target: routes["/play"].toolbar.querySelector(".moveBtn"),
+			type: "mousedown",
+			callback() {
+				tutorialScene.start();
+			}
+		},
+		{
+			target: canvas,
+			type: "mouseup",
+			callback() {
+				if(pw.getPosition(targets[0].ref)[1] < -0.229612818){
+					tutorialScene.start();
+				}
+			}
+		},
 		{
 			target: routes["/play"].toolbar.querySelector(".cwWheelCreatorBtn"),
 			type: "mousedown",

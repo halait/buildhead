@@ -383,8 +383,8 @@ const moveEventHandler = {
 		if(sandboxMode || pw.isPointInside(assemblyField.ref, canvasEventManager.mx, canvasEventManager.my)){
 			this.gameObjectsMoving = getHandlesNear(canvasEventManager.mx, canvasEventManager.my);
 			if(this.gameObjectsMoving.length > 0){
-				this.objsOriginX = this.gameObjectsMoving[0].x;
-				this.objsOriginY = this.gameObjectsMoving[0].y;
+				this.objsOriginX = canvasEventManager.mx;
+				this.objsOriginY = canvasEventManager.my;
 				for(const j of this.gameObjectsMoving){
 					let form = pw.getForm(j.gameObject.ref);
 					if(form == pw.CIRCLE_FORM){
