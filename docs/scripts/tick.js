@@ -568,12 +568,12 @@ pw.render = function() {
 			this.positions[p++] = tempPolygon[v + 1][0];
 			this.positions[p++] = tempPolygon[v + 1][1];
 
-			this.texCoords[c++] = WHITE_TC[0];
-			this.texCoords[c++] = WHITE_TC[1];
-			this.texCoords[c++] = WHITE_TC[0];
-			this.texCoords[c++] = WHITE_TC[1];
-			this.texCoords[c++] = WHITE_TC[0];
-			this.texCoords[c++] = WHITE_TC[1];
+			this.texCoords[c++] = texs.white[0];
+			this.texCoords[c++] = texs.white[1];
+			this.texCoords[c++] = texs.white[0];
+			this.texCoords[c++] = texs.white[1];
+			this.texCoords[c++] = texs.white[0];
+			this.texCoords[c++] = texs.white[1];
 		}
 	}
 
@@ -586,12 +586,12 @@ pw.render = function() {
 			this.positions[p++] = d[0];
 			this.positions[p++] = d[1]+ 0.02;
 
-			this.texCoords[c++] = ORANGE_TC[0];
-			this.texCoords[c++] = ORANGE_TC[1];
-			this.texCoords[c++] = ORANGE_TC[0];
-			this.texCoords[c++] = ORANGE_TC[1];
-			this.texCoords[c++] = ORANGE_TC[0];
-			this.texCoords[c++] = ORANGE_TC[1];
+			this.texCoords[c++] = texs.orange[0];
+			this.texCoords[c++] = texs.orange[1];
+			this.texCoords[c++] = texs.orange[0];
+			this.texCoords[c++] = texs.orange[1];
+			this.texCoords[c++] = texs.orange[0];
+			this.texCoords[c++] = texs.orange[1];
 		}
 		debugPoints.splice(0);
 	}

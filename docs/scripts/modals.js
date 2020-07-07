@@ -529,9 +529,6 @@ const tutorialScene = {
 				tutorialScene.start();
 			}
 		},
-		
-
-
 		{
 			target: routes["/play"].toolbar.querySelector(".removeBtn"),
 			type: "mousedown",
@@ -771,7 +768,6 @@ const createCustomScene = {
 		};
 		this.planeUi.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 
-
 		formElement = this.circleUi.querySelector(".customProperties");
 		this.circleForm = this.createForm(formElement);
 		this.circleForm.radius = formElement.querySelector("#radius");
@@ -786,9 +782,10 @@ const createCustomScene = {
 	}
 }
 createCustomScene.init();
-/*
+
 const createPolygonScene = {
 	vertices: null,
+	/*
 	eventHandler: {
 		cv: 0,
 		handleActivePress(){
@@ -812,58 +809,58 @@ const createPolygonScene = {
 			
 		},
 	},
+	*/
 	activeBtn: false,
 	toolbar: document.getElementById("createPolygonToolbar"),
 	ui: document.getElementById("createPolygonPopup"),
+	polygonForm: null,
 
 	start(){
 		this.toolbar.style.display = "flex";
-		this.ui.style.display = "block";
+		//this.ui.style.display = "block";
 		//pw.render();
 	},
 	suspend(){
 		this.toolbar.style.display = "none";
 		this.ui.style.display = "none";
-		tempPolygon.splice();
 	},
 
 	init(){
-		let formElement = createCustomScene.customPropertiesForm.cloneNode(true);
-		let polygonForm = createCustomScene.createForm(formElement);
-		let polygonDef = null;
+		let formElement = this.ui.querySelector(".customProperties");
+		this.polygonForm = createCustomScene.createForm(formElement);
 		createCustomScene.addFormEvents(formElement);
 		formElement.onsubmit = (e) => {
 			e.preventDefault();
-			polygonDef = createCustomScene.setCustomProperties(polygonForm);
+			let polygonDef = createCustomScene.setCustomProperties(this.polygonForm);
 			polygonDef.form = pw.POLYGON_FORM;
 			polygonDef.vertices = tempPolygon;
 			if(polygonDef.group == FIXED_GROUP){
-				polygonDef.userFloats = polygonDef.userFloats.concat(GREEN_TC);
+				polygonDef.userFloats.push(...texs.green);
 			} else if(polygonDef.group == COPLANAR_GROUP) {
 				if(polygonDef.target){
-					polygonDef.userFloats = polygonDef.userFloats.concat(DARK_ORANGE_TC);
+					polygonDef.userFloats.push(...texs.darkOrange);
 				} else {
-					polygonDef.userFloats = polygonDef.userFloats.concat(GRAY_TC);
+					polygonDef.userFloats.push(...texs.gray);
 				}
 			} else if(polygonDef.group == NON_COPLANAR_GROUP) {
-				polygonDef.userFloats = polygonDef.userFloats.concat(AQUA_TC);
+				polygonDef.userFloats.push(...texs.aqua);
 			} else {
 				console.error("Unhandled texture");
 			}
-			this.ui.style.display = "none";
-			return false;
+			create(polygonDef);
+			tempPolygon.splice(0);
+			canvasEventManager.setHandler();
+			pw.render();
+			sceneManager.popModal();
 		};
-		this.ui.appendChild(formElement);
-
-		let sceneCloseBtn = closeBtn.cloneNode(true);
-		sceneCloseBtn.addEventListener("mousedown", () => {sceneManager.unfloat();});
-		this.ui.prepend(sceneCloseBtn);
 
 		document.getElementById("polygonDoneBtn").addEventListener("mousedown", () => {
+			this.ui.style.display = "block";
+			/*
 			new Polygon(polygonDef);
 			sceneManager.pop();
-
-		/*
+			*/
+			/*
 			new Polygon({
 				form: pw.POLYGON_FORM,
 				type: pw.MOVABLE_TYPE,
@@ -873,15 +870,10 @@ const createPolygonScene = {
 				userFloats: [NON_JOINABLE, ...GREEN_TC],
 			});
 			sceneManager.pop();
-			*//*
+			*/
 		});
-		addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
-		/*
-		this.ui.querySelector("#customPolygonForm").onsubmit = (e) => {
-			e.preventDefault();
-		};
-		*//*
+
+		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
 	}
 }
 createPolygonScene.init();
-*/

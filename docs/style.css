@@ -30,11 +30,11 @@ input[type=radio] {
 	margin-left: 32px;
 }
 .toolbar {
+	position: absolute;
 	top: 0px;
 	left: 0px;
 	height: var(--toolbar-height);
 	width: 100vw;
-	box-sizing: border-box;
 	background-color: #222;
 	display: none;
 	justify-content: space-between;
@@ -164,11 +164,7 @@ input[type=radio] {
 	display: block;
 	width: 64%;
 	max-width: 800px;
-	background-color: #000;
 	border-radius: 4px;
-}
-#logoText:hover {
-	fill: #f80;
 }
 /* remove */
 #level-input {

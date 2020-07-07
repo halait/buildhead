@@ -487,7 +487,9 @@ const pw = {
 			this.unsolved = false;
 			for(let ptr = 0, len = this.cTotal; ptr < len; ++ptr){
 				let si = this.C_PTRS[ptr];
-				if(!M[C_ACTIVE + si]) continue;
+
+				//if(!M[C_ACTIVE + si]) continue;
+
 				let asi = M[C_PO_PTR_A + si];
 				let bsi = M[C_PO_PTR_B + si];
 				if(M[C_TYPE + si] == this.COLLISION_TYPE){
@@ -711,7 +713,7 @@ const pw = {
 		this.collisionData[0] = nx;
 		this.collisionData[1] = ny;
 		this.collisionData[2] = ax;
-		this.	collisionData[3] = ay;
+		this.collisionData[3] = ay;
 		this.collisionData[4] = bx;
 		this.collisionData[5] = by;
 		this.collisionData[6] = dist - this.M[O_RADIUS + asi] - this.M[O_RADIUS + bsi];
@@ -750,12 +752,19 @@ const pw = {
 				ny /= dist;
 				cx -= nx * M[O_RADIUS + cPtr];
 				cy -= ny * M[O_RADIUS + cPtr];
-				//debugPoints.push([px, py]);
-				//debugPoints.push([cx, cy]);
-				return [nx, ny, cx, cy, px, py, dist - M[O_RADIUS + cPtr] - this.POLYGON_SKIN];
+				debugPoints.push([px, py]);
+				debugPoints.push([cx, cy]);
+				this.collisionData[0] = nx;
+				this.collisionData[1] = ny;
+				this.collisionData[2] = cx;
+				this.collisionData[3] = cy;
+				this.collisionData[4] = px;
+				this.collisionData[5] = py;
+				this.collisionData[6] = dist - M[O_RADIUS + cPtr] - this.POLYGON_SKIN;
+				return;
 			}
 		}
-		return false;
+		this.collisionData[6] = Infinity;
 	},
 
 	computeLineIntersect(asx, asy, adx, ady, bsx, bsy, bdx, bdy){
@@ -840,9 +849,16 @@ const pw = {
 				debugPoints.push([sx, sy]);
 				debugPoints.push([px, py]);
 
-				results.push(nx / dist, ny / dist, sx, sy, px, py, -dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN);
+				this.collisionData[0] = nx / dist;
+				this.collisionData[1] = ny / dist;
+				this.collisionData[2] = sx;
+				this.collisionData[3] = sy;
+				this.collisionData[4] = px;
+				this.collisionData[5] = py;
+				//this.collisionData[6] = -dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN;
+				this.collisionData[6] = dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN;
 			} else {
-				results.push(0, 0, 0, 0, 0, 0, 99);
+				this.collisionData[6] = Infinity;
 			}
 			if(vp1){
 				let px = M[V_WX + vp1];
@@ -867,10 +883,17 @@ const pw = {
 
 				debugPoints.push([sx, sy]);
 				debugPoints.push([px, py]);
+				this.collisionData[7] = nx / dist;
+				this.collisionData[8] = ny / dist;
+				this.collisionData[9] = sx;
+				this.collisionData[10] = sy;
+				this.collisionData[11] = px;
+				this.collisionData[12] = py;
+				//this.collisionData[13] = -dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN;
+				this.collisionData[13] = dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN;
 
-				results.push(nx / dist, ny / dist, sx, sy, px, py, -dist - M[O_HALF_WIDTH + aPtr] - this.POLYGON_SKIN);
 			} else {
-				results.push(0, 0, 0, 0, 0, 0, 99);
+				this.collisionData[13] = Infinity;
 			}
 			return results;
 			

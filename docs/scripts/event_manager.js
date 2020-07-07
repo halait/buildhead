@@ -62,7 +62,7 @@ const canvasEventManager = {
 	currentHandler: null,
 	currentBtn: null,
 
-	setHandler(handler, btn){
+	setHandler(handler = null, btn = null){
 		if(this.currentBtn) {
 			this.currentBtn.classList.remove("activeBtn");
 			this.handlePointerEnd();
@@ -165,7 +165,7 @@ const canvasEventManager = {
 canvasEventManager.init();
 var tempWheel = null;
 var tempRod = null;
-
+/*
 function addBtn(node, parentNode, eventHandler){
 	if(typeof eventHandler === "object" && eventHandler.handleEvent === undefined){
 		let handler = eventHandler;
@@ -174,7 +174,7 @@ function addBtn(node, parentNode, eventHandler){
 	node.addEventListener("mousedown", eventHandler);
 	parentNode.appendChild(node);
 }
-
+*/
 
 const ccwWheelCreatorEventHandler = {
 	handleActivePress(){
@@ -559,9 +559,28 @@ const goalFieldCreatorEventHandler = {
 	},
 };
 
-
-
 const polygonBtnEventHandler = {
+	handleActivePress(){
+		let len = tempPolygon.length;
+		for(let v = 0, len = tempPolygon.length; v < len; ++v){
+			if(Math.abs(tempPolygon[v][0] - canvasEventManager.mx) < MAX_SNAP_DIST && Math.abs(tempPolygon[v][1] - canvasEventManager.my) < MAX_SNAP_DIST){
+				this.cv = v;
+				return;
+			}			
+		}
+		tempPolygon.push([canvasEventManager.mx, canvasEventManager.my]);
+		this.cv = len;
+		pw.render();
+	},
+	handleActiveDrag(){
+		tempPolygon[this.cv][0] = canvasEventManager.mx;
+		tempPolygon[this.cv][1] = canvasEventManager.my;
+		pw.render();
+	},
+	handleActiveMouseup(){
+		
+	},
+	/*
 	handleEvent(e){
 		setActiveBtn(e.currentTarget, this);
 		sceneManager.float(createCustomScene, pw.POLYGON_FORM);
@@ -584,6 +603,7 @@ const polygonBtnEventHandler = {
 	},
 	handleActiveMouseup(){
 	},
+	*/
 };
 
 

@@ -182,25 +182,25 @@
 		<div id="simulationSceneBtnsDiv" class="toolbar">
 			<svg class="stopSimulationBtn toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
 				xmlns="http://www.w3.org/2000/svg">
-			<title>Stop Simulation</title>
-			<polygon points="25 25, 75 25, 75 75, 25 75" fill="#fff"></polygon>
+				<title>Stop Simulation</title>
+				<polygon points="25 25, 75 25, 75 75, 25 75" fill="#fff"></polygon>
 			</svg>
 		</div>
+
+		<div id="createPolygonToolbar" class="toolbar">
+      <svg id="polygonDoneBtn" class="toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
+				xmlns="http://www.w3.org/2000/svg">
+				<title>Done</title>
+				<polyline points="10 50, 30 70, 90 10" fill="none" stroke-width="8" stroke="#4f4"></polyline>
+      </svg>
+    </div>
 		
 		<canvas id="canvas"></canvas>
 		<div id="level-info">Name - Author</div>
 
-    <div id="createPolygonToolbar" class="toolbar">
-      <svg id="polygonDoneBtn" class="toolbarBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100"
-        xmlns="http://www.w3.org/2000/svg">
-        <text dominant-baseline="middle" text-anchor="middle" x="50%" y="50%" font-family="sans-serif"
-          font-size="40" fill="white">Done</text>
-      </svg>
-    </div>
-
     <div id="menuUI" class="overlay">
       <svg id="logo" preserveAspectRatio="xMinYMin meet" viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg">
-        <text id="logoText" text-anchor="middle" x="60" y="17" font-family="sans-serif" font-size="20" fill="#fff">BUILDHEAD</text>
+        <text text-anchor="middle" x="60" y="17" font-family="sans-serif" font-size="20" fill="#fff">BUILDHEAD</text>
 			</svg>
 			<div id="accountBtn" class="btn center">Login</div>
 			<div id="level-type-container">
@@ -345,7 +345,9 @@
     
     <div id="createPolygonPopup" class="modal">
 			_closeBtn
-      <p class="modalHeader">Custom Polygon Properties</p>
+			<p class="modalHeader">Custom Polygon Properties</p>
+			_customizeFormTopChunk
+			_customizeFormBottomChunk
     </div>
     
     <div id="successSceneDiv" class="modal">

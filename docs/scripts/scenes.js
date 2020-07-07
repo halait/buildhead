@@ -3,6 +3,9 @@ const routes = {
 	"/": {
 		start(){
 			this.ui.style.display = "block";
+			if(!user && !localStorage.length) {
+				sceneManager.pushModal(messageScene, "Welcome", `If your new to the game, start at the tutorial inside "Original Levels".`);
+			}
 			/*
 			if(tutorialStep != -1){
 				tutorialScene.removeCurrentEventListener();
@@ -261,9 +264,10 @@ const routes = {
 				canvasEventManager.setHandler(gRodCreatorEventHandler, this);
 				sceneManager.pushModal(createCustomScene);
 			});
-			/*this.toolbar.querySelector(".polygonBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".polygonBtn").addEventListener("pointerdown", function(){
+				canvasEventManager.setHandler(polygonBtnEventHandler, this);
 				sceneManager.pushModal(createPolygonScene);
-			});*/
+			});
 			this.toolbar.querySelector(".moveBtn").addEventListener("pointerdown", function(){
 				canvasEventManager.setHandler(moveEventHandler, this);
 			});
