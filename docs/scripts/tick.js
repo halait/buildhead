@@ -49,14 +49,24 @@ const simulationManager = {
 	simulate(now) {
 		if(simulationManager.isSimulating) {
 			requestAnimationFrame(simulationManager.simulate);
+			if(!simulationManager.before) simulationManager.before = now - simulationManager.updateDt;
 			let dt = now - simulationManager.before;
-			if(!simulationManager.before) dt = simulationManager.updateDt;
+
+			// new
+			if(dt + 1 < simulationManager.updateDt){
+				console.log("skipped dt = " + dt);
+				return;
+			}
+
 			simulationManager.before = now;
 			let maxUpdate = 4;
+
 			do {
 				pw.update();
-			} while(--maxUpdate && Math.abs(dt -= simulationManager.updateDt) > 1 && dt > -1);
+				dt -= simulationManager.updateDt;
+			} while(--maxUpdate && dt > 1);
 			pw.render();
+
 			simulationManager.before = now;
 			if(simulationManager.successPending){
 				let success = true;

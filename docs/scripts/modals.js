@@ -359,7 +359,7 @@ const registerScene = {
 				await auth.createUserWithEmailAndPassword(emailInput.value, password);
 				await auth.currentUser.updateProfile({displayName: desiredUsername});
 				await db.collection("users").doc(user.uid).set({username: user.displayName});
-				sceneManager.unfloat();
+				sceneManager.popModal();
 			} catch(err) {
 				console.error(err);
 				const code = err.code;
