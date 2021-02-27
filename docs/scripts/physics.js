@@ -217,7 +217,7 @@ const pw = {
 		// integrate external forces (gravity and physics object resistance)
 		for(let i = 0, len = this.poTotal; i < len; ++i){
 			let ptr = this.PO_PTRS[i];
-			if(M[O_TYPE + ptr] == this.FIXED_TYPE) continue;
+			if(M[O_TYPE + ptr] === this.FIXED_TYPE) continue;
 			M[O_VY + ptr] += this.G;
 			M[O_VX + ptr] *= M[O_VM + ptr];
 			M[O_VY + ptr] *= M[O_VM + ptr];
@@ -235,8 +235,8 @@ const pw = {
 				this.getCollisionData(si, asi, bsi);
 				// temp
 				let cdLen = 7;
-				//if(collisionData.length == 14) cdLen = 14;
-				if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) cdLen = 14;
+				//if(collisionData.length === 14) cdLen = 14;
+				if(M[C_FORM + si] === this.SURFACES_FORM || M[C_FORM + si] === this.SURFACE_POLYGON_FORM || M[C_FORM + si] === this.POLYGONS_FORM) cdLen = 14;
 				// never updated to accomadate C_JT
 				for(let i = si, c = 0; c < cdLen; i += 16, c += 7){
 																																// tune
@@ -284,12 +284,12 @@ const pw = {
 						//M[C_JT + i] *= 0.8;
 						let jx = M[C_JN + i] * M[C_NX + i] - M[C_JT + i] * M[C_NY + i];
 						let jy = M[C_JN + i] * M[C_NY + i] + M[C_JT + i] * M[C_NX + i];
-						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
+						if(M[O_TYPE + asi] === this.MOVABLE_TYPE){
 							M[O_VX + asi] -= jx * M[O_M_INV + asi];
 							M[O_VY + asi] -= jy * M[O_M_INV + asi];
 							M[O_W + asi] -= (M[C_JN + i] * M[C_RNA + i] + M[C_JT + i] * M[C_RTA + i]) * M[O_I_INV + asi];
 						}
-						if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
+						if(M[O_TYPE + bsi] === this.MOVABLE_TYPE){
 							M[O_VX + bsi] += jx * M[O_M_INV + bsi];
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += (M[C_JN + i] * M[C_RNB + i] + M[C_JT + i] * M[C_RTB + i]) * M[O_I_INV + bsi];
@@ -314,12 +314,12 @@ const pw = {
 					//M[C_JX + si] *= 0.8;
 					//M[C_JY + si] *= 0.8;
 					//M[C_SUM_T + si] *= 0.8;
-					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
+					if(M[O_TYPE + asi] === this.MOVABLE_TYPE){
 						M[O_VX + asi] -= M[C_JX + si] * M[O_M_INV + asi];
 						M[O_VY + asi] -= M[C_JY + si] * M[O_M_INV + asi];
 						M[O_W + asi] -= ((M[C_RAX + si] * M[C_JY + si] - M[C_RAY + si] * M[C_JX + si]) + M[C_SUM_T + si]) * M[O_I_INV + asi];
 					}
-					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
+					if(M[O_TYPE + bsi] === this.MOVABLE_TYPE){
 						M[O_VX + bsi] += M[C_JX + si] * M[O_M_INV + bsi];
 						M[O_VY + bsi] += M[C_JY + si] * M[O_M_INV + bsi];
 						M[O_W + bsi] += ((M[C_RBX + si] * M[C_JY + si] - M[C_RBY + si] * M[C_JX + si]) + M[C_SUM_T + si]) * M[O_I_INV + bsi];
@@ -345,10 +345,10 @@ const pw = {
 				if(M[C_TYPE + si] === this.COLLISION_TYPE){
 					// TODO implement block solver from GDC Erin Catto video
 					let len = 1;
-					if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) len = 2;
+					if(M[C_FORM + si] === this.SURFACES_FORM || M[C_FORM + si] === this.SURFACE_POLYGON_FORM || M[C_FORM + si] === this.POLYGONS_FORM) len = 2;
 					// TODO update i increment?
 					for(let i = si, c = 0; c < len; i += 16, c += 1){
-						if(M[C_ACTIVE + i] == 0) continue;
+						if(M[C_ACTIVE + i] === 0) continue;
 						// relative velocity at collsion vertices
 						let vxRel = M[O_VX + asi] + M[O_W + asi] * -M[C_RAY + i] - M[O_VX + bsi] - M[O_W + bsi] * -M[C_RBY + i];
 						let vyRel = M[O_VY + asi] + M[O_W + asi] * M[C_RAX + i] - M[O_VY + bsi] - M[O_W + bsi] * M[C_RBX + i];
@@ -369,12 +369,12 @@ const pw = {
 						// integrate tangential impusle
 						let jx = jt * -M[C_NY + i];
 						let jy = jt * M[C_NX + i];
-						if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
+						if(M[O_TYPE + asi] === this.MOVABLE_TYPE){
 							M[O_VX + asi] -= jx * M[O_M_INV + asi];
 							M[O_VY + asi] -= jy * M[O_M_INV + asi];
 							M[O_W + asi] -= jt * M[C_RTA + i] * M[O_I_INV + asi];
 						}
-						if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
+						if(M[O_TYPE + bsi] === this.MOVABLE_TYPE){
 							M[O_VX + bsi] += jx * M[O_M_INV + bsi];
 							M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_W + bsi] += jt * M[C_RTB + i] * M[O_I_INV + bsi];
@@ -397,12 +397,12 @@ const pw = {
 							// integrate impusle
 							let jx = jn * M[C_NX + i];
 							let jy = jn * M[C_NY + i];
-							if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
+							if(M[O_TYPE + asi] === this.MOVABLE_TYPE){
 								M[O_VX + asi] -= jx * M[O_M_INV + asi];
 								M[O_VY + asi] -= jy * M[O_M_INV + asi];
 								M[O_W + asi] -= jn * M[C_RNA + i] * M[O_I_INV + asi];
 							}
-							if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
+							if(M[O_TYPE + bsi] === this.MOVABLE_TYPE){
 								M[O_VX + bsi] += jx * M[O_M_INV + bsi];
 								M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 								M[O_W + bsi] += jn * M[C_RNB + i] * M[O_I_INV + bsi];
@@ -411,7 +411,7 @@ const pw = {
 					}
 
 					// revolute joint solver
-				} else if(M[C_TYPE + si] == this.JOINT_TYPE){
+				} else if(M[C_TYPE + si] === this.JOINT_TYPE){
 					if(M[C_IS_MOTOR + si]){
 						// solve motor sub-constraint
 						// relative angular velocity minus desired velocity
@@ -455,12 +455,12 @@ const pw = {
 					M[C_JX + si] += jx;
 					M[C_JY + si] += jy;
 
-					if(M[O_TYPE + asi] == this.MOVABLE_TYPE){
+					if(M[O_TYPE + asi] === this.MOVABLE_TYPE){
 						M[O_VX + asi] -= jx * M[O_M_INV + asi];
 						M[O_VY + asi] -= jy * M[O_M_INV + asi];
 						M[O_W + asi] -= j * rna * M[O_I_INV + asi];
 					}
-					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE){
+					if(M[O_TYPE + bsi] === this.MOVABLE_TYPE){
 						M[O_VX + bsi] += jx * M[O_M_INV + bsi];
 						M[O_VY + bsi] += jy * M[O_M_INV + bsi];
 						M[O_W + bsi] += j * rnb * M[O_I_INV + bsi];
@@ -472,7 +472,7 @@ const pw = {
 
 		// integrate velocities
 		for(let i = 0, ptr = this.PO_PTRS[i], len = this.poTotal; i < len; ++i, ptr = this.PO_PTRS[i]){
-			if(M[O_TYPE + ptr] == this.FIXED_TYPE) continue;
+			if(M[O_TYPE + ptr] === this.FIXED_TYPE) continue;
 			M[O_TX + ptr] += M[O_VX + ptr];
 			M[O_TY + ptr] += M[O_VY + ptr];
 			M[O_O + ptr] += M[O_W + ptr];
@@ -492,9 +492,9 @@ const pw = {
 
 				let asi = M[C_PO_PTR_A + si];
 				let bsi = M[C_PO_PTR_B + si];
-				if(M[C_TYPE + si] == this.COLLISION_TYPE){
+				if(M[C_TYPE + si] === this.COLLISION_TYPE){
 					let cdLen = 7;
-					if(M[C_FORM + si] == this.SURFACES_FORM || M[C_FORM + si] == this.SURFACE_POLYGON_FORM || M[C_FORM + si] == this.POLYGONS_FORM) cdLen = 14;
+					if(M[C_FORM + si] === this.SURFACES_FORM || M[C_FORM + si] === this.SURFACE_POLYGON_FORM || M[C_FORM + si] === this.POLYGONS_FORM) cdLen = 14;
 					this.getCollisionData(si, asi, bsi);
 					for(let i = si, c = 0; c < cdLen; i += 16, c += 7){
 						if(this.collisionData[6 + c] >= 0) {
@@ -507,7 +507,7 @@ const pw = {
 						let j = this.collisionData[6 + c] * 0.5 / (M[O_M_INV + asi] + M[O_M_INV + bsi] + rna * rna * M[O_I_INV + asi] + rnb * rnb * M[O_I_INV + bsi]);
 						let jx = j * this.collisionData[0 + c];
 						let jy = j * this.collisionData[1 + c];
-						if(M[O_TYPE + asi] == this.MOVABLE_TYPE) {
+						if(M[O_TYPE + asi] === this.MOVABLE_TYPE) {
 							M[O_TX + asi] -= jx * M[O_M_INV + asi];
 							M[O_TY + asi] -= jy * M[O_M_INV + asi];
 							M[O_O + asi] -= j * rna * M[O_I_INV + asi];
@@ -515,7 +515,7 @@ const pw = {
 							M[O_SIN + asi] = Math.sin(M[O_O + asi]);
 							this.updateWorldPositions(asi);
 						}
-						if(M[O_TYPE + bsi] == this.MOVABLE_TYPE) {
+						if(M[O_TYPE + bsi] === this.MOVABLE_TYPE) {
 							M[O_TX + bsi] += jx * M[O_M_INV + bsi];
 							M[O_TY + bsi] += jy * M[O_M_INV + bsi];
 							M[O_O + bsi] += j * rnb * M[O_I_INV + bsi];
@@ -525,7 +525,7 @@ const pw = {
 						}
 					}
 
-				} else if(M[C_TYPE + si] == this.JOINT_TYPE){
+				} else if(M[C_TYPE + si] === this.JOINT_TYPE){
 					M[C_RAX + si] = M[C_LAX + si] * M[O_COS + asi] - M[C_LAY + si] * M[O_SIN + asi];
 					M[C_RAY + si] = M[C_LAY + si] * M[O_COS + asi] + M[C_LAX + si] * M[O_SIN + asi];
 					M[C_RBX + si] = M[C_LBX + si] * M[O_COS + bsi] - M[C_LBY + si] * M[O_SIN + bsi];
@@ -549,7 +549,7 @@ const pw = {
 					let jx = j * nx;
 					let jy = j * ny;
 
-					if(M[O_TYPE + asi] == this.MOVABLE_TYPE) {
+					if(M[O_TYPE + asi] === this.MOVABLE_TYPE) {
 						M[O_TX + asi] -= jx * M[O_M_INV + asi];
 						M[O_TY + asi] -= jy * M[O_M_INV + asi];
 						M[O_O + asi] -= j * rna * M[O_I_INV + asi];
@@ -557,7 +557,7 @@ const pw = {
 						M[O_SIN + asi] = Math.sin(M[O_O + asi]);
 						this.updateWorldPositions(asi);
 					}
-					if(M[O_TYPE + bsi] == this.MOVABLE_TYPE) {
+					if(M[O_TYPE + bsi] === this.MOVABLE_TYPE) {
 						M[O_TX + bsi] += jx * M[O_M_INV + bsi];
 						M[O_TY + bsi] += jy * M[O_M_INV + bsi];
 						M[O_O + bsi] += j * rnb * M[O_I_INV + bsi];
@@ -572,8 +572,8 @@ const pw = {
 	},
 
 	updateWorldPositions(ptr){
-		if(this.M[O_TYPE + ptr] == this.FIXED_TYPE) return;
-		if(this.M[O_FORM + ptr] == this.PLANE_FORM) {
+		if(this.M[O_TYPE + ptr] === this.FIXED_TYPE) return;
+		if(this.M[O_FORM + ptr] === this.PLANE_FORM) {
 			this.M[O_W0X + ptr] = (this.M[O_L0X + ptr] * this.M[O_COS + ptr] - this.M[O_L0Y + ptr] * this.M[O_SIN + ptr]) + this.M[O_TX + ptr];
 			this.M[O_W0Y + ptr] = (this.M[O_L0Y + ptr] * this.M[O_COS + ptr] + this.M[O_L0X + ptr] * this.M[O_SIN + ptr]) + this.M[O_TY + ptr];
 			this.M[O_W1X + ptr] = (this.M[O_L1X + ptr] * this.M[O_COS + ptr] - this.M[O_L1Y + ptr] * this.M[O_SIN + ptr]) + this.M[O_TX + ptr];
@@ -584,7 +584,7 @@ const pw = {
 			this.M[O_UY + ptr] = dy * this.M[O_L_INV + ptr];
 
 
-		} else if(this.M[O_FORM + ptr] == this.POLYGON_FORM){
+		} else if(this.M[O_FORM + ptr] === this.POLYGON_FORM){
 			let start = O_NUM_VERTICES + ptr;
 			let pPtr = start + 1;
 			this.M[V_WX + pPtr] = (this.M[V_LX + pPtr] * this.M[O_COS + ptr] - this.M[V_LY + pPtr] * this.M[O_SIN + ptr]) + this.M[O_TX + ptr];
@@ -609,7 +609,7 @@ const pw = {
 		else if(dot > this.M[O_L + bsi]) dot = this.M[O_L + bsi];
 		bx += dot * this.M[O_UX + bsi];
 		by += dot * this.M[O_UY + bsi];
-		if(dot == 0 || dot == this.M[O_L + bsi]){
+		if(dot === 0 || dot === this.M[O_L + bsi]){
 			dot = (bx - ax) * this.M[O_UX + asi] + (by - ay) * this.M[O_UY + asi];
 			if(dot < 0) dot = 0;
 			else if(dot > this.M[O_L + asi]) dot = this.M[O_L + asi];
@@ -641,7 +641,7 @@ const pw = {
 		else if(dot > this.M[O_L + bsi]) dot = this.M[O_L + bsi];
 		bx += dot * this.M[O_UX + bsi];
 		by += dot * this.M[O_UY + bsi];
-		if(dot == 0 || dot == this.M[O_L + bsi]){
+		if(dot === 0 || dot === this.M[O_L + bsi]){
 			dot = (ax - bx) * this.M[O_UX + asi] + (ay - by) * this.M[O_UY + asi];
 			if(dot < 0) dot = 0.0;
 			else if(dot > this.M[O_L + asi]) dot = this.M[O_L + asi];
@@ -733,11 +733,11 @@ const pw = {
 			if(dot > 0.0 && dot < M[V_L + vPtr] && inv * M[V_UY + vPtr] * px - inv * M[V_UX + vPtr] * py > 0) {
 				dot = (cx - M[V_WX + vPtr]) * M[V_UX + vPtr] + (cy - M[V_WY + vPtr]) * M[V_UY + vPtr];
 				if(dot < 0) {
-					if(vPtr == O_NUM_VERTICES + 1 + pPtr) vPtr = len - this.V_SIZE;
+					if(vPtr === O_NUM_VERTICES + 1 + pPtr) vPtr = len - this.V_SIZE;
 					else vPtr -= this.V_SIZE;
 					dot = (cx - M[V_WX + vPtr]) * M[V_UX + vPtr] + (cy - M[V_WY + vPtr]) * M[V_UY + vPtr];
 				} else if(dot > M[V_L + vPtr]){
-					if(vPtr == len - this.V_SIZE) vPtr = O_NUM_VERTICES + 1 + pPtr;
+					if(vPtr === len - this.V_SIZE) vPtr = O_NUM_VERTICES + 1 + pPtr;
 					else vPtr += this.V_SIZE;
 					dot = (cx - M[V_WX + vPtr]) * M[V_UX + vPtr] + (cy - M[V_WY + vPtr]) * M[V_UY + vPtr];
 				}
@@ -774,15 +774,190 @@ const pw = {
 		return [inv * bdy * dx - inv * bdx * dy, inv * ady * dx - inv * adx * dy];
 	},
 
+	// temp, feb 27
+	getClosestPoints(ax, ay, bx, by, aux, auy, bux, buy, aLen, bLen) {
+		let ax0 = ax;
+		let ay0 = ay;
+		let bx0 = bx;
+		let by0 = by;
+		let dot = (ax0 - bx0) * bux + (ay0 - by0) * buy;
+		if(dot < 0) dot = 0;
+		else if(dot > bLen) dot = bLen;
+		bx0 += dot * bux;
+		by0 += dot * buy;
+		if(dot === 0 || dot === bLen){
+			dot = (bx0 - ax0) * aux + (by0 - ay0) * auy;
+			if(dot < 0) dot = 0;
+			else if(dot > aLen) dot = aLen;
+			ax0 += dot * aux;
+			ay0 += dot * auy;
+		}
+		let nx = ax0 - bx0;
+		let ny = ay0 - by0;
+
+		this.collisionData[0] = nx;
+		this.collisionData[1] = ny;
+		this.collisionData[2] = ax0;
+		this.collisionData[3] = ay0;
+		this.collisionData[4] = bx0;
+		this.collisionData[5] = by0;
+		this.collisionData[6] = nx * nx + ny * ny;
+
+		ax0 = ax + aLen * aux;
+		ay0 = ay + aLen * auy;
+		bx0 = bx;
+		by0 = by;
+		dot = (ax0 - bx0) * bux + (ay0 - by0) * buy;
+		if(dot < 0) dot = 0;
+		else if(dot > bLen) dot = bLen;
+		bx0 += dot * bux;
+		by0 += dot * buy;
+		if(dot === 0 || dot === bLen){
+			dot = (ax0 - bx0) * aux + (ay0 - by0) * auy;
+			if(dot < 0) dot = 0.0;
+			else if(dot > aLen) dot = aLen;
+			ax0 -= dot * aux;
+			ay0 -= dot * auy;
+		}
+		nx = ax0 - bx0;
+		ny = ay0 - by0;
+
+		this.collisionData[7] = nx;
+		this.collisionData[8] = ny;
+		this.collisionData[9] = ax0;
+		this.collisionData[10] = ay0;
+		this.collisionData[11] = bx0;
+		this.collisionData[12] = by0;
+		this.collisionData[13] = nx * nx + ny * ny;
+	},
+
 	getCollisionData(ptr, aPtr, bPtr){
 		let M = this.M;
 		let form = M[C_FORM + ptr];
-		if(form == this.POINT_SURFACE_FORM) return this.getCirclePlaneCollisionData(aPtr, bPtr);
-		else if(form == this.POINTS_FORM) return this.getCirclesCollisionData(aPtr, bPtr);
-		else if(form == this.SURFACES_FORM) return this.getPlanesCollisionData(aPtr, bPtr);
-		else if(form == this.POINT_POLYGON_FORM) return this.getCirclePolygonCollisionData(aPtr, bPtr);
+		if(form === this.POINT_SURFACE_FORM) return this.getCirclePlaneCollisionData(aPtr, bPtr);
+		else if(form === this.POINTS_FORM) return this.getCirclesCollisionData(aPtr, bPtr);
+		else if(form === this.SURFACES_FORM) return this.getPlanesCollisionData(aPtr, bPtr);
+		else if(form === this.POINT_POLYGON_FORM) return this.getCirclePolygonCollisionData(aPtr, bPtr);
 
-		else if(form == this.SURFACE_POLYGON_FORM){
+		else if(form === this.SURFACE_POLYGON_FORM){
+			// feb 27 version
+			let sPtr = aPtr;
+			let pPtr = bPtr;
+
+			/*
+			let nx0 = 0;
+			let ny0 = 0;
+			let nx1 = 0;
+			let ny1 = 0;
+			let bx0 = 0;
+			let by0 = 0;
+			let bx1 = 0;
+			let by1 = 0;
+			let px0 = 0;
+			let py0 = 0;
+			let px1 = 0;
+			let py1 = 0;
+			let distSq0 = Infinity;
+			let distSq1 = Infinity;
+			*/
+			let closestPolygonSide = 0;
+			let closestPolygonSideDistSq = Infinity;
+			for(let vPtr = O_NUM_VERTICES + 1 + pPtr, len = vPtr + M[O_NUM_VERTICES + pPtr] * this.V_SIZE; vPtr < len; vPtr += this.V_SIZE){
+
+				this.getClosestPoints(
+					M[O_W0X + sPtr],
+					M[O_W0Y + sPtr],
+					M[V_WX + vPtr],
+					M[V_WY + vPtr],
+					M[O_UX + sPtr],
+					M[O_UY + sPtr],
+					M[V_UX + vPtr],
+					M[V_UY + vPtr],
+					M[O_L + sPtr],
+					M[V_L + vPtr]
+				);
+				
+				let sumDistSq = this.collisionData[6] + this.collisionData[13];
+				if(sumDistSq < closestPolygonSideDistSq) {
+					closestPolygonSide = vPtr;
+					closestPolygonSideDistSq = sumDistSq;
+				}
+
+				/*
+				for(let i = 0; i != 14; i += 7){
+					if(this.collisionData[i + 6] < distSq1) {
+						if(this.collisionData[i + 6] < distSq0) {
+							nx0 = this.collisionData[i + 0];
+							ny0 = this.collisionData[i + 1];
+							bx0 = this.collisionData[i + 2];
+							by0 = this.collisionData[i + 3];
+							px0 = this.collisionData[i + 4];
+							py0 = this.collisionData[i + 5];
+							distSq0 = this.collisionData[i + 6];
+						} else {
+							nx1 = this.collisionData[i + 0];
+							ny1 = this.collisionData[i + 1];
+							bx1 = this.collisionData[i + 2];
+							by1 = this.collisionData[i + 3];
+							px1 = this.collisionData[i + 4];
+							py1 = this.collisionData[i + 5];
+							distSq1 = this.collisionData[i + 6];
+						}
+					}
+				}
+				*/
+			}
+
+			this.getClosestPoints(
+				M[O_W0X + sPtr],
+				M[O_W0Y + sPtr],
+				M[V_WX + closestPolygonSide],
+				M[V_WY + closestPolygonSide],
+				M[O_UX + sPtr],
+				M[O_UY + sPtr],
+				M[V_UX + closestPolygonSide],
+				M[V_UY + closestPolygonSide],
+				M[O_L + sPtr],
+				M[V_L + closestPolygonSide]
+			);
+
+			let ptx = this.collisionData[4] - M[O_TX + pPtr];
+			let pty = this.collisionData[5] - M[O_TY + pPtr];
+
+			if(this.collisionData[0] * ptx + this.collisionData[1] * pty < 0){
+				this.collisionData[0] = -this.collisionData[0];
+				this.collisionData[1] = -this.collisionData[1];
+			}
+
+			let dist = Math.sqrt(this.collisionData[6]);
+
+			this.collisionData[0] /= dist;
+			this.collisionData[1] /= dist;
+			this.collisionData[6] = dist - M[O_HALF_WIDTH + sPtr];
+			
+
+			ptx = this.collisionData[11] - M[O_TX + pPtr];
+			pty = this.collisionData[12] - M[O_TY + pPtr];
+
+			if(this.collisionData[7] * ptx + this.collisionData[8] * pty < 0){
+				this.collisionData[7] = -this.collisionData[7];
+				this.collisionData[8] = -this.collisionData[8];
+			}
+
+			dist = Math.sqrt(this.collisionData[13]);
+
+			this.collisionData[7] /= dist;
+			this.collisionData[8] /= dist;
+			this.collisionData[13] = dist - M[O_HALF_WIDTH + sPtr];
+
+			debugPoints.push([this.collisionData[2], this.collisionData[3]]);
+			debugPoints.push([this.collisionData[4], this.collisionData[5]]);
+
+			debugPoints.push([this.collisionData[9], this.collisionData[10]]);
+			debugPoints.push([this.collisionData[11], this.collisionData[12]]);
+
+
+			/*
 			let vp0 = 0;
 			let vp1 = 0;
 			let nx0 = M[O_W0X + aPtr] - M[O_TX + bPtr];
@@ -804,7 +979,7 @@ const pw = {
 
 						if(dots[0] > 1) vp0 = v;
 						else vp0 = false;
-						if(vp1 !== 0) break;
+						if(vp1 !=== 0) break;
 					}
 				}
 				if(vp1 === 0){
@@ -820,7 +995,7 @@ const pw = {
 
 						if(dots[0] > 1) vp1 = v;
 						else vp1 = false;
-						if(vp0 !== 0) break;
+						if(vp0 !=== 0) break;
 					}
 				}
 			}
@@ -835,7 +1010,7 @@ const pw = {
 				else if(dot > M[V_L + vp0]) dot = M[V_L + vp0];
 				px += dot * M[V_UX + vp0];
 				py += dot * M[V_UY + vp0];
-				if(!dot || dot == M[V_L + vp0]) {
+				if(!dot || dot === M[V_L + vp0]) {
 					dot = (px - sx) * M[O_UX + aPtr] + (py - sy) * M[O_UY + aPtr];
 					if(dot < 0) dot = 0;
 					else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
@@ -870,7 +1045,7 @@ const pw = {
 				else if(dot > M[V_L + vp1]) dot = M[V_L + vp1];
 				px += dot * M[V_UX + vp1];
 				py += dot * M[V_UY + vp1];
-				if(!dot || dot == M[V_L + vp1]) {
+				if(!dot || dot === M[V_L + vp1]) {
 					dot = (sx - px) * M[O_UX + aPtr] + (sy - py) * M[O_UY + aPtr];
 					if(dot < 0) dot = 0;
 					else if(dot > M[O_L + aPtr]) dot = M[O_L + aPtr];
@@ -896,7 +1071,7 @@ const pw = {
 				this.collisionData[13] = Infinity;
 			}
 			return results;
-			
+		*/
 
 
 		/*
@@ -1066,7 +1241,7 @@ const pw = {
 		*/
 		
 		
-		} else if(form == this.POLYGONS_FORM){
+		} else if(form === this.POLYGONS_FORM){
 
 			let nx = M[O_TX + aPtr] - M[O_TX + bPtr];
 			let ny = M[O_TY + aPtr] - M[O_TY + bPtr];
@@ -1322,43 +1497,43 @@ const pw = {
 		if(def.poPtrA === undefined || def.poPtrB === undefined) console.error("Missing poPtrA and/or poPtrB.");
 		if(def.type === undefined) console.error("Missing constraint type.");
 		if(def.poPtrA === def.poPtrB) console.error("Cannot create constraint with one object, def.poPtrA === def.poPtrB.");
-		if(def.type == this.COLLISION_TYPE){
+		if(def.type === this.COLLISION_TYPE){
 			
-			if(this.M[O_TYPE + def.poPtrA] == this.FIXED_TYPE && this.M[O_TYPE + def.poPtrB] == this.FIXED_TYPE) return;
+			if(this.M[O_TYPE + def.poPtrA] === this.FIXED_TYPE && this.M[O_TYPE + def.poPtrB] === this.FIXED_TYPE) return;
 
 
 			let aForm = this.M[O_FORM + def.poPtrA];
 			let bForm = this.M[O_FORM + def.poPtrB];
-			if(aForm == this.CIRCLE_FORM){
-				if(bForm == this.PLANE_FORM) def.form = this.POINT_SURFACE_FORM;
-				else if(bForm == this.CIRCLE_FORM) def.form = this.POINTS_FORM;
-				else if(bForm == this.POLYGON_FORM) def.form = this.POINT_POLYGON_FORM;
+			if(aForm === this.CIRCLE_FORM){
+				if(bForm === this.PLANE_FORM) def.form = this.POINT_SURFACE_FORM;
+				else if(bForm === this.CIRCLE_FORM) def.form = this.POINTS_FORM;
+				else if(bForm === this.POLYGON_FORM) def.form = this.POINT_POLYGON_FORM;
 				else console.error("Unhandled form: " + bForm);
-			} else if(aForm == this.PLANE_FORM){
-				if(bForm == this.CIRCLE_FORM){
+			} else if(aForm === this.PLANE_FORM){
+				if(bForm === this.CIRCLE_FORM){
 					let temp = def.poPtrA;
 					def.poPtrA = def.poPtrB;
 					def.poPtrB = temp;
 					def.form = this.POINT_SURFACE_FORM;
-				} else if(bForm == this.PLANE_FORM) {
+				} else if(bForm === this.PLANE_FORM) {
 					def.form = this.SURFACES_FORM;
-				} else if(bForm == this.POLYGON_FORM) {
+				} else if(bForm === this.POLYGON_FORM) {
 					def.form = this.SURFACE_POLYGON_FORM;
 				} else {
 					throw "Unhandled form: " + bForm;
 				}
-			} else if(aForm == this.POLYGON_FORM){
-				if(bForm == this.CIRCLE_FORM){
+			} else if(aForm === this.POLYGON_FORM){
+				if(bForm === this.CIRCLE_FORM){
 					let temp = def.poPtrA;
 					def.poPtrA = def.poPtrB;
 					def.poPtrB = temp;
 					def.form = this.POINT_POLYGON_FORM;
-				} else if(bForm == this.PLANE_FORM){
+				} else if(bForm === this.PLANE_FORM){
 					let temp = def.poPtrA;
 					def.poPtrA = def.poPtrB;
 					def.poPtrB = temp;
 					def.form = this.SURFACE_POLYGON_FORM;
-				} else if(bForm == this.POLYGON_FORM){
+				} else if(bForm === this.POLYGON_FORM){
 					def.form = this.POLYGONS_FORM;
 				} else {
 					console.error("unhandled form: " + bForm);
@@ -1372,7 +1547,7 @@ const pw = {
 
 
 		// temp
-		if(def.form == this.POLYGONS_FORM || def.form == this.SURFACE_POLYGON_FORM || def.form == this.SURFACES_FORM){
+		if(def.form === this.POLYGONS_FORM || def.form === this.SURFACE_POLYGON_FORM || def.form === this.SURFACES_FORM){
 			this.M[C_JN + ptr + 16] = 0.0;
 			this.M[C_JT + ptr + 16] = 0.0;
 		}
@@ -1387,7 +1562,7 @@ const pw = {
 		this.M[C_US + ptr] = (this.M[O_US + def.poPtrA] + this.M[O_US + def.poPtrB]) * 0.5;
 		this.M[C_UK + ptr] = (this.M[O_UK + def.poPtrA] + this.M[O_UK + def.poPtrB]) * 0.5;
 
-		if(def.type == this.JOINT_TYPE){
+		if(def.type === this.JOINT_TYPE){
 			if(def.x === undefined || def.y === undefined) {
 				throw "Missing x and/or y (position).";
 			}
@@ -1411,7 +1586,7 @@ const pw = {
 			this.M[C_SUM_T + ptr] = 0.0;
 			for(let i = this.cTotal - 1; i > -1; --i){
 				let cPtr = this.C_PTRS[i];
-				if(this.M[C_TYPE + cPtr] == this.COLLISION_TYPE){
+				if(this.M[C_TYPE + cPtr] === this.COLLISION_TYPE){
 					if((this.M[C_PO_PTR_A + cPtr] === def.poPtrA && this.M[C_PO_PTR_B + cPtr] === def.poPtrB) ||
 						(this.M[C_PO_PTR_B + cPtr] === def.poPtrA && this.M[C_PO_PTR_A + cPtr] === def.poPtrB)){
 						this.destroyConstraint(cPtr);
@@ -1468,7 +1643,7 @@ const pw = {
 			let ptr = this.C_PTRS[i];
 			if(M[C_TYPE + ptr] === this.COLLISION_TYPE){
 				let cLen = 1;
-				if(M[C_FORM + ptr] == this.SURFACES_FORM || M[C_FORM + ptr] == this.SURFACE_POLYGON_FORM || M[C_FORM + ptr] == this.POLYGONS_FORM) cLen = 2;
+				if(M[C_FORM + ptr] === this.SURFACES_FORM || M[C_FORM + ptr] === this.SURFACE_POLYGON_FORM || M[C_FORM + ptr] === this.POLYGONS_FORM) cLen = 2;
 				for(let cPtr = ptr, c = 0; c < cLen; cPtr += 16, c += 1){
 					M[C_JN + cPtr] = 0.0;
 					M[C_JT + cPtr] = 0.0;
@@ -1502,7 +1677,7 @@ const pw = {
 		if(def.form === undefined || def.type === undefined) {
 			throw "Missing form and/or type in PhysicsObject definition";
 		}
-		if(def.type == this.MOVABLE_TYPE && (def.density === undefined)) {
+		if(def.type === this.MOVABLE_TYPE && (def.density === undefined)) {
 			throw "Missing density in PhysicsObject definition of this.MOVABLE_TYPE";
 		}
 		let size = this.PO_SIZES[def.form] + def.userFloats.length;
@@ -1532,7 +1707,7 @@ const pw = {
 		this.M[O_COS + ptr] = 1.0;
 		this.M[O_SIN + ptr] = 0.0;
 		this.M[O_O + ptr] = 0.0;
-		if(def.type == this.FIXED_TYPE){
+		if(def.type === this.FIXED_TYPE){
 			this.M[O_P + ptr] = 0.0;
 			this.M[O_M + ptr] = 0.0;
 			this.M[O_M_INV + ptr] = 0.0;
@@ -1540,14 +1715,14 @@ const pw = {
 			this.M[O_I_INV + ptr] = 0.0;
 		}
 
-		if(def.form == this.CIRCLE_FORM) {
+		if(def.form === this.CIRCLE_FORM) {
 			if(def.radius === undefined || def.x === undefined|| def.y === undefined) {
 				console.error("Missing radius and/or position (x and y) in PhysicsObject definition of this.CIRCLE_FORM");
 			}
 			this.M[O_TX + ptr] = def.x;
 			this.M[O_TY + ptr] = def.y;
 			this.M[O_RADIUS + ptr] = def.radius;
-			if(def.type == this.MOVABLE_TYPE) {
+			if(def.type === this.MOVABLE_TYPE) {
 				const mass = def.density * Math.PI * def.radius * def.radius;
 				// is mass needed or only m_inv?
 				this.M[O_M + ptr] = mass;
@@ -1557,19 +1732,19 @@ const pw = {
 				this.M[O_I_INV + ptr] = 1.0 / this.M[O_I + ptr];
 			}
 
-		} else if(def.form == this.PLANE_FORM) {
+		} else if(def.form === this.PLANE_FORM) {
 			if(def.vertices === undefined || def.vertices.length != 2){
 				console.error("Missing vertices or vertices not of length 2 in PhysicsObject def of this.PLANE_FORM");
 			}
 			if(def.width === undefined){
 				console.error("Missing width in PhysicsObject definition of this.PLANE_FORM");
 			}
-			if(def.vertices[0][0] == def.vertices[1][0] && def.vertices[0][1] == def.vertices[1][1]) def.vertices[1][0] += this.MIN_PLANE_LEN;
+			if(def.vertices[0][0] === def.vertices[1][0] && def.vertices[0][1] === def.vertices[1][1]) def.vertices[1][0] += this.MIN_PLANE_LEN;
 			this.M[O_HALF_WIDTH + ptr] = def.width * 0.5;
 			this.setVertex(ptr, 0, def.vertices[0][0], def.vertices[0][1]);
 			this.setVertex(ptr, 1, def.vertices[1][0], def.vertices[1][1]);
 
-		} else if(def.form == this.AABB_FORM){
+		} else if(def.form === this.AABB_FORM){
 			if(def.vertices === undefined || def.vertices.length != 2){
 				console.error("Missing vertices or vertices not of length 2 in PhysicsObject definition of this.AABB_FORM");
 			}
@@ -1578,7 +1753,7 @@ const pw = {
 			this.M[O_MAX_X + ptr] = def.vertices[1][0];
 			this.M[O_MAX_Y + ptr] = def.vertices[1][1];
 			
-		} else if(def.form == this.POLYGON_FORM) {
+		} else if(def.form === this.POLYGON_FORM) {
 			console.log(def.vertices);
 			let numVertices = def.vertices.length;
 			this.M[O_USERFLOATS_PTR + ptr] += def.vertices.length * this.V_SIZE;
@@ -1629,8 +1804,8 @@ const pw = {
 				this.M[O_TX + ptr] += cx * a;
 				this.M[O_TY + ptr] += cy * a;
 
-				if(def.type == this.MOVABLE_TYPE){
-					// moment of area of triangle with axis parralel to base passing though origin point
+				if(def.type === this.MOVABLE_TYPE){
+					// moment of area of triangle with axis parralel to base passing through origin point
 					let i = 0.5 * a * h * h;
 					console.log("i = " + i);
 					let ht = Math.sqrt((px - this.M[V_WX + v]) * (px - this.M[V_WX + v]) + (py - this.M[V_WY + v]) * (py - this.M[V_WY + v]));
@@ -1661,7 +1836,7 @@ const pw = {
 			this.M[O_TY + ptr] /= area;
 			debugPoints.push([this.M[O_TX + ptr], this.M[O_TY + ptr]]);
 
-			if(def.type == this.MOVABLE_TYPE) {
+			if(def.type === this.MOVABLE_TYPE) {
 				let m = def.density * area;
 				this.M[O_M + ptr] = m;
 				this.M[O_M_INV + ptr] = 1.0 / m;
@@ -1701,31 +1876,31 @@ const pw = {
 	},
 
 	isPointInside(poPtr, x, y, radius){
-		if(arguments.length == 3) radius = 0.0;
+		if(arguments.length === 3) radius = 0.0;
 		let maxDist = 0.0;
 		let px = 0.0;
 		let py = 0.0;
 		const form = this.M[O_FORM + poPtr];
-		if(form == this.CIRCLE_FORM){
+		if(form === this.CIRCLE_FORM){
 			px = this.M[O_TX + poPtr];
 			py = this.M[O_TY + poPtr];
 			maxDist = this.M[O_RADIUS + poPtr];
 
-		} else if(form == this.PLANE_FORM){
+		} else if(form === this.PLANE_FORM){
 			let dot = (x - this.M[O_W0X + poPtr]) * this.M[O_UX + poPtr] + (y - this.M[O_W0Y + poPtr]) * this.M[O_UY + poPtr];
 			dot = Math.max(0.0, Math.min(this.M[O_L + poPtr], dot));
 			px = this.M[O_UX + poPtr] * dot + this.M[O_W0X + poPtr];
 			py = this.M[O_UY + poPtr] * dot + this.M[O_W0Y + poPtr];
 			maxDist = this.M[O_HALF_WIDTH + poPtr];
 
-		} else if(form == this.AABB_FORM){
+		} else if(form === this.AABB_FORM){
 			if(x + radius < this.M[O_MIN_X + poPtr] || y + radius < this.M[O_MIN_Y + poPtr]) return false;
 			if(x - radius > this.M[O_MAX_X + poPtr] || y - radius > this.M[O_MAX_Y + poPtr]) return false;
 			return true;
 
 
 
-		} else if(form == this.POLYGON_FORM){
+		} else if(form === this.POLYGON_FORM){
 
 			for(let vPtr = O_NUM_VERTICES + poPtr + 1, len = this.M[O_NUM_VERTICES + poPtr] * this.V_SIZE + vPtr; vPtr < len; vPtr += this.V_SIZE){
 				let dx = x - this.M[V_WX + vPtr];
@@ -1746,19 +1921,19 @@ const pw = {
 	},
 
 	isPenetrating(ptrA, ptrB){
-		if(ptrA == ptrB) throw "Comparing physics object with self";
-		if(this.M[O_FORM + ptrA] == this.CIRCLE_FORM){
+		if(ptrA === ptrB) throw "Comparing physics object with self";
+		if(this.M[O_FORM + ptrA] === this.CIRCLE_FORM){
 			if(pw.isPointInside(ptrB, this.M[O_TX + ptrA], this.M[O_TY + ptrA], this.M[O_RADIUS + ptrA])){
 				return true;
 			}
 			return false;
-		} else if(this.M[O_FORM + ptrA] == this.PLANE_FORM){
+		} else if(this.M[O_FORM + ptrA] === this.PLANE_FORM){
 			let collisionData = false;
-			if(this.M[O_FORM + ptrB] == this.CIRCLE_FORM){
+			if(this.M[O_FORM + ptrB] === this.CIRCLE_FORM){
 				if(pw.isPointInside(ptrA, this.M[O_TX + ptrB], this.M[O_TY + ptrB], this.M[O_RADIUS + ptrB])) return true;
 				return false;
 
-			} else if(this.M[O_FORM + ptrB] == this.PLANE_FORM){
+			} else if(this.M[O_FORM + ptrB] === this.PLANE_FORM){
 				let xr = this.M[O_W1X + ptrA] - this.M[O_W0X + ptrA];
 				let yr = this.M[O_W1Y + ptrA] - this.M[O_W0Y + ptrA];
 				let xs = this.M[O_W1X + ptrB] - this.M[O_W0X + ptrB];
@@ -1775,7 +1950,7 @@ const pw = {
 				}
 				return false;
 
-			} else if(this.M[O_FORM + ptrB] == this.POLYGON_FORM){
+			} else if(this.M[O_FORM + ptrB] === this.POLYGON_FORM){
 				// temp
 				return false;
 
@@ -1792,14 +1967,14 @@ const pw = {
 		if(this.M[O_FORM + AABB_Ptr] != this.AABB_FORM) throw "First argument is not reference to AABB_FORM";
 		let bForm = this.M[O_FORM + poPtr];
 
-		if(bForm == this.CIRCLE_FORM){
+		if(bForm === this.CIRCLE_FORM){
 			if(this.M[O_TX + poPtr] + this.M[O_RADIUS + poPtr] > this.M[O_MAX_X + AABB_Ptr]) return false;
 			if(this.M[O_TY + poPtr] + this.M[O_RADIUS + poPtr] > this.M[O_MAX_Y + AABB_Ptr]) return false;
 			if(this.M[O_TX + poPtr] - this.M[O_RADIUS + poPtr] < this.M[O_MIN_X + AABB_Ptr]) return false;
 			if(this.M[O_TY + poPtr] - this.M[O_RADIUS + poPtr] < this.M[O_MIN_Y + AABB_Ptr]) return false;
 			return true;
 
-		} else if(bForm == this.PLANE_FORM){
+		} else if(bForm === this.PLANE_FORM){
 			if(this.M[O_W0X + poPtr] + this.M[O_HALF_WIDTH + poPtr] > this.M[O_MAX_X + AABB_Ptr]) return false;
 			if(this.M[O_W0Y + poPtr] + this.M[O_HALF_WIDTH + poPtr] > this.M[O_MAX_Y + AABB_Ptr]) return false;
 			if(this.M[O_W0X + poPtr] - this.M[O_HALF_WIDTH + poPtr] < this.M[O_MIN_X + AABB_Ptr]) return false;
@@ -1864,11 +2039,11 @@ const pw = {
 	},
 
 	setVertex(poPtr, vertexIndex, x, y){
-		if(this.M[O_FORM + poPtr] == this.PLANE_FORM){
-			if(vertexIndex == 0){
+		if(this.M[O_FORM + poPtr] === this.PLANE_FORM){
+			if(vertexIndex === 0){
 				this.M[O_W0X + poPtr] = x;
 				this.M[O_W0Y + poPtr] = y;
-			} else if(vertexIndex == 1) {
+			} else if(vertexIndex === 1) {
 				this.M[O_W1X + poPtr] = x;
 				this.M[O_W1Y + poPtr] = y;
 			} else {
@@ -1891,7 +2066,7 @@ const pw = {
 				let y = 0.0;
 				let mx = this.M[O_UX + poPtr] * this.MIN_PLANE_LEN * 1.01;
 				let my = this.M[O_UY + poPtr] * this.MIN_PLANE_LEN * 1.01;
-				if(vertexIndex == 0){
+				if(vertexIndex === 0){
 					if(this.M[O_L + poPtr] < 0.0001){
 						x = this.M[O_W1X + poPtr] - this.MIN_PLANE_LEN * 1.01;
 						y = this.M[O_W1Y + poPtr];
@@ -1916,7 +2091,7 @@ const pw = {
 			this.M[O_L0Y + poPtr] = this.M[O_W0Y + poPtr] - this.M[O_TY + poPtr];
 			this.M[O_L1X + poPtr] = this.M[O_W1X + poPtr] - this.M[O_TX + poPtr];
 			this.M[O_L1Y + poPtr] = this.M[O_W1Y + poPtr] - this.M[O_TY + poPtr];
-			if(this.M[O_TYPE + poPtr] == this.MOVABLE_TYPE) {
+			if(this.M[O_TYPE + poPtr] === this.MOVABLE_TYPE) {
 				const w = this.M[O_HALF_WIDTH + poPtr] * 2;
 				this.M[O_M + poPtr] = this.M[O_P + poPtr] * (w * this.M[O_L + poPtr] + Math.PI * this.M[O_HALF_WIDTH + poPtr] * this.M[O_HALF_WIDTH + poPtr]);
 				this.M[O_M_INV + poPtr] = 1.0 / this.M[O_M + poPtr];
@@ -1932,10 +2107,10 @@ const pw = {
 			
 
 		} else if(this.AABB_FORM){
-			if(vertexIndex == 0){
+			if(vertexIndex === 0){
 				this.M[O_MIN_X + poPtr] = x;
 				this.M[O_MIN_Y + poPtr] = y;
-			} else if(vertexIndex == 1) {
+			} else if(vertexIndex === 1) {
 				this.M[O_MAX_X + poPtr] = x;
 				this.M[O_MAX_Y + poPtr] = y;
 			}
@@ -1951,7 +2126,7 @@ const pw = {
 	},
 
 	setLinearVelocity(poPtr, vx, vy){
-		if(this.M[O_TYPE + poPtr] == this.FIXED_TYPE) {
+		if(this.M[O_TYPE + poPtr] === this.FIXED_TYPE) {
 			console.warn("Cannot set linear velocity of PhysicsObject of type this.FIXED_TYPE");
 			return;
 		}
@@ -1960,7 +2135,7 @@ const pw = {
 	},
 
 	setRotationalVelocity(poPtr, w){
-		if(this.M[O_TYPE + poPtr] == this.FIXED_TYPE) {
+		if(this.M[O_TYPE + poPtr] === this.FIXED_TYPE) {
 			console.warn("Cannot set rotational velocity of PhysicsObject of type this.FIXED_TYPE");
 			return;
 		}
@@ -1975,7 +2150,7 @@ const pw = {
 
 	// TODO check overflow
 	setUserFloats(poPtr, source, start){
-		//if(arguments.length == 2) startingIndex = 0;
+		//if(arguments.length === 2) startingIndex = 0;
 		//let ufStart = this.PO_SIZES[this.M[O_FORM + poPtr]] + poPtr + start;
 		let ufStart = this.M[O_USERFLOATS_PTR + poPtr] + start;
 		//let ufLen = this.M[O_NUM_FLOATS + poPtr] + poPtr - 1 - ufStart;
@@ -1985,13 +2160,13 @@ const pw = {
 	},
 
 	getWorldVertices(poPtr){
-		if(this.M[O_FORM + poPtr] == this.PLANE_FORM) {
+		if(this.M[O_FORM + poPtr] === this.PLANE_FORM) {
 			return [[this.M[O_W0X + poPtr], this.M[O_W0Y + poPtr]], [this.M[O_W1X + poPtr], this.M[O_W1Y + poPtr]]];
 		}
-		if(this.M[O_FORM + poPtr] == this.AABB_FORM) {
+		if(this.M[O_FORM + poPtr] === this.AABB_FORM) {
 			return [[this.M[O_MIN_X + poPtr], this.M[O_MIN_Y + poPtr]], [this.M[O_MAX_X + poPtr], this.M[O_MAX_Y + poPtr]]];
 		}
-		if(this.M[O_FORM + poPtr] == this.POLYGON_FORM){
+		if(this.M[O_FORM + poPtr] === this.POLYGON_FORM){
 			let result = [];
 			for(let v = O_NUM_VERTICES + 1 + poPtr, len = this.M[O_NUM_VERTICES + poPtr] * this.V_SIZE + v; v < len; v += this.V_SIZE){
 				result.push([this.M[V_WX + v], this.M[V_WY + v]]);

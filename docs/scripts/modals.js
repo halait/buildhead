@@ -358,7 +358,11 @@ const registerScene = {
 			try {
 				await auth.createUserWithEmailAndPassword(emailInput.value, password);
 				await auth.currentUser.updateProfile({displayName: desiredUsername});
+				// update username on index screen
+				routes["/"].onUserChanged();
 				await db.collection("users").doc(user.uid).set({username: user.displayName});
+				// pop twice because always come here from loginModal
+				sceneManager.popModal();
 				sceneManager.popModal();
 			} catch(err) {
 				console.error(err);
@@ -511,7 +515,7 @@ const tutorialScene = {
 	removeCurrentEventListener(){
 		if(this.eventIndex != -1) {
 			this.events[this.eventIndex].target.removeEventListener(this.events[this.eventIndex].type, this.events[this.eventIndex].callback);
-			console.log("current evtlist remooved");
+			console.log("current evtlist removed");
 		}
 	},
 	events: [
@@ -621,6 +625,11 @@ const tutorialScene = {
 		this.showBtn.style.display = "none";
 	},
 	init(){
+		//cache images
+		for(let i = 0; i != this.events.length; ++i) {
+			let img = new Image();
+			img.src = "/images/" + i + "tut.png";
+		}
 		this.shrinkBtn.addEventListener("click", () => {this.hideImg();});
 		this.showBtn.addEventListener("click", () => {this.showImg();});
 		this.img.onload = () => {
