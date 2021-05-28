@@ -174,8 +174,6 @@ pw.U_SCALE_LOCATION = pw.gl.getUniformLocation(program, "u_scale");
 pw.U_TRANSLATE_LOCATION = pw.gl.getUniformLocation(program, "u_translate");
 pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 
-const loadingScreen = document.getElementById("loadingDiv");
-
 function createTexture(imgPath){
 	let img = document.createElement("img");
 	if(path) {
@@ -183,15 +181,11 @@ function createTexture(imgPath){
 		imgPath = path + imgPath;
 	}
 	img.onerror = () => {
-		//loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-		loadingScreen.style.display = "none";
 		sceneManager.pushModal(messageScene, "Error", "Unable to play game because texture could not be loaded.");
 		window.onresize();
 		throw "Unable to load texture";
 	}
 	img.onload = () => {
-		//loadingScreen.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-		loadingScreen.style.display = "none";
 		window.onresize();
 		sceneManager.push(location.href);
 

@@ -1,27 +1,30 @@
-* {
+body {
 	margin: 0;
-	padding: 0;
-	-webkit-user-drag: none;
-	user-select: none;
-	-khtml-user-select: none;
-	-o-user-select: none;
-	-moz-user-select: none;
-	-webkit-user-select: none;
-	outline: none;
-	font-size: 18px;
+	font-family: sans-serif;
+	--brand-color: rgb(185, 39, 14);
+	--brand-color-on-hover: rgb(180, 52, 30);
+	--background-color: #000;
+	--color: #fff;
+	background-color: var(--background-color);
+}
+button {
+	background-color: inherit;
+	color: inherit;
+	border: none;
+	cursor: pointer;
+}
+.customProperties h4 {
+	margin: 0.5rem 0 0.1rem;
 }
 #game {
-	width: 100vw;
-	height: 100vh;
-	overflow: hidden;
+	min-height: 100vh;
 	position: relative;
-	--toolbar-height: 40px;
-	min-width: 240px;
+	--toolbar-height: 2.5rem;
+	--header-height: 2.5rem;
+	--header-height-plus-toolbar-height: calc(var(--header-height) + var(--toolbar-height));
+	min-width: 300px;
+	overflow-x: hidden;
 }
-/* label {
-	display: block;
-	margin: 8px 0;
-} */
 input {
 	border-radius: 4px;
 	padding-left: 8px;
@@ -29,21 +32,75 @@ input {
 input[type=radio] {
 	margin-left: 32px;
 }
+
+#site-header {
+	flex: 0	0 auto;
+	height: var(--header-height);
+	display: flex;
+	justify-content: space-between;
+	background-color: var(--brand-color);
+	color: #fff;
+	position: fixed;
+	width: 100%;
+	z-index: 2;
+	padding: 0 1rem;
+	box-sizing: border-box;
+}
+#header-menu-svg {
+	width: 2rem;
+	height: auto;
+}
+#header-logo-a, .header-nav-a, #accountBtn {
+	color: inherit;
+	text-decoration: none;
+	height: var(--header-height);
+	line-height: var(--header-height);
+	font-size: 1.1rem;
+}
+#logo {
+	font-size: 1.6rem;
+	margin: 0;
+}
+.header-nav {
+	transform: translateX(-100%);
+	position: fixed;
+	width: 80%;
+	top: var(--header-height);
+	bottom: 0;
+	left: 0;
+	background-color: var(--brand-color);
+	padding: 1rem;
+	transition: transform 0.25s ease-in-out;
+}
+.header-nav-show {
+	transform: translateX(0);
+}
+.header-nav-a {
+	display: block;
+	color: #ccc;
+}
+.header-nav-a:hover {
+	color: #fff;
+}
 .toolbar {
 	position: absolute;
-	top: 0px;
+	top: var(--header-height);
 	left: 0px;
 	height: var(--toolbar-height);
-	width: 100vw;
+	width: 100%;
 	background-color: #222;
 	display: none;
+	align-items: center;
 	justify-content: space-between;
+	overflow: auto;
+	z-index: 1;
 }
 .toolbarBtn {
 	border-radius: 100%;
-	height:  var(--toolbar-height);
-	width: var(--toolbar-height);
-	background-size: 100% 300%;
+	width: auto;
+	height: 100%;
+	flex-shrink: 0;
+	display: block;
 }
 .toolbarBtn:hover {
 	background-color: #444;
@@ -56,31 +113,38 @@ input[type=radio] {
 }
 .overlay {
 	display: none;
+	background-color: var(--background-color);
+	flex: 1 1 0;
+	padding: 2rem 1rem;
+	z-index: 1;
 	position: absolute;
+	top: var(--header-height);
+	min-height: calc(100vh - var(--header-height));
 	width: 100%;
-	height: 100%;
-	background-color: #111;
+	box-sizing: border-box;
 }
 .modal {
 	background-color: #222;
-	position: absolute;
+	position: fixed;
 	left: 50%;
 	top: 50%;
 	transform: translateX(-50%) translateY(-50%);
 	margin: 0 auto;
 	display: none;
-	padding: 32px;
+	padding: 0.5rem 1rem;
 	border-radius: 2px;
 	color: #fff;
 	box-sizing: border-box;
-	max-height: 100%;
-	max-width: 100%;
+	max-height: 80vh;
+	max-width: 90vw;
 	min-width: inherit;
+	overflow: auto;
+	z-index: 3;
 }
 .modalHeader {
-	font: small-caps 32px sans-serif;
-	margin-bottom: 20px;
-	white-space: nowrap;
+	margin: 0 0 1rem;
+	font-size: 2rem;
+	font-weight: 700;
 }
 .startSimulationBtn, .stopSimulationBtn, .backBtn {
 	border-radius: 0px;
@@ -109,13 +173,14 @@ input[type=radio] {
 	right: 0;
 	top: 0;
 	border-radius: inherit;
+	padding: 0.2rem;
 }
 .closeBtn:hover {
 	background-color: #b00;
 }
 .btn {
 	width: max-content;
-	background-color: #000;
+	background-color: #444;
 	color: #fff;
 	border-radius: 2px;
 	margin: 8px auto;
@@ -131,19 +196,22 @@ input[type=radio] {
 	border: none;
 }
 .btn:hover {
-	background-color: #333;
+	background-color: #666;
 }
 .errMessage {
 	color: #f44;
 }
 #tutorialUi {
-	top: 60px;
-	transform: translateX(-50%) translateY(0%);
 	text-align: center;
+	top: calc(2rem + var(--header-height-plus-toolbar-height));
+	transform: translateX(-50%) translateY(0);
 }
 #tutorialImgDiv {
-	max-height: calc(100vh - 240px);
 	overflow: auto;
+}
+#tutorialImg {
+	max-width: 100%;
+	height: auto;
 }
 #tutorialShowBtn {
 	display: none;
@@ -152,46 +220,24 @@ input[type=radio] {
 	display: none;
 }
 #canvas {
-	position: absolute;
-	top: var(--toolbar-height);
+	top: var(--header-height-plus-toolbar-height);
 	cursor: crosshair;
-	width: 100%;
-	height: calc(100% - var(--toolbar-height));
 	touch-action: none;
-}
-#logo {
-	margin: 32px auto;
-	display: block;
-	width: 64%;
-	max-width: 800px;
-	border-radius: 4px;
+	width: 100%;
+	height: calc(100vh - var(--header-height-plus-toolbar-height));
+	position: absolute;
 }
 /* remove */
 #level-input {
 	display: block;
 	margin-left: 20px;
 }
-/*
-#loadingScreen {
-	background-color: #000;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	font-size: 40px;
-	color: #fff;
-}
-*/
-#levelBrowserUi{
-	//text-align: center;
-}
 #browser-container {
 	display: flex;
 	flex-direction: column;
 	padding: 16px 0 0 0;
 	margin: 0 auto;
-	width: max-content;
-	max-height: 100%;
+	max-width: 60rem;
 }
 #content-container {
 	margin: 16px 0;
@@ -227,7 +273,7 @@ input[type=radio] {
 	border-collapse: collapse;
 	border: none;
 	text-align: center;
-	white-space: nowrap;
+	width: 100%;
 }
 tbody:hover {
 	cursor: pointer;
@@ -239,8 +285,8 @@ tr:hover {
 	background-color: #06b;
 }
 td, th {
-	padding: 16px;
-	font-size: 24px;
+	padding: 0.5rem;
+	font-size: 1.2rem;
 }
 th {
 	background-color: #000;
@@ -253,37 +299,9 @@ th {
 .completed-level:hover {
 	background-color: #b60;
 }
-#level-type-container {
-	max-width: 1000px;
-	margin: 32px auto 0 auto;
-	display: flex;
-	flex-direction: row;
-	justify-content: space-around;
-	flex-wrap: wrap;
-}
-.level-type-btns {
-	background-color: #840;
-	border-radius: 4px;
-	margin: 32px;
-	width: 128px;
-	height: 128px;
-	cursor: pointer;
-}
-.level-type-btns:hover {
-	background-color: #b60;
-}
 #points-widget {
 	margin: 0 auto;
 	text-align: center;
-}
-#loadingDiv {
-	background-color:#fff;
-	display: block;
-	/*
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	*/
 }
 #play-btn {
 	background-color: #048;
@@ -296,46 +314,66 @@ th {
 #save-ui {
 	max-width: 480px;
 }
-/*
-#strob {
-	width: 50%;
-	max-width: 256px;
-	animation: 1s infinite alternate blink;
+#login-message {
+	margin: 1rem 0;
 }
-*/
 #level-info {
 	display: none;
 	color: #fff;
-	font-size: 32px;
+	font-size: 1.5rem;
 	position: absolute;
-	bottom: 16px;
-	right: 16px;
+	bottom: 1rem;
+	right: 1rem;
 }
 #registerBtn {
 	margin: 8px 0;
 }
-
-@keyframes blink {
-	from {
-		fill: rgba(255, 255, 255, 1.0);
-	}
-	to {
-		fill: rgba(0, 0, 0, 0.0);
-	}
+#menu-nav {
+	display: grid;
+	justify-content: center;
+	grid-template-columns: repeat(auto-fit, 12rem);
+	grid-gap: 4rem;
+	margin: 10% 0;
 }
-
-@media (max-width: 480px){
+.menu-nav-a {
+	text-decoration: none;
+	color: var(--color);
+	display: block;
+	font-size: 1.5rem;
+	background-color: var(--brand-color);
+	padding: 1rem;
+	text-align: center;
+}
+.menu-nav-a:hover {
+	background-color: var(--brand-color-on-hover);
+}
+.success-increment-btn {
+	width: 3rem;
+	height: auto;
+}
+.submitBtn {
+	margin-top: 1rem;
+	padding: 0.2rem 0.5rem;
+}
+@media (min-width: 32rem){
+	#header-menu-btn {
+		display: none;
+	}
+	.header-nav {
+		transform: none;
+		position: static;
+		width: auto;
+		padding: 0;
+	}
+	.header-nav-a {
+		display: inline;
+		padding: 0.5rem;
+	}
 	.modal {
-		padding: 16px;
+		padding: 1rem 2rem;
 	}
-	.level-type-btns {
-		margin: 16px;
-		width: 80px;
-		height: 80px;
-	}
-	td, th {
-		padding: 4px;
-		font-size: 16px;
-		white-space: normal;
+	.overlay {
+		padding-left: 2rem;
+		padding-right: 2rem;
 	}
 }

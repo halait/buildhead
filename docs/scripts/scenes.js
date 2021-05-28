@@ -28,36 +28,15 @@ const routes = {
 
 		ui: document.getElementById("menuUI"),
 		accountBtn: document.getElementById("accountBtn"),
-		listingOriginalRoute: "/listing/original",
-		listingCommunityRoute: "/listing/community",
 
 		init(){
-			document.getElementById("originalLevelsBtn").addEventListener("pointerdown", () => {
-				sceneManager.push(this.listingOriginalRoute);
-			});
-			document.getElementById("userLevelsBtn").addEventListener("pointerdown", () => {
-				sceneManager.push(this.listingCommunityRoute);
-			});
-			document.getElementById("sandboxBtn").addEventListener("pointerdown", () => {
-				//canvasEventManager.reset();
-				sceneManager.push("/sandbox");
-			});
-			/*
-			document.getElementById("your-levels-btn").addEventListener("pointerdown", () => {
-				if(!user){
-					sceneManager.pushModal(loginScene);
-					return;
-				}
-				sceneManager.push("/listing/community?author=" + user.displayName);
-			});
-			*/
+			
 		}
 	},
 
 	"/listing": {
 		ui: document.getElementById("levelBrowserUi"),
 		async start(){
-			loadingScreen.style.display = "flex";
 			this.ui.style.display = "block";
 			const collection = location.pathname.replace(this.route, "");
 			if(collection == "/original"){
@@ -92,7 +71,6 @@ const routes = {
 			}
 			this.browserContent.innerHTML = "";
 			this.populate(this.items);
-			loadingScreen.style.display ="none";
 		},
 		suspend(){
 			this.ui.style.display = "none";
@@ -216,7 +194,6 @@ const routes = {
 			this.toolbar.style.display = "flex";
 			if(docPath != "/sandbox") {
 				docPath = docPath.replace("/sandbox", "");
-				loadingScreen.style.display = "flex";
 				try {
 					const level = await levelManager.getLevel(docPath);
 					levelManager.loadLevel(level);
@@ -224,7 +201,6 @@ const routes = {
 					sceneManager.pushModal(messageScene, "Error", "Level could not be loaded. Try a different level also please consider sending feedback.");
 					console.error(e);
 				}
-				loadingScreen.style.display = "none";
 			} else {
 				canvasEventManager.reset();
 			}
@@ -290,7 +266,6 @@ const routes = {
 
 	"/play": {
 		async start(){
-			loadingScreen.style.display = "flex";
 			this.toolbar.style.display = "flex";
 			let docPath = location.pathname.replace("/play/", "");
 			if(!docPath){
@@ -307,7 +282,6 @@ const routes = {
 			sandboxMode = false;
 			this.levelInfo.style.display = "block";
 			this.levelInfo.textContent = this.currentLevel.author + " - " + this.currentLevel.name;
-			loadingScreen.style.display = "none";
 			if(this.currentLevel.name == "Tutorial" && this.currentLevel.author == "halait"){
 				sceneManager.pushModal(tutorialScene);
 			}

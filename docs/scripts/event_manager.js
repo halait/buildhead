@@ -607,7 +607,6 @@ const polygonBtnEventHandler = {
 };
 
 
-// scene management
 const sceneManager = {
 	modalEntries: [],
 	current: null,
@@ -651,7 +650,7 @@ const sceneManager = {
 	}
 };
 
-window.addEventListener("popstate", (e) => {
+window.addEventListener("popstate", () => {
 	sceneManager.popAllModal();
 	if(sceneManager.current){
 		sceneManager.current.suspend();
@@ -663,3 +662,20 @@ window.addEventListener("popstate", (e) => {
 function getRoute(){
 	return /\/[^\/]*/.exec(location.pathname)[0];
 }
+
+function handleSameDomainLink(e) {
+	e.preventDefault();
+	sceneManager.push(this.pathname);
+}
+
+const links = document.querySelectorAll('a');
+for(let i = 0, len = links.length; i != len; ++i) {
+	if(links[i].origin === window.location.origin) {
+		links[i].addEventListener('click', handleSameDomainLink);
+	}
+}
+
+const headerNav = document.querySelector('.header-nav');
+document.getElementById('header-menu-btn').addEventListener('click', function() {
+	headerNav.classList.toggle('header-nav-show');
+});

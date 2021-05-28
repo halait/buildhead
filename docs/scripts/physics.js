@@ -2,7 +2,7 @@
 // PRE-ALPHA
 /* TODO
 	- implement block solver for multiple contacts
-	- consolidate physics object PLANE_FORM into POLYGON_FORM for simplification purposes
+	- consolidate physics object PLANE_FORM into POLYGON_FORM
 */
 /* GLOSSARY
 	- physics object: actual objects that are simulated by the physics engine. For now this is circles, planes and convex polygons.
@@ -877,11 +877,16 @@ const pw = {
 					M[V_L + vPtr]
 				);
 				
-				let sumDistSq = this.collisionData[6] + this.collisionData[13];
-				if(sumDistSq < closestPolygonSideDistSq) {
+				if(
+					(this.collisionData[2] != this.collisionData[9] || this.collisionData[3] != this.collisionData[10]) &&
+					(this.collisionData[4] != this.collisionData[11] || this.collisionData[5] != this.collisionData[12]) &&
+					(this.collisionData[6] < closestPolygonSideDistSq || this.collisionData[13] < closestPolygonSideDistSq)
+				) {
 					closestPolygonSide = vPtr;
-					closestPolygonSideDistSq = sumDistSq;
+					closestPolygonSideDistSq = this.collisionData[6];
 				}
+
+
 
 				/*
 				for(let i = 0; i != 14; i += 7){

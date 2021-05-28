@@ -83,7 +83,7 @@ const saveScene = {
 	start(level){
 		if(!user){
 			sceneManager.popModal();
-			sceneManager.pushModal(loginScene);
+			sceneManager.pushModal(loginScene, "Login to save level.");
 			return;
 		}
 		if(!isPlayable()){
@@ -166,6 +166,7 @@ const saveScene = {
 			this.nameInput.value = "";
 			routes["/listing"].forceRefreshFlag = true;
 			loadingScreen.style.display = "none";
+			sceneManager.pushModal(messageScene, "Level Saved", "The level was saved successfully.");
 		});
 	}
 }
@@ -267,8 +268,10 @@ messageScene.init();
 
 const loginScene = {
   ui: document.getElementById("loginUi"),
-  start(){
+	message: document.getElementById("login-message"),
+  start(message){
     this.ui.style.display ="block";
+		this.message.textContent = message || '';
   },
   suspend(){
     this.ui.style.display = "none";
