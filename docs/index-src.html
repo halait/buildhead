@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<link rel="icon" type="image/png" href="/images/icon.png">
+	<link rel="icon" type="image/png" href="/images/favicon.png">
 	<link rel="stylesheet" href="/style.css">
 	<title>Let's do it</title>
 	<meta name="google-site-verification" content="cwxbdL28yMr8f7_njaJMntysc_h-TlQh71n8FualssU" />
@@ -95,21 +95,21 @@
 	<input class="density" type="number" step="0.0001" min="0" placeholder="If empty defaults to 30.0">
 	<h4>Friction: </h4>
 	<label>Static friction: <input class="staticFriction" type="number" step="0.0001" min="0"
-			placeholder="If empty defaults to 0.8"></label><br>
+			placeholder="If empty defaults to 0.8"></label>
 	<label>Kinetic friction: <input class="kineticFriction" type="number" step="0.0001" min="0"
 			placeholder="If empty defaults to 0.5"></label>
 	<h4>Velocity Resistance: </h4>
 	<label>Linear velocity resistance: <input class="linearResistance" type="number" step="0.001" min="0"
-			placeholder="If empty defaults to 0.01"></label><br>
+			placeholder="If empty defaults to 0.01"></label>
 	<label>Rotational velocity resistance: <input class="rotationalResistance" type="number" step="0.001"
-			min="0" placeholder="If empty defaults to 0.01"></label><br>
+			min="0" placeholder="If empty defaults to 0.01"></label>
 	<input class="submitBtn" type="submit" value="Apply">
 </form>
 }}
 {{ define _rodCustomizeFormChunk
 <span id="rodProperties">
 	<h4>Width: </h4>
-	<input id="width" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.05"><br>
+	<input id="width" type="number" step="0.00001" min="0" placeholder="If empty defaults to 0.05">
 </span>
 }}
 {{ define _wheelCustomizeFormChunk
@@ -120,7 +120,7 @@
 	<input id="motorSpeed" type="number" step="0.00001" placeholder="If empty then circle non-motorized">
 	<h4>Max Motor Torque: </h4>
 	<input id="maxMotorTorque" type="number" step="0.00001" min="0"
-		placeholder="If empty then circle non-motorized"><br>
+		placeholder="If empty then circle non-motorized">
 </span>
 }}
 <body>
@@ -133,7 +133,13 @@
 					<line x1="0" y1="90" x2="150" y2="90"></line>
 				</svg>
 			</button>
-			<a id='header-logo-a' href='/'><h1 id='logo'>Buildhead</h1></a>
+			<a id='header-logo-a' href='/'>
+				<!--<h1 id='logo'>Buildhead</h1>-->
+				<svg id='header-logo' version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox='0 0 100 100'>
+					<path d="M 0 100 C 20 10, 80 10, 100 100" fill="#f80"></path>
+					<circle cx="50" cy="16.6" r="16.6" fill="#08f"></circle>
+				</svg>
+			</a>
 			<nav class='header-nav'>
 				<a class='header-nav-a' href='/listing/original'>Orginal Levels</a>
 				<a class='header-nav-a' href='/listing/community'>Community Levels</a>
@@ -215,6 +221,15 @@
 		<div id="level-info">Name - Author</div>
 
     <div id="menuUI" class="overlay">
+			<svg id='menu-logo' version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox='0 0 100 100'>
+				<path d="M 0 100 C 20 10, 80 10, 100 100" fill="#f80"></path>
+				<circle cx="50" cy="16.6" r="16.6" fill="#08f"></circle>
+			</svg>
+			<h2 id='menu-hero'>
+				2D physics based game by <a href='https://github.com/halait'>halait</a>. Made with 
+				<a href='https://github.com/halait/pulsition'>Pulsition</a>, a 2D physics engine for 
+				the web. Visit <a href='https://github.com/halait/buildhead'>the repo</a> to learn more.
+			</h2>
 			<div id="menu-nav">
 				<a class='menu-nav-a' href='/listing/original'>Orginal Levels</a>
 				<a class='menu-nav-a' href='/listing/community'>Community Levels</a>
@@ -226,7 +241,7 @@
 			<div id="browser-container">
 				<div id="filter-container">
 					<label id="search-container">
-						<input id="search-input" type="search" placeholder="Search">
+						<input id="search-input" type="search">
 						<svg id="search-btn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" 
 						stroke-width="4" stroke="#fff" fill="none">
 							<title>Search</title>
@@ -258,27 +273,17 @@
 						<tbody id="browser-content">
 						</tbody>
 					</table>
-					<div id="load-more-btn" class="btn">Load More</div>
+					<button id="load-more-btn">Load More</button>
 				</div>
 			</div>
 		</div>
 
-		<!--
-		<div id="loadingDiv" class="overlay">
-			<svg id="strob" preserveAspectRatio="xMinYMin meet" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg">
-				<circle cx="10" cy="10" r="10"></circle>
-				<circle cx="40" cy="10" r="10"></circle>
-				<circle cx="70" cy="10" r="10"></circle>
-			</svg>
-		</div>
-	-->
-
 		<div id="mode-ui" class="modal">
 			_closeBtn
-			<p class="modalHeader">Mode</p>
-			<div id="play-btn" class="btn">Play</div>
-			<div id="edit-btn" class="btn">Edit</div>
-			<div id="delete-btn" class="btn">Delete</div>
+			<h2 class="modalHeader">Mode</h2>
+			<button id="play-btn" class='block-btn'>Play</button>
+			<button id="edit-btn" class='block-btn'>Edit</button>
+			<button id="delete-btn" class='block-btn'>Delete</button>
 		</div>
 
 		<div id="tutorialUi" class="modal">
@@ -286,39 +291,31 @@
         <p id="tutImgLoadingMsg">Loading...</p>
 				<img id="tutorialImg" alt="Unable to load tutorial, check your internet connection.">
 			</div>
-			<span id="tutorialShrinkBtn" class="btn">Hide</span>
-			<span id="tutorialShowBtn" class="btn">Show</span>
+			<button id="tutorialShrinkBtn">Hide</button>
+			<button id="tutorialShowBtn">Show</button>
     </div>
 
     <div id="save-ui" class="modal">
 			_closeBtn
-			<p id="save-header" class="modalHeader"></p>
+			<h2 id="save-header" class="modalHeader"></h2>
 			<form id="save-form">
-				<label>Name<br><input id="name-input" type="text" required></label>
-				<label>Tags (optional, space seperated keywords used for search, the name you enter above and your username will be added automatically)<br><input id="tag-input" type="text"></label>
-				<input id="save-btn" class="btn" type="submit" value="Save">
+				<label>Name<input id="name-input" type="text" required></label>
+				<label>Tags (optional, space seperated keywords used for search, the name you enter above and your username will be added automatically)<input id="tag-input" type="text"></label>
+				<input id="save-btn" type="submit" value="Save">
 			</form>
-			<p id="save-info-p" class="message"></p>
+			<p id="save-info-p"></p>
 		</div>
-
-		<!--
-    <div id="loadLevelUI" class="modal">
-      <p class="modalHeader">Load Level</p>
-      <input id="level-input" type="file" accept="application/json" />
-      <p id="loadMessageP"></p><br>
-		</div>
-	-->
-
+		
     <div id="message-div" class="modal">
 			_closeBtn
-      <p id="message-header" class="modalHeader"></p>
+      <h2 id="message-header" class="modalHeader"></h2>
 			<span id="message"></span>
-			<div id="message-btn" class="btn"></div>
+			<button id="message-btn" class="block-btn"></button>
     </div>
 
     <div id="setCustomObroundPopup" class="modal">
 			_closeBtn
-			<p class="modalHeader">Custom Obround Properties</p>
+			<h2 class="modalHeader">Custom Obround Properties</h2>
 			_customizeFormTopChunk
 			_rodCustomizeFormChunk
 			_customizeFormBottomChunk
@@ -326,7 +323,7 @@
 
     <div id="setCustomCirclePopup" class="modal">
 			_closeBtn
-			<p class="modalHeader">Custom Circle Properties</p>
+			<h2 class="modalHeader">Custom Circle Properties</h2>
 			_customizeFormTopChunk
 			_wheelCustomizeFormChunk
 			_customizeFormBottomChunk
@@ -334,14 +331,14 @@
     
     <div id="createPolygonPopup" class="modal">
 			_closeBtn
-			<p class="modalHeader">Custom Polygon Properties</p>
+			<h2 class="modalHeader">Custom Polygon Properties</h2>
 			_customizeFormTopChunk
 			_customizeFormBottomChunk
     </div>
     
     <div id="successSceneDiv" class="modal">
 			_closeBtn
-			<p class="modalHeader">Success</p>
+			<h2 class="modalHeader">Success</h2>
 			<div id="points-widget">
 				<svg id="increment-btn" class="success-increment-btn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="#0f0" stroke="#0f0">
 					<title>Increment</title>
@@ -353,51 +350,51 @@
 					<polygon points="50 90, 15 55, 42 55, 42 10, 58 10, 58 55, 85 55"></polygon>
 				</svg>
 			</div>
-			<!--<div id="next-level-btn" class="btn">Next</div>-->
-			<div id="go-back-btn" class="btn">Go Back</div>
+			
+			<button id="go-back-btn" class='block-btn'>Go Back</button>
 			<span id="solution-btns">
-				<div id="save-solution-btn" class="btn">Save Solution</div>
-				<div id="browse-solutions-btn" class="btn">Browse Solutions</div>
+				<button id="save-solution-btn" class='block-btn'>Save Solution</button>
+				<button id="browse-solutions-btn" class='block-btn'>Browse Solutions</button>
 			</span>
-			<div id="main-menu-btn" class="btn">Main Menu</div>
+			<button id="main-menu-btn" class='block-btn'>Main Menu</button>
 		</div>
 		
 		<div id="loginUi" class="modal">
 			_closeBtn
-			<p class="modalHeader">Login</p>
+			<h2 class="modalHeader">Login</h2>
 			<div id="login-message"></div>
 			<form id="loginForm">
-				<label>Email Address<br><input id="loginEmail" type="email" required></label><br><br>
-				<label>Password<br><input id="loginPassword" type="password" required minlength="6" maxlength="128"></label>
-				<span id="showPasswordBtn" class="smallBtn btn">Show Password</span><br>
-				<p id="loginMessage" class="message errMessage"></p>
-				<input id="loginBtn" class="btn" type="submit" value="Login">
+				<label>Email Address<input id="loginEmail" type="email" required></label>
+				<label>Password<input id="loginPassword" type="password" required minlength="6" maxlength="128"></label>
+				<button id='showPasswordBtn'type='button'>Show Password</button>
+				<p id="loginMessage" class="errMessage"></p>
+				<input id="loginBtn" type="submit" value="Login">
 			</form>
-			<p class="message">Don't have an account?</p>
-			<div id="registerBtn" class="btn">Create Account</div>
+			<p>Don't have an account?</p>
+			<button id="registerBtn">Create Account</button>
 		</div>
 
     <div id="registerUi" class="modal">
 			_closeBtn
-			<p class="modalHeader">Create Account</p>
+			<h2 class="modalHeader">Create Account</h2>
 			<form id="registerForm">
-				<label>Email<br><input id="registerEmail" type="email" required></label>
-				<p id="registerEmailMessage" class="message errMessage"></p>
-				<label>Username<br><input id="registerName" type="text" pattern="[\w@#\*\-\+\[\]\{\}/\.,~]+" required></label>
-				<p id="registerNameMessage" class="message errMessage"></p>
-				<label>Password<br><input id="registerPassword0" type="password" required minlength="6" maxlength="128"></label><br>
-				<label>Confirm Password<br><input id="registerPassword1" type="password" required minlength="6" maxlength="128"></label>
-				<p id="registerPasswordMessage" class="message errMessage"></p>
-				<p class="message">The username and password cannot contain white <br>space, parentheses and other special characters</p>
-				<span id="showPasswordsBtn" class="smallBtn btn">Show Password</span><br>
-				<input class="btn" type="submit" value="Submit">
+				<label>Email<input id="registerEmail" type="email" required></label>
+				<div id="registerEmailMessage" class="errMessage"></div>
+				<label>Username<input id="registerName" type="text" pattern="[\w@#\*\-\+\[\]\{\}/\.,~]+" required></label>
+				<div id="registerNameMessage" class="errMessage"></div>
+				<label>Password<input id="registerPassword0" type="password" required minlength="6" maxlength="128"></label>
+				<label>Confirm Password<input id="registerPassword1" type="password" required minlength="6" maxlength="128"></label>
+				<button type='button' id="register-show-passwords-btn">Show Password</button>
+				<div id="registerPasswordMessage" class="errMessage"></div>
+				<p>The username and password cannot contain white space, parentheses and other special characters</p>
+				<input type="submit" value="Submit">
 			</form>
 		</div>
 
 		<div id="profileUi" class="modal">
 			_closeBtn
-			<p class="modalHeader">Profile</p>
-			<span id="logoutBtn" class="btn">Logout</span>
+			<h2 class="modalHeader">Profile</h2>
+			<button id="logoutBtn">Logout</button>
 		</div>
 	</div>
 

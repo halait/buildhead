@@ -9,9 +9,6 @@ var xSub = 0.0;
 var widthMultiplier = 0.0;
 var heightMultiplier = 0.0;
 
-let path = false;
-if(window.location.protocol == "file:") path = "https://halait.github.io/js-physics-game/";
-
 const canvasEventManager = {
 	activePointers: [],
 	centerX: 0,
@@ -26,7 +23,7 @@ const canvasEventManager = {
 	zoom: 1,
 	mx: 0,
 	my: 0,
-	game: document.getElementById("game"),
+	//game: document.getElementById("game"),
 	now: 0,
 	before: 0,
 	drag(x, y){
@@ -611,14 +608,15 @@ const sceneManager = {
 	modalEntries: [],
 	current: null,
 	modalEntry: null,
-	push(url, state){
+	async push(url, state){
 		history.pushState(state, "", url);
 		this.popAllModal();
 		if(this.current){
 			this.current.suspend();
 		}
+		headerNav.classList.remove('header-nav-show');
 		this.current = routes[getRoute()];
-		this.current.start();
+		await this.current.start();
 	},
 	pushModal(modal, ...state){
 		if(this.modalEntry){

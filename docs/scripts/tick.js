@@ -95,7 +95,7 @@ const simulationManager = {
 		}
 	},
 	init(){
-		this.toolbar.querySelector(".stopSimulationBtn").addEventListener("pointerdown", function(){
+		this.toolbar.querySelector(".stopSimulationBtn").addEventListener("click", function(){
 			simulationManager.end();
 		});
 	}
@@ -176,10 +176,6 @@ pw.U_SAMPLER = pw.gl.getUniformLocation(program, "u_sampler");
 
 function createTexture(imgPath){
 	let img = document.createElement("img");
-	if(path) {
-		img.crossOrigin = "";
-		imgPath = path + imgPath;
-	}
 	img.onerror = () => {
 		sceneManager.pushModal(messageScene, "Error", "Unable to play game because texture could not be loaded.");
 		window.onresize();

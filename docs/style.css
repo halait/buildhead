@@ -2,16 +2,35 @@ body {
 	margin: 0;
 	font-family: sans-serif;
 	--brand-color: rgb(185, 39, 14);
-	--brand-color-on-hover: rgb(180, 52, 30);
+	--brand-color-on-hover: rgb(218, 54, 25);
 	--background-color: #000;
 	--color: #fff;
 	background-color: var(--background-color);
+	color: var(--color);
 }
-button {
-	background-color: inherit;
-	color: inherit;
-	border: none;
+button, input[type=submit] {
+	background-color: #444;
+	color: #fff;
 	cursor: pointer;
+	border: none;
+	font-size: inherit;
+	text-align: center;
+	display: block;
+	padding: 0.4em 0.8em;
+	border-radius: 0;
+}
+button:hover, input[type=submit]:hover {
+	background-color: #888;
+}
+a {
+	color: #aaf;
+}
+a:hover {
+	color: #ccf;
+}
+.block-btn {
+	display: block;
+	margin: 1em auto;
 }
 .customProperties h4 {
 	margin: 0.5rem 0 0.1rem;
@@ -25,52 +44,75 @@ button {
 	min-width: 300px;
 	overflow-x: hidden;
 }
-input {
-	border-radius: 4px;
-	padding-left: 8px;
+input[type=email], input[type=password], input[type=number], input[type=text], input[type=search] {
+	margin: 0.2em 0 1em;
+	display: block;
+	background-color: #444;
+	color: #fff;
 }
 input[type=radio] {
 	margin-left: 32px;
 }
-
+label {
+	display: block;
+	margin-top: 0.5em;
+}
+select {
+	color: #fff;
+	background-color: #111;
+}
 #site-header {
 	flex: 0	0 auto;
 	height: var(--header-height);
 	display: flex;
 	justify-content: space-between;
-	background-color: var(--brand-color);
-	color: #fff;
 	position: fixed;
 	width: 100%;
 	z-index: 2;
 	padding: 0 1rem;
 	box-sizing: border-box;
+	align-items: center;
+	background-color: var(--brand-color);
 }
 #header-menu-svg {
-	width: 2rem;
-	height: auto;
+	width: auto;
+	height: calc(var(--header-height) * 0.5);
 }
-#header-logo-a, .header-nav-a, #accountBtn {
+#header-menu-btn {
+	background-color: inherit;
 	color: inherit;
+	padding: 0;
+}
+.header-nav-a, #accountBtn {
 	text-decoration: none;
 	height: var(--header-height);
 	line-height: var(--header-height);
 	font-size: 1.1rem;
 }
+#accountBtn {
+	background-color: inherit;
+	padding: 0;
+}
 #logo {
 	font-size: 1.6rem;
 	margin: 0;
+	color: #fff;
+}
+#header-logo {
+	height: calc(var(--header-height) * 0.8);
+	width: auto;
+	display: block;
 }
 .header-nav {
 	transform: translateX(-100%);
 	position: fixed;
-	width: 80%;
+	width: 66%;
 	top: var(--header-height);
 	bottom: 0;
 	left: 0;
-	background-color: var(--brand-color);
 	padding: 1rem;
 	transition: transform 0.25s ease-in-out;
+	background-color: var(--brand-color);
 }
 .header-nav-show {
 	transform: translateX(0);
@@ -131,9 +173,8 @@ input[type=radio] {
 	transform: translateX(-50%) translateY(-50%);
 	margin: 0 auto;
 	display: none;
-	padding: 0.5rem 1rem;
+	padding: 0.5rem 1rem 1rem;
 	border-radius: 2px;
-	color: #fff;
 	box-sizing: border-box;
 	max-height: 80vh;
 	max-width: 90vw;
@@ -144,7 +185,6 @@ input[type=radio] {
 .modalHeader {
 	margin: 0 0 1rem;
 	font-size: 2rem;
-	font-weight: 700;
 }
 .startSimulationBtn, .stopSimulationBtn, .backBtn {
 	border-radius: 0px;
@@ -161,12 +201,6 @@ input[type=radio] {
 .stopSimulationBtn:hover {
 	background-color: #f00;
 }
-.backBtn {
-	background-color: #a00;
-}
-.backBtn:hover {
-	background-color: #f00;
-}
 .closeBtn {
 	height: 32px;
 	position: absolute;
@@ -177,26 +211,6 @@ input[type=radio] {
 }
 .closeBtn:hover {
 	background-color: #b00;
-}
-.btn {
-	width: max-content;
-	background-color: #444;
-	color: #fff;
-	border-radius: 2px;
-	margin: 8px auto;
-	padding: 8px;
-	border: none;
-	cursor: pointer;
-}
-.smallBtn {
-	font-size: 14px;
-	border-radius: 1px;
-	margin: 4px auto;
-	padding: 4px;
-	border: none;
-}
-.btn:hover {
-	background-color: #666;
 }
 .errMessage {
 	color: #f44;
@@ -227,11 +241,6 @@ input[type=radio] {
 	height: calc(100vh - var(--header-height-plus-toolbar-height));
 	position: absolute;
 }
-/* remove */
-#level-input {
-	display: block;
-	margin-left: 20px;
-}
 #browser-container {
 	display: flex;
 	flex-direction: column;
@@ -245,31 +254,25 @@ input[type=radio] {
 }
 #load-more-btn {
 	width: 100%;
-	padding: 16px 0;
+	padding: 1rem 0;
 	margin: 0px;
 	text-align: center;
 }
-#sort-by-container, #search-container, #search-input, #sort-by-select, option {
-	color: #fff;
-	background-color: #111;
-	height: 32px;
-}
-#sort-by-container {
-	float: right;
-}		
-#search-container {
-	float: left;
+#filter-container {
+	display: flex;
+	justify-content: space-between;
 }
 #search-btn {
-	height: 100%;
+	height: 1.5rem;
+	width: auto;
 	vertical-align: bottom;
 	cursor: pointer;
 }
 #search-input {
-	background-color: #000;
+	display: inline-block;
+	margin: 0;
 }
 #levelBrowser {
-	color: #fff;
 	border-collapse: collapse;
 	border: none;
 	text-align: center;
@@ -305,55 +308,51 @@ th {
 }
 #play-btn {
 	background-color: #048;
-	font-size: 24px;
-	padding: 8px;
+	font-size: 1.5rem;
 }
 #play-btn:hover {
 	background-color: #06b;
 }
-#save-ui {
-	max-width: 480px;
-}
-#login-message {
-	margin: 1rem 0;
-}
 #level-info {
 	display: none;
-	color: #fff;
-	font-size: 1.5rem;
+	font-size: 1.4rem;
 	position: absolute;
 	bottom: 1rem;
 	right: 1rem;
 }
-#registerBtn {
-	margin: 8px 0;
-}
-#menu-nav {
-	display: grid;
-	justify-content: center;
-	grid-template-columns: repeat(auto-fit, 12rem);
-	grid-gap: 4rem;
-	margin: 10% 0;
-}
 .menu-nav-a {
 	text-decoration: none;
-	color: var(--color);
 	display: block;
-	font-size: 1.5rem;
+	font-size: 1.4rem;
 	background-color: var(--brand-color);
 	padding: 1rem;
 	text-align: center;
+	color: inherit;
+	margin: 2rem 0;
 }
 .menu-nav-a:hover {
 	background-color: var(--brand-color-on-hover);
+	color: inherit;
 }
 .success-increment-btn {
 	width: 3rem;
 	height: auto;
 }
-.submitBtn {
-	margin-top: 1rem;
-	padding: 0.2rem 0.5rem;
+#register-show-passwords-btn {
+	margin-bottom: 1rem;
+}
+#menu-nav {
+	margin: 2rem auto;
+	max-width: 32rem;
+}
+#menu-logo {
+	margin: 1rem auto;
+	display: block;
+}
+#menu-hero {
+	text-align: center;
+	max-width: 60rem;
+	margin: 0 auto;
 }
 @media (min-width: 32rem){
 	#header-menu-btn {
@@ -370,7 +369,7 @@ th {
 		padding: 0.5rem;
 	}
 	.modal {
-		padding: 1rem 2rem;
+		padding: 1rem 2rem 2rem;
 	}
 	.overlay {
 		padding-left: 2rem;

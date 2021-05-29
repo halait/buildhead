@@ -19,16 +19,15 @@ const modeScene = {
 		this.ui.style.display = "none";
 	},
 	init() {
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 		document.getElementById("play-btn").addEventListener("click", () => {
 			sceneManager.push("/play/" + this.level.path);
 		});
 		document.getElementById("edit-btn").addEventListener("click", () => {
 			sceneManager.push("/sandbox/" + this.level.path);
 		});
-		this.deleteBtn.addEventListener("pointerdown", async () => {
+		this.deleteBtn.addEventListener("click", async () => {
 			sceneManager.popModal();
-			loadingScreen.style.display = "flex";
 			const batch = db.batch();
 			batch.delete(db.doc(this.level.path));
 			if(!this.level.solution){
@@ -66,7 +65,6 @@ const modeScene = {
 				}
 				*/
 			}
-			loadingScreen.style.display = "none";
 		});
 	}
 }
@@ -117,10 +115,9 @@ const saveScene = {
 		return json;
 	},
 	init(){
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 		document.getElementById("save-form").addEventListener("submit", async (e) => {
 			e.preventDefault();
-			loadingScreen.style.display = "flex";
 			let nameIn = this.nameInput.value.trim();
 			const pre = /^og /;
 			let docPath = null;
@@ -165,7 +162,6 @@ const saveScene = {
 			this.saveInfoP.textContent = "";
 			this.nameInput.value = "";
 			routes["/listing"].forceRefreshFlag = true;
-			loadingScreen.style.display = "none";
 			sceneManager.pushModal(messageScene, "Level Saved", "The level was saved successfully.");
 		});
 	}
@@ -260,7 +256,7 @@ const messageScene = {
 	},
 
 	init(){
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 		this.btn.addEventListener("click", () => {sceneManager.popModal();});
 	}
 }
@@ -277,7 +273,7 @@ const loginScene = {
     this.ui.style.display = "none";
   },
 	init(){
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 		const passwordInput = document.getElementById("loginPassword");
 		const emailInput = document.getElementById("loginEmail");
 		const message = document.getElementById("loginMessage");
@@ -286,8 +282,8 @@ const loginScene = {
 			message.textContent = "";
 		});
 		emailInput.addEventListener("input", () => {message.textContent = "";});
-		document.getElementById("showPasswordBtn").addEventListener("pointerdown", () => {passwordInput.type = "text";});
-		document.getElementById("registerBtn").addEventListener("pointerdown", () => {sceneManager.pushModal(registerScene);});
+		document.getElementById("showPasswordBtn").addEventListener("click", () => {passwordInput.type = "text";});
+		document.getElementById("registerBtn").addEventListener("click", () => {sceneManager.pushModal(registerScene);});
 		document.getElementById("loginForm").addEventListener("submit", (e) => {
 			e.preventDefault();
 			auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
@@ -325,11 +321,11 @@ const registerScene = {
 		registerScene.passwordMessage.textContent = "";
 	},
 	init(){
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 		let form = document.getElementById("registerForm");
 		this.password0.addEventListener("input", this.hidePasswords);
 		this.password1.addEventListener("input", this.hidePasswords);
-		document.getElementById("showPasswordsBtn").addEventListener("pointerdown", () => {
+		document.getElementById("register-show-passwords-btn").addEventListener("click", () => {
 			this.password0.type = "text";
 			this.password1.type = "text";
 		});
@@ -342,11 +338,9 @@ const registerScene = {
 
 		form.addEventListener("submit", async (e) => {
 			e.preventDefault();
-			loadingScreen.style.display = "flex";
 			const password = this.password0.value;
 			if(password != this.password1.value){
 				this.passwordMessage.textContent = "Both passwords must match, try agian";
-				loadingScreen.style.display = "none";
 				return;
 			}
 			const desiredUsername = usernameInput.value.trim();
@@ -355,7 +349,6 @@ const registerScene = {
 			console.log(exists);
 			if(exists){
 				usernameMessage.textContent = "Username taken, choose a different username";
-				loadingScreen.style.display = "none";
 				return;
 			}
 			try {
@@ -382,7 +375,6 @@ const registerScene = {
 					user.delete().catch();
 				}
 			}
-			loadingScreen.style.display = "none";
 		});
 	}
 }
@@ -397,7 +389,7 @@ const profileScene = {
 	},
 	ui: document.getElementById("profileUi"),
 	init(){
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 		document.getElementById("logoutBtn").addEventListener("click", () => {
 			firebase.auth().signOut();
 			sceneManager.popModal();
@@ -477,7 +469,7 @@ const successScene = {
 		batch.commit().catch((err) => {sceneManager.pushModal(messageScene, "Error", err.message);});
 	},
 	init(){
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 		document.getElementById("main-menu-btn").addEventListener("click", () => {sceneManager.push("/");});
 		this.incrementBtn.addEventListener("click", this.ratingHandler);
 		this.decrementBtn.addEventListener("click", this.ratingHandler);
@@ -778,7 +770,7 @@ const createCustomScene = {
 			e.preventDefault();
 			sceneManager.popModal();
 		};
-		this.planeUi.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.planeUi.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 
 		formElement = this.circleUi.querySelector(".customProperties");
 		this.circleForm = this.createForm(formElement);
@@ -790,7 +782,7 @@ const createCustomScene = {
 			e.preventDefault();
 			sceneManager.popModal();
 		};
-		this.circleUi.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.circleUi.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 	}
 }
 createCustomScene.init();
@@ -885,7 +877,7 @@ const createPolygonScene = {
 			*/
 		});
 
-		this.ui.querySelector(".closeBtn").addEventListener("pointerdown", function(){sceneManager.popModal();});
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
 	}
 }
 createPolygonScene.init();

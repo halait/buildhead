@@ -214,49 +214,49 @@ const routes = {
 		},
 
 		init() {
-			this.toolbar.querySelector(".startSimulationBtn").addEventListener("pointerdown", function() {
+			this.toolbar.querySelector(".startSimulationBtn").addEventListener("click", function() {
 				simulationManager.begin(routes["/sandbox"]);
 			});
-			this.toolbar.querySelector(".ccwWheelCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".ccwWheelCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(ccwWheelCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".nWheelCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".nWheelCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(nWheelCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".cwWheelCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".cwWheelCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(cwWheelCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".tWheelCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".tWheelCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(tWheelCreatorEventHandler, this);
 				sceneManager.pushModal(createCustomScene, pw.CIRCLE_FORM);
 			});
-			this.toolbar.querySelector(".nRodCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".nRodCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(nRodCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".cRodCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".cRodCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(cRodCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".gRodCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".gRodCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(gRodCreatorEventHandler, this);
 				sceneManager.pushModal(createCustomScene);
 			});
-			this.toolbar.querySelector(".polygonBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".polygonBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(polygonBtnEventHandler, this);
 				sceneManager.pushModal(createPolygonScene);
 			});
-			this.toolbar.querySelector(".moveBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".moveBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(moveEventHandler, this);
 			});
-			this.toolbar.querySelector(".removeBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".removeBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(removeEventHandler, this);
 			});
-			this.toolbar.querySelector(".assemblyFieldCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".assemblyFieldCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(assemblyFieldCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".goalFieldCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".goalFieldCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(goalFieldCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".saveLevelBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".saveLevelBtn").addEventListener("click", function(){
 				sceneManager.pushModal(saveScene);
 			});
 			//addBtn(loadLevelBtn.cloneNode(true), this.toolbar, () => {sceneManager.push(loadLevelScene);});
@@ -298,28 +298,28 @@ const routes = {
 		currentLevel: null,
 	
 		init(){
-			this.toolbar.querySelector(".startSimulationBtn").addEventListener("pointerdown", function() {
+			this.toolbar.querySelector(".startSimulationBtn").addEventListener("click", function() {
 				simulationManager.begin(routes["/play"]);
 			});
-			this.toolbar.querySelector(".ccwWheelCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".ccwWheelCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(ccwWheelCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".nWheelCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".nWheelCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(nWheelCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".cwWheelCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".cwWheelCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(cwWheelCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".nRodCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".nRodCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(nRodCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".cRodCreatorBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".cRodCreatorBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(cRodCreatorEventHandler, this);
 			});
-			this.toolbar.querySelector(".moveBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".moveBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(moveEventHandler, this);
 			});
-			this.toolbar.querySelector(".removeBtn").addEventListener("pointerdown", function(){
+			this.toolbar.querySelector(".removeBtn").addEventListener("click", function(){
 				canvasEventManager.setHandler(removeEventHandler, this);
 			});
 			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
