@@ -133,19 +133,20 @@
 					<line x1="0" y1="90" x2="150" y2="90"></line>
 				</svg>
 			</button>
-			<a id='header-logo-a' href='/'>
-				<!--<h1 id='logo'>Buildhead</h1>-->
-				<svg id='header-logo' version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox='0 0 100 100'>
-					<path d="M 0 100 C 20 10, 80 10, 100 100" fill="#f80"></path>
-					<circle cx="50" cy="16.6" r="16.6" fill="#08f"></circle>
-				</svg>
-			</a>
-			<nav class='header-nav'>
-				<a class='header-nav-a' href='/listing/original'>Orginal Levels</a>
-				<a class='header-nav-a' href='/listing/community'>Community Levels</a>
-				<a class='header-nav-a' href='/sandbox'>Sandbox</a>
-			</nav>
-			<button id="accountBtn">Login</button>
+				<div id='header-logo'>
+					<a href='/'>
+						<svg id='header-logo-svg' version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox='0 0 100 100'>
+							<path d="M 0 100 C 20 10, 80 10, 100 100" fill="#f80"></path>
+							<circle cx="50" cy="16.6" r="16.6" fill="#08f"></circle>
+						</svg>
+					</a>
+				</div>
+				<nav class='header-nav'>
+					<a class='header-nav-a' href='/listing/original'>Orginal Levels</a>
+					<a class='header-nav-a' href='/listing/community'>Community Levels</a>
+					<a class='header-nav-a' href='/sandbox'>Sandbox</a>
+				</nav>
+				<button id="accountBtn">Login</button>
 		</header>
     <div id="sandboxToolbar" class="toolbar">
 			_startSimBtn
@@ -225,11 +226,14 @@
 				<path d="M 0 100 C 20 10, 80 10, 100 100" fill="#f80"></path>
 				<circle cx="50" cy="16.6" r="16.6" fill="#08f"></circle>
 			</svg>
-			<h2 id='menu-hero'>
-				2D physics based game by <a href='https://github.com/halait'>halait</a>. Made with 
-				<a href='https://github.com/halait/pulsition'>Pulsition</a>, a 2D physics engine for 
-				the web. Visit <a href='https://github.com/halait/buildhead'>the repo</a> to learn more.
-			</h2>
+			<div id='menu-hero'>
+				<h1>Buildhead</h1>
+				<h2>
+					2D physics based game by <a href='https://github.com/halait'>halait</a>. Made with 
+					<a href='https://github.com/halait/pulsition'>Pulsition</a>, a 2D physics engine for 
+					the web. Visit <a href='https://github.com/halait/buildhead'>the repo</a> to learn more.
+				</h2>
+			</div>
 			<div id="menu-nav">
 				<a class='menu-nav-a' href='/listing/original'>Orginal Levels</a>
 				<a class='menu-nav-a' href='/listing/community'>Community Levels</a>
@@ -287,12 +291,15 @@
 		</div>
 
 		<div id="tutorialUi" class="modal">
-      <div id="tutorialImgDiv">
+			<div id='tutorial-container'>
+
+			</div>
+      <!-- <div id="tutorialImgDiv">
         <p id="tutImgLoadingMsg">Loading...</p>
 				<img id="tutorialImg" alt="Unable to load tutorial, check your internet connection.">
-			</div>
-			<button id="tutorialShrinkBtn">Hide</button>
-			<button id="tutorialShowBtn">Show</button>
+			</div> -->
+			<button id="tutorialShrinkBtn" class='block-btn'>Hide</button>
+			<button id="tutorialShowBtn" class='block-btn'>Show</button>
     </div>
 
     <div id="save-ui" class="modal">
@@ -415,6 +422,105 @@
 			<polygon points="40 22, 50 12, 60 22" fill="#0f0"></polygon>
 		</svg>
 		-->
+
+	<template id='tutorial-0'>
+		<h1>Welcome</h1>
+		<p>
+			The goal of this game is to move the orange object into the dark orange area.
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/0.png' width='545' height='250' alt='Goal of game'>
+		<p>
+			To zoom in and out scroll with your mouse or trackpad, or pinch-to-zoom on touchscreens.
+		</p>
+		<p>
+			Currently the game is in build mode. <b>Enter simulation mode by pressing the green play button on 
+			the top left of the screen.</b>
+		</p>
+	</template>
+
+	<template id='tutorial-1'>
+		<p>
+			The game is now in simulation mode. In this mode you can always pan the screen by dragging with your 
+			mouse, or finger on touchscreens.
+		</p>
+		<p>
+			Looks like the orangle wheel is going the wrong way. Let's fix this. <b>Return to build mode by 
+			pressing the red stop button in the top left corner.</b>
+		</p>
+	</template>
+
+	<template id='tutorial-2'>
+		<p>
+			At the top of the screen is the toolbar.
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/1.png' width='715' height='300' alt='Toolbar information'>
+		<p>
+			Let's start fixing. <b>Select the delete tool in the toolbar.</b>
+		</p>
+	</template>
+
+	<template id='tutorial-3'>
+		<p>
+			<b>Delete the counter-clockwise wheel (the one with red arrows) and the blue rod by pressing them.</b>
+		</p>
+	</template>
+
+	<template id='tutorial-4'>
+		<p>
+			Great, now <b>select the move tool in the toolbar</b>. It looks like this:
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/2.png' width='43' height='42' alt='Move tool icon'>
+	</template>
+
+	<template id='tutorial-5'>
+		<p>
+			You can use the move tool to pan the screen in build mode by dragging with you mouse, or finger on touchscreens 
+			and move objects by dragging on their joints. Joints are the small black and white circles on wheels and rods. 
+			Let's move the orange wheel into the proper position. <b>Drag the orange wheel down (with your mouse, or finger on 
+			touchscreens) to the position shown below.</b>
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/3.png' width='492' height='419' alt='Correct position for orangle wheel'>
+	</template>
+
+	<template id='tutorial-6'>
+		<p>
+			<b>Select the clockwise wheel tool in the toolbar.</b> It looks like the image below.
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/4.png' width='43' height='38' alt='Clockwise wheel icon'>
+	</template>
+
+	<template id='tutorial-7'>
+		<p>
+			You can only build inside the blue area. <b>Build the wheel by pressing inside the blue area, drag it to the 
+			position shown below, then release.</b>
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/5.png' width='533' height='408' alt='Correct build position'>
+	</template>
+
+	<template id='tutorial-8'>
+		<p>
+			Now, <b>select the blue rod tool in the toolbar. It looks like the image below.</b>
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/6.png' width='54' height='39' alt='Blue rod icon'>
+	</template>
+
+	<template id='tutorial-9'>
+		<p>
+			Blue objects only collide with fixed objects (green objects), unlike the gray objects. Now let's connect the wheels 
+			by <b>pressing and holding at the center of one wheel, then dragging to the center of the second wheel, then relasing.</b> 
+			Once complete it should look like the image below. If you make a mistake you can always use the delete tool and try again.
+		</p>
+		<img class='tutorial-img' src='/images/tutorial/7.png' width='528' height='403' alt='Example machine'>
+	</template>
+
+	<template id='tutorial-10'>
+		<p>
+			Excellent, you have completed the tutorial. Remember you can zoom at anytime. You can go back by using the back button 
+			on your browser. Now, <b>enter simulation mode by pressing the green play button in the top left</b>, the machine should 
+			roll into the orange area, this will complete the level. Thank you for playing and consider sending me feedback on 
+			Github.
+		</p>
+	</template>
 
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-firestore.js"></script>

@@ -490,16 +490,31 @@ successScene.init();
 
 const tutorialScene = {
 	ui: document.getElementById("tutorialUi"),
-	img: document.getElementById("tutorialImg"),
-	loadingMsg: document.getElementById("tutImgLoadingMsg"),
+	//img: document.getElementById("tutorialImg"),
+	//loadingMsg: document.getElementById("tutImgLoadingMsg"),
+
+	template: null,
+	container: document.getElementById('tutorial-container'),
+	currentTutorial: null,
+
 	eventIndex: -1,
 	start(){
-		this.img.style.display = "none";
-		this.loadingMsg.style.display = "block";
+		//this.img.style.display = "none";
+		//this.loadingMsg.style.display = "block";
 		this.removeCurrentEventListener();
 		++this.eventIndex;
 		this.events[this.eventIndex].target.addEventListener(this.events[this.eventIndex].type, this.events[this.eventIndex].callback);
-		this.img.src = "/images/" + this.eventIndex + "tut.png";
+		//this.img.src = "/images/" + this.eventIndex + "tut.png";
+
+
+		if(this.currentTutorial) {
+			this.container.removeChild(this.currentTutorial);
+		}
+		this.currentTutorial = document.createElement('div');
+		this.currentTutorial.appendChild(document.getElementById('tutorial-' + this.eventIndex).cloneNode(true).content);
+		this.container.appendChild(this.currentTutorial);
+
+
 		this.ui.style.display = "block";
 	},
 	suspend(){
@@ -610,27 +625,30 @@ const tutorialScene = {
 	shrinkBtn: document.getElementById("tutorialShrinkBtn"),
 	showBtn: document.getElementById("tutorialShowBtn"),
 	hideImg(){
-		this.img.style.display = "none";
+		this.container.style.display = "none";
 		this.shrinkBtn.style.display = "none";
-		this.showBtn.style.display = "inline-block";
+		this.showBtn.style.display = "block";
 	},
 	showImg(){
-		this.img.style.display = "block";
-		this.shrinkBtn.style.display = "inline-block";
+		this.container.style.display = "block";
+		this.shrinkBtn.style.display = "block";
 		this.showBtn.style.display = "none";
 	},
 	init(){
 		//cache images
-		for(let i = 0; i != this.events.length; ++i) {
+		for(let i = 0; i != 8; ++i) {
 			let img = new Image();
-			img.src = "/images/" + i + "tut.png";
+			img.src = "/images/tutorial/" + i + ".png";
 		}
 		this.shrinkBtn.addEventListener("click", () => {this.hideImg();});
 		this.showBtn.addEventListener("click", () => {this.showImg();});
+
+		/*
 		this.img.onload = () => {
 			this.showImg();
 			this.loadingMsg.style.display = "none";
 		};
+		*/
 	}
 };
 tutorialScene.init();
