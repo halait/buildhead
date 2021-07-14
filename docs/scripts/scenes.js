@@ -4,7 +4,7 @@ const routes = {
 		start(){
 			this.ui.style.display = "block";
 			if(!user && !localStorage.length) {
-				sceneManager.pushModal(messageScene, "Welcome", `If your new to the game, start at the tutorial inside "Original Levels".`);
+				sceneManager.pushModal(messageScene, "Welcome", `If your new to the game, start at the tutorial inside Original Levels.`);
 			}
 			/*
 			if(tutorialStep != -1){

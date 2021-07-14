@@ -74,9 +74,27 @@ class GameObject {
 	constructor(def){
 		let len = def.userFloats.length;
 		if(len !== 5) console.error("len: " + len);
-		this.ref = pw.create(def);
+		try {
+			this.ref = pw.create(def);
+		} catch(e) {
+			if(e == "Memory failure") {
+				sceneManager.pushModal(messageScene, "Error", "Cannot create more objects, memory full.")
+			} else {
+				sceneManager.pushModal(messageScene, "Error", e)
+			}
+			return;
+		}
+
+
 		this.def = def;
-		if(def.group !== undefined) pw.createContacts(this.ref, GROUP_CONTACTS[def.group]);
+		if(def.group !== undefined) {
+			try {
+				pw.createContacts(this.ref, GROUP_CONTACTS[def.group]);
+			} catch(e) {
+				sceneManager.pushModal(messageScene, "Error", e);
+				return;
+			}
+		}
 		this.joints = [];
 		this.connectedObjects = [];
 		//this.originX = 0.0;

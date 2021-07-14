@@ -752,8 +752,8 @@ const pw = {
 				ny /= dist;
 				cx -= nx * M[O_RADIUS + cPtr];
 				cy -= ny * M[O_RADIUS + cPtr];
-				debugPoints.push([px, py]);
-				debugPoints.push([cx, cy]);
+				//debugPoints.push([px, py]);
+				//debugPoints.push([cx, cy]);
 				this.collisionData[0] = nx;
 				this.collisionData[1] = ny;
 				this.collisionData[2] = cx;
@@ -877,13 +877,14 @@ const pw = {
 					M[V_L + vPtr]
 				);
 				
+				const totalDistSq = this.collisionData[6] + this.collisionData[13];
+
 				if(
-					(this.collisionData[2] != this.collisionData[9] || this.collisionData[3] != this.collisionData[10]) &&
-					(this.collisionData[4] != this.collisionData[11] || this.collisionData[5] != this.collisionData[12]) &&
-					(this.collisionData[6] < closestPolygonSideDistSq || this.collisionData[13] < closestPolygonSideDistSq)
+					(this.collisionData[0] * M[V_UY + vPtr] + this.collisionData[1] * -M[V_UX + vPtr] > 0) &&
+					(totalDistSq < closestPolygonSideDistSq)
 				) {
 					closestPolygonSide = vPtr;
-					closestPolygonSideDistSq = this.collisionData[6];
+					closestPolygonSideDistSq = totalDistSq;
 				}
 
 
@@ -911,6 +912,11 @@ const pw = {
 					}
 				}
 				*/
+			}
+
+			if(!closestPolygonSide) {
+				closestPolygonSide = O_NUM_VERTICES + 1 + pPtr;
+				return;
 			}
 
 			this.getClosestPoints(
@@ -955,12 +961,13 @@ const pw = {
 			this.collisionData[8] /= dist;
 			this.collisionData[13] = dist - M[O_HALF_WIDTH + sPtr];
 
+			/*
 			debugPoints.push([this.collisionData[2], this.collisionData[3]]);
 			debugPoints.push([this.collisionData[4], this.collisionData[5]]);
 
 			debugPoints.push([this.collisionData[9], this.collisionData[10]]);
 			debugPoints.push([this.collisionData[11], this.collisionData[12]]);
-
+			*/
 
 			/*
 			let vp0 = 0;
@@ -1693,7 +1700,7 @@ const pw = {
 			}
 			size += def.vertices.length * this.V_SIZE;
 		}
-
+		
 		let ptr = this.POMM.alloc(size);
 
 		this.M[O_USERFLOATS_PTR + ptr] = ptr + this.PO_SIZES[def.form];

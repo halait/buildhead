@@ -5,6 +5,7 @@
 server.js
 /functions
 .firebaserc
-firebase.json
 firebase-debug.log
 .firebase
+
+/bugs
