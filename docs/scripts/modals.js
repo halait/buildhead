@@ -869,7 +869,8 @@ const createPolygonScene = {
 			} else {
 				console.error("Unhandled texture");
 			}
-			create(polygonDef);
+			const polygon = create(polygonDef);
+			polygon.setFinalProperties();
 			tempPolygon.splice(0);
 			canvasEventManager.setHandler();
 			pw.render();

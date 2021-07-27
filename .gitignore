@@ -1,9 +1,6 @@
 ﻿/.vs
-/docs/game_objects(old).js
-/docs/code_graveyard.js
 /docs/firebase
 server.js
-/functions
 .firebaserc
 firebase-debug.log
 .firebase

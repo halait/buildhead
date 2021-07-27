@@ -149,7 +149,7 @@ class MemoryManager {
 				}
 				this.memory[ptr] = size;
 				this.memory[ptr + size - 1] = -size;
-				console.log(size + " floats allocated at address: " + ptr);
+				//console.log(size + " floats allocated at address: " + ptr);
 				return ++ptr;
 			}
 		}
@@ -1766,7 +1766,7 @@ const pw = {
 			this.M[O_MAX_Y + ptr] = def.vertices[1][1];
 			
 		} else if(def.form === this.POLYGON_FORM) {
-			console.log(def.vertices);
+			//console.log(def.vertices);
 			let numVertices = def.vertices.length;
 			this.M[O_USERFLOATS_PTR + ptr] += def.vertices.length * this.V_SIZE;
 			this.M[O_NUM_VERTICES + ptr] = numVertices;
@@ -1811,7 +1811,7 @@ const pw = {
 				let cx = (ox + this.M[V_WX + v] + nx) / 3;
 				let cy = (oy + this.M[V_WY + v] + ny) / 3;
 
-				debugPoints.push([cx, cy]);
+				//debugPoints.push([cx, cy]);
 
 				this.M[O_TX + ptr] += cx * a;
 				this.M[O_TY + ptr] += cy * a;
@@ -1819,7 +1819,7 @@ const pw = {
 				if(def.type === this.MOVABLE_TYPE){
 					// moment of area of triangle with axis parralel to base passing through origin point
 					let i = 0.5 * a * h * h;
-					console.log("i = " + i);
+					//console.log("i = " + i);
 					let ht = Math.sqrt((px - this.M[V_WX + v]) * (px - this.M[V_WX + v]) + (py - this.M[V_WY + v]) * (py - this.M[V_WY + v]));
 					let hn = Math.sqrt((px - nx) * (px - nx) + (py - ny) * (py - ny));
 					// moment of area of sub-triangles divided by projecting origin on base with axis perpendicular to base passing through origin point
@@ -1846,7 +1846,7 @@ const pw = {
 			}
 			this.M[O_TX + ptr] /= area;
 			this.M[O_TY + ptr] /= area;
-			debugPoints.push([this.M[O_TX + ptr], this.M[O_TY + ptr]]);
+			//debugPoints.push([this.M[O_TX + ptr], this.M[O_TY + ptr]]);
 
 			if(def.type === this.MOVABLE_TYPE) {
 				let m = def.density * area;
@@ -1857,7 +1857,7 @@ const pw = {
 				this.M[O_I + ptr] -= area * dSqd;
 				// change to mass moment of inertia and scale up
 				this.M[O_I + ptr] *= def.density * 1.5;
-				console.log("this.M[O_I + ptr] = " + this.M[O_I + ptr]);
+				//console.log("this.M[O_I + ptr] = " + this.M[O_I + ptr]);
 				this.M[O_I_INV + ptr] = 1.0 / this.M[O_I + ptr];
 			}
 			for(let vPtr = O_NUM_VERTICES + ptr + 1, len = numVertices * this.V_SIZE + vPtr; vPtr < len; vPtr += this.V_SIZE){

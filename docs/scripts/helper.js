@@ -369,10 +369,11 @@ class Polygon extends GameObject {
 		let p = pw.getPosition(this.ref);
 		this.originX = p[0];
 		this.originY = p[1];
+		this.def.vertices = pw.getWorldVertices(this.ref);
 	}
 
 	toJson(){
-		this.def.vertices = pw.getWorldVertices(this.ref);
+		//this.def.vertices = pw.getWorldVertices(this.ref);
 		return JSON.stringify(this.def);
 	}
 }
