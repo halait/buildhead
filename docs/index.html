@@ -193,19 +193,35 @@
 				<path d="M 0 100 C 20 10, 80 10, 100 100" fill="#f80"></path>
 				<circle cx="50" cy="16.6" r="16.6" fill="#08f"></circle>
 			</svg>
-			<div id='menu-hero'>
-				<h1>Buildhead</h1>
-				<h2>
+			<div id='hero'>
+				<h1 class='overlay-h'>Buildhead</h1>
+				<p id='hero-content'>
 					2D physics based game by <a href='https://github.com/halait'>halait</a>. Made with 
 					<a href='https://github.com/halait/pulsition'>Pulsition</a>, a 2D physics engine for 
 					the web. Visit <a href='https://github.com/halait/buildhead'>the repo</a> to learn more.
-				</h2>
+				</p>
 			</div>
 			<div id="menu-nav">
 				<a class='menu-nav-a' href='/listing/original'>Orginal Levels</a>
 				<a class='menu-nav-a' href='/listing/community'>Community Levels</a>
 				<a class='menu-nav-a' href='/sandbox'>Sandbox</a>
+				<a class='menu-nav-a' href='/feedback'>Send Feedback</a>
 			</div>
+		</div>
+
+		<div id='feedbackUi' class='overlay'>
+			<h1 class='overlay-h'>Send Feedback</h1>
+			<form id="feedback-form" method="post" action="https://us-central1-mailer-704d0.cloudfunctions.net/mail">
+				<label>Name<input name="name" class='feedback-input' required type="text"></label>
+				<label>Email Address<input name="from" class='feedback-input' required type="email"></label>
+				<label>Feedback<textarea name="message" class='feedback-input' required spellcheck="true" minlength="8" rows="8" cols="32"></textarea></label>
+				<input id="send-btn" class='feedback-input' type="submit" value="Send">
+			</form>
+		</div>
+
+		<div id='thankYouUi' class='overlay'>
+			<h1 class='overlay-h'>Thank You</h1>
+			<p id='thankYouContent'>Feedback sent successfully</p>
 		</div>
 		
 		<div id="levelBrowserUi" class="overlay">

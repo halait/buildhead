@@ -324,6 +324,48 @@ const routes = {
 			});
 			//addBtn(backBtn.cloneNode(true), this.toolbar, () => {sceneManager.pop();});
 		}
+	},
+	'/feedback': {
+		ui: document.getElementById("feedbackUi"),
+		start() {
+			this.ui.style.display = "block";
+		},
+		suspend() {
+			this.ui.style.display = "none";
+		},
+		init() {
+			document.getElementById('feedback-form').addEventListener('submit', async function(e) {
+				e.preventDefault();
+				const form = e.target;
+				const formParams = new URLSearchParams(new FormData(form));
+				try {
+					const res = await fetch(form.action, {
+						method: form.method,
+						body: formParams
+					})
+					if(res.status == 200) {
+						sceneManager.push('/thank-you');
+						return;
+					} else {
+						throw 'Non 200 status code';
+					}
+				} catch(e) {
+					sceneManager.pushModal(messageScene, "Error", "Unable to send feedback, please try again later.");
+					throw e;
+				}
+			});
+		}
+	},
+	'/thank-you': {
+		ui: document.getElementById("thankYouUi"),
+		start() {
+			this.ui.style.display = "block";
+		},
+		suspend() {
+			this.ui.style.display = "none";
+		},
+		init() {
+		}
 	}
 }
 for(const route in routes){
