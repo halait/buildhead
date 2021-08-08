@@ -515,6 +515,7 @@ const tutorialScene = {
 		this.container.appendChild(this.currentTutorial);
 
 
+		this.showImg();
 		this.ui.style.display = "block";
 	},
 	suspend(){

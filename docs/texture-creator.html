@@ -3,21 +3,19 @@
 		<head>
 			<title>Texture Creator</title>
 		</head>
-		<body style="background-color: rgb(0, 0, 0);">
+		<body>
 		<canvas id="c" style="border: solid 4px red;"></canvas>
 		<!--<a id="a" download>Download</a>-->
 		<script>
 			"use strict";
-			/*
 			const DBL_PI = Math.PI * 2;
 			var canvas = document.getElementById("c");
 
-			let c = 512;
-			//let c = 80;
+			let c = 40 / 1.2;
 
 			let l = c * 2;
-			canvas.width = l * 4;
-			canvas.height = l * 4;
+			canvas.width = l * 1.2;
+			canvas.height = l * 1.2;
 			//canvas.width = l;
 			//canvas.height = l;
 			let ctx = canvas.getContext("2d");
@@ -28,11 +26,30 @@
 			const orange = "rgb(255, 128, 0)";
 			const green = "rgb(0, 255, 0)";
 
+			drawWheel(c + c * 0.2, c + c * 0.2, c, 0, gray);
+
+			/*
+			let c = 512;
+
+			let l = c * 2;
+			canvas.width = l * 4;
+			canvas.height = l * 4;
+			let ctx = canvas.getContext("2d");
+			ctx.imageSmoothingEnabled = false;
+			const lw = c * 0.16;
+			const gray = "rgb(200, 200, 200)";
+			const aqua = "rgb(0, 255, 255)";
+			const orange = "rgb(255, 128, 0)";
+			const green = "rgb(0, 255, 0)";
+			*/
 
 
 
-			drawWheel(c, c, c, -1, gray);
+
 			
+			/*
+			drawWheel(c, c, c, -1, gray);
+
 			let y = c + l;
 			drawWheel(c, y, c, 1, gray);
 			
@@ -55,6 +72,7 @@
 
 			y += l;
 			drawWheel(x, y, c, 0, aqua);
+			*/
 
 			// pin
 			y += l;
@@ -93,7 +111,7 @@
 			ctx.fillStyle = green;
 			ctx.fill();
 			*/
-			/*
+			
 			y += l;
 			ctx.beginPath();
 			ctx.arc(x + c, y + c, l, 0, DBL_PI);
@@ -130,8 +148,8 @@
 			y += l / 7;
 			ctx.fillStyle = "rgb(0, 128, 255)";
 			ctx.fillRect(x, y, l, l / 7);
-			*/
-
+			
+			/*
 			let canvas = document.getElementById("c");
 			let w = 400;
 			canvas.width = w;
@@ -140,11 +158,12 @@
 			ctx.imageSmoothingEnabled = false;
 			const DBL_PI = Math.PI * 2;
 			ctx.strokeStyle = "rgb(0, 0, 0)";
+			*/
 			
 
 
-			drawGear(260, 140, 100);
-			drawGear(110, 290, 75);
+			//drawGear(260, 140, 100);
+			//drawGear(110, 290, 75);
 			function drawGear(x, y, r){
 				ctx.beginPath();
 				let pr = r / 4;
@@ -163,6 +182,12 @@
 
 
 			function drawWheel(x, y, r, d, color){
+				ctx.beginPath();
+				ctx.arc(x, y, r, 0, DBL_PI);
+				ctx.fillStyle = color;
+				ctx.fill();
+				
+				/*
 				ctx.beginPath();
 				//ctx.arc(x, y, r - lw / 2, 0, DBL_PI);
 				ctx.arc(x, y, r - lw / 2 - r * 0.05, 0, DBL_PI);
@@ -183,24 +208,14 @@
 				drawSpoke(x, y, 0, r - lw, 8);
 				ctx.lineWidth = lw;
 				ctx.stroke();
+				*/
 
 				if(!d) return;
 				ctx.beginPath();
 				drawRegularPolygon(x, y, r * 0.256, 8);
 				ctx.fillStyle = "rgb(0, 0, 0)";
 				ctx.fill();
-				/*
-				ctx.beginPath();
-				drawSpoke(x, y, 0, r * 0.128, 4);
-				ctx.lineWidth = c * 0.128;
-				ctx.strokeStyle = "rgb(200, 200, 200)";
-				ctx.stroke();
-			
-				ctx.beginPath();
-				drawRegularPolygon(x, y, r * 0.128, 8);
-				ctx.fillStyle = "rgb(200, 200, 200)";
-				ctx.fill();
-				*/
+				
 				ctx.beginPath();
 				ctx.arc(x, y, r * 0.1, 0, DBL_PI);
 				ctx.fillStyle = "rgb(255, 255, 255)";
