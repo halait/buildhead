@@ -245,9 +245,13 @@ const messageScene = {
 	header: document.getElementById("message-header"),
 	message: document.getElementById("message"),
 	btn: document.getElementById("message-btn"),
-	start(header, message, btn = "Okay"){
+	start(header, message, btn = "Okay", hasHTML = false){
 		this.header.textContent = header;
-		this.message.textContent = message;
+		if(hasHTML) {
+			this.message.innerHTML = message;
+		} else {
+			this.message.textContent = message;
+		}
 		this.btn.textContent = btn;
 		this.ui.style.display = "block";
 	},
@@ -901,3 +905,18 @@ const createPolygonScene = {
 	}
 }
 createPolygonScene.init();
+
+const newUserScene = {
+	ui: document.getElementById("new-user-div"),
+	start(){
+		this.ui.style.display = "block";
+	},
+	suspend(){
+		this.ui.style.display = "none";
+	},
+
+	init(){
+		this.ui.querySelector(".closeBtn").addEventListener("click", function(){sceneManager.popModal();});
+	}
+}
+newUserScene.init();

@@ -11,24 +11,7 @@
 			const DBL_PI = Math.PI * 2;
 			var canvas = document.getElementById("c");
 
-			let c = 40 / 1.2;
 
-			let l = c * 2;
-			canvas.width = l * 1.2;
-			canvas.height = l * 1.2;
-			//canvas.width = l;
-			//canvas.height = l;
-			let ctx = canvas.getContext("2d");
-			ctx.imageSmoothingEnabled = false;
-			const lw = c * 0.16;
-			const gray = "rgb(200, 200, 200)";
-			const aqua = "rgb(0, 255, 255)";
-			const orange = "rgb(255, 128, 0)";
-			const green = "rgb(0, 255, 0)";
-
-			drawWheel(c + c * 0.2, c + c * 0.2, c, 0, gray);
-
-			/*
 			let c = 512;
 
 			let l = c * 2;
@@ -41,13 +24,11 @@
 			const aqua = "rgb(0, 255, 255)";
 			const orange = "rgb(255, 128, 0)";
 			const green = "rgb(0, 255, 0)";
-			*/
 
 
 
 
 			
-			/*
 			drawWheel(c, c, c, -1, gray);
 
 			let y = c + l;
@@ -72,7 +53,6 @@
 
 			y += l;
 			drawWheel(x, y, c, 0, aqua);
-			*/
 
 			// pin
 			y += l;

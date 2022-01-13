@@ -202,7 +202,7 @@
 				</p>
 			</div>
 			<div id="menu-nav">
-				<a class='menu-nav-a' href='/listing/original'>Orginal Levels</a>
+				<a id='menu-nav-original' class='menu-nav-a' href='/listing/original'>Original Levels</a>
 				<a class='menu-nav-a' href='/listing/community'>Community Levels</a>
 				<a class='menu-nav-a' href='/sandbox'>Sandbox</a>
 				<a class='menu-nav-a' href='/feedback'>Send Feedback</a>
@@ -307,16 +307,31 @@
 		</div>
 		
     <div id="message-div" class="modal">
-			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" 
-				xmlns="http://www.w3.org/2000/svg">
-				<title>Close Button</title>
-				<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
-				<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
-			</svg>
-      <h2 id="message-header" class="modalHeader"></h2>
-			<span id="message"></span>
-			<button id="message-btn" class="block-btn"></button>
+		<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" 
+			xmlns="http://www.w3.org/2000/svg">
+			<title>Close Button</title>
+			<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
+			<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
+		</svg>
+		<h2 id="message-header" class="modalHeader"></h2>
+		<span id="message"></span>
+		<button id="message-btn" class="block-btn"></button>
     </div>
+
+	<div id="new-user-div" class="modal">
+		<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" 
+			xmlns="http://www.w3.org/2000/svg">
+			<title>Close Button</title>
+			<line x1="20" y1="20" x2="80" y2="80" stroke="#fff" stroke-width="7"></line>
+			<line x1="80" y1="20" x2="20" y2="80" stroke="#fff" stroke-width="7"></line>
+		</svg>
+		<h2 class="modalHeader">Welcome</h2>
+		<p id="message">
+			Start at the tutorial if you are new to the game.
+		</p>
+		<a class='btn block-btn undecorated-a' href='/play/original/bGE9ImhhbGFpdCIsbG49IlR1dG9yaWFsIE5ldyI~'>Go to Tutorial</a>
+    </div>
+	
 
     <div id="setCustomObroundPopup" class="modal">
 			<svg class="closeBtn" preserveAspectRatio="xMinYMin meet" viewBox="0 0 100 100" 
@@ -659,15 +674,15 @@
 		</p>
 	</template>
 
-	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-firestore.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-auth.js"></script>
-	<script src="/scripts/event_manager.js"></script>
-	<script src="/scripts/scenes.js"></script>
-	<script src="/scripts/firebase.js"></script>
-	<script src="/scripts/physics.js"></script>
-	<script src="/scripts/helper.js"></script>
-	<script src="/scripts/tick.js"></script>
-	<script src="/scripts/modals.js"></script>
+	<script defer src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
+	<script defer src="https://www.gstatic.com/firebasejs/7.8.0/firebase-firestore.js"></script>
+	<script defer  src="https://www.gstatic.com/firebasejs/7.8.0/firebase-auth.js"></script>
+	<script defer src="/scripts/event_manager.js"></script>
+	<script defer src="/scripts/scenes.js"></script>
+	<script defer src="/scripts/firebase.js"></script>
+	<script defer src="/scripts/physics.js"></script>
+	<script defer src="/scripts/helper.js"></script>
+	<script defer src="/scripts/tick.js"></script>
+	<script defer src="/scripts/modals.js"></script>
 </body>
 </html>

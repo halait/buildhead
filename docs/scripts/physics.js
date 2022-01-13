@@ -160,7 +160,7 @@ class MemoryManager {
 		if(!Number.isInteger(ptr)) throw "Ptr must be representable as integer, ptr = " + ptr;
 		if(ptr < 0) throw "Unable to free ptr less than 0, ptr = " + ptr;
 		--ptr;
-		console.log("freeing ptr: " + ptr);
+		//console.log("freeing ptr: " + ptr);
 		if(this.memory[ptr] < 20) console.warn("freeing ptr with size: " + this.memory[ptr]);
 		let start = ptr;
 		let end = this.memory[ptr] + ptr;

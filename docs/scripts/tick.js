@@ -2,12 +2,14 @@
 
 const simulationManager = {
 	begin(caller){
-		this.caller = caller;
-		caller.toolbar.style.display = "none";
-		this.toolbar.style.display = "block";
-		this.oldBtn = canvasEventManager.currentBtn;
-		this.oldHandler = canvasEventManager.currentHandler;
-		canvasEventManager.setHandler(this.eventHandler);
+		if(caller) {
+			this.caller = caller;
+			caller.toolbar.style.display = "none";
+			this.toolbar.style.display = "block";
+			this.oldBtn = canvasEventManager.currentBtn;
+			this.oldHandler = canvasEventManager.currentHandler;
+			canvasEventManager.setHandler(this.eventHandler);
+		}
 		this.isSimulating = true;
 		this.successPending = !sandboxMode;
 		requestAnimationFrame(() => {this.simulate()});
@@ -15,8 +17,10 @@ const simulationManager = {
 	end(){
 		this.isSimulating = false;
 		this.toolbar.style.display = "none";
-		this.caller.toolbar.style.display = "flex";
-		canvasEventManager.setHandler(this.oldHandler, this.oldBtn);
+		if(this.caller) {
+			this.caller.toolbar.style.display = "flex";
+			canvasEventManager.setHandler(this.oldHandler, this.oldBtn);
+		}
 		//sceneManager.popAllModal();
 	},
 	

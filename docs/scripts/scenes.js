@@ -1,20 +1,25 @@
 "use strict";
 const routes = {
 	"/": {
-		start(){
+		async start(){
 			this.ui.style.display = "block";
-			if(!user && !localStorage.length) {
-				sceneManager.pushModal(messageScene, "Welcome", `If your new to the game, start at the tutorial inside Original Levels.`);
+			try {
+				this.currentLevel = await levelManager.getLevel('community/bGE9ImhhbGFpdCIsbG49Im1lbnUgYmFja2dyb3VuZCAtIGNsZWFuIg~~');
+				levelManager.loadLevel(this.currentLevel);
+			} catch(e) {
+				sceneManager.pushModal(messageScene, "Error", "Level could not be loaded. Try a different level also please consider sending feedback.");
+				throw e;
 			}
-			/*
-			if(tutorialStep != -1){
-				tutorialScene.removeCurrentEventListener();
-				tutorialStep = -1;
+			sandboxMode = true;
+			simulationManager.begin();
+			if(!user && localStorage.length === 1) {
+				//sceneManager.pushModal(messageScene, "Welcome", `If your new to the game, start at the tutorial inside Original Levels.`);
+				sceneManager.pushModal(newUserScene);
 			}
-			*/
 		},
 		suspend(){
 			this.ui.style.display = "none";
+			simulationManager.end();
 		},
 		onUserChanged(){
 			if(user) {
@@ -114,7 +119,7 @@ const routes = {
 		sortBySelect: document.getElementById("sort-by-select"),
 		searchInput: document.getElementById("search-input"),
 		searchContainer: document.getElementById("search-container"),
-		template: `<tr class="{{c}}" data-path="{{p}}"><td>{{n}}</td><td>{{a}}</td><td>{{d}}</td><td>{{r}}</td><td>{{pl}}</td></tr>`,
+		template: `<tr class="{{c}}" data-path="{{p}}"><td class='listing-name'>{{n}}</td><td>{{a}}</td><td>{{d}}</td><td>{{r}}</td><td>{{pl}}</td></tr>`,
 		populate(items){
 			const len = items.length;
 			let html = "";
@@ -268,6 +273,7 @@ const routes = {
 		async start(){
 			this.toolbar.style.display = "flex";
 			let docPath = location.pathname.replace("/play/", "");
+			console.log(docPath);
 			if(!docPath){
 				sceneManager.pushModal(messageScene, "Error", "Url is incorrectly formatted");
 				return;
