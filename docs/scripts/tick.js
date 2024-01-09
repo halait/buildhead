@@ -12,10 +12,11 @@ const simulationManager = {
 		}
 		this.isSimulating = true;
 		this.successPending = !sandboxMode;
-		requestAnimationFrame(() => {this.simulate()});
+		requestAnimationFrame(this.simulate);
 	},
 	end(){
 		this.isSimulating = false;
+		simulationManager.before = 0;
 		this.toolbar.style.display = "none";
 		if(this.caller) {
 			this.caller.toolbar.style.display = "flex";
@@ -50,15 +51,22 @@ const simulationManager = {
 	successPending: false,
 	before: 0,
 	updateDt: 1 / 60 * 1000,
+	dt: 0,
 	simulate(now) {
 		if(simulationManager.isSimulating) {
 			requestAnimationFrame(simulationManager.simulate);
-			if(!simulationManager.before) simulationManager.before = now - simulationManager.updateDt;
-			let dt = now - simulationManager.before;
+			if(simulationManager.before === 0) {
+				simulationManager.dt = simulationManager.updateDt;
+			} else {
+				simulationManager.dt = simulationManager.dt + (now - simulationManager.before);
+				simulationManager.dt = Math.min(simulationManager.dt, simulationManager.updateDt *  4);
+			}
 
-			// new
-			if(dt + 1 < simulationManager.updateDt){
-				console.log("skipped dt = " + dt);
+			// console.log("dt: " + simulationManager.dt);
+
+			if(simulationManager.dt < simulationManager.updateDt){
+				// console.log("skipped dt = " + simulationManager.dt);
+				simulationManager.dt = simulationManager.dt - (now - simulationManager.before);
 				return;
 			}
 
@@ -67,8 +75,8 @@ const simulationManager = {
 
 			do {
 				pw.update();
-				dt -= simulationManager.updateDt;
-			} while(--maxUpdate && dt > 1);
+				simulationManager.dt -= simulationManager.updateDt;
+			} while(--maxUpdate && simulationManager.dt > simulationManager.updateDt);
 			pw.render();
 
 			simulationManager.before = now;
