@@ -16,7 +16,6 @@ const simulationManager = {
 	},
 	end(){
 		this.isSimulating = false;
-		simulationManager.before = 0;
 		this.toolbar.style.display = "none";
 		if(this.caller) {
 			this.caller.toolbar.style.display = "flex";
@@ -56,30 +55,38 @@ const simulationManager = {
 		if(simulationManager.isSimulating) {
 			requestAnimationFrame(simulationManager.simulate);
 			if(simulationManager.before === 0) {
-				simulationManager.dt = simulationManager.updateDt;
-			} else {
-				simulationManager.dt = simulationManager.dt + (now - simulationManager.before);
-				simulationManager.dt = Math.min(simulationManager.dt, simulationManager.updateDt *  4);
+				simulationManager.before = now - simulationManager.updateDt;
 			}
 
-			// console.log("dt: " + simulationManager.dt);
+			let dt = simulationManager.dt + (now - simulationManager.before);
+			dt = Math.min(dt, simulationManager.updateDt *  4);
 
-			if(simulationManager.dt < simulationManager.updateDt){
-				// console.log("skipped dt = " + simulationManager.dt);
-				simulationManager.dt = simulationManager.dt - (now - simulationManager.before);
+			// browser frame pacing is inconsistent, round it out
+			// this optimization only makes sense when requestanimationframe frame time should be divisable by 1 / 60 * 1000 milliseconds
+
+			let frames_num = dt / simulationManager.updateDt;
+			let frames_num_round = Math.round(frames_num);
+
+			if(Math.abs(frames_num - frames_num_round) < 0.05) {
+				frames_num = frames_num_round;
+				dt = frames_num * simulationManager.updateDt
+			}
+
+			// console.log("frames_num: " + frames_num);
+
+			if(frames_num < 1){
+				// console.log("skipped dt: " + dt);
 				return;
 			}
 
 			simulationManager.before = now;
-			let maxUpdate = 4;
-
+			simulationManager.dt = dt - Math.floor(frames_num) * simulationManager.updateDt;
 			do {
 				pw.update();
-				simulationManager.dt -= simulationManager.updateDt;
-			} while(--maxUpdate && simulationManager.dt > simulationManager.updateDt);
+				--frames_num;
+			} while(frames_num >= 1);
 			pw.render();
 
-			simulationManager.before = now;
 			if(simulationManager.successPending){
 				let success = true;
 				for(let i = 0, len = targets.length; i != len; ++i){
